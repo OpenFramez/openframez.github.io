@@ -1,0 +1,40 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+dist/
+build/
+.cache/
+
+# Logs
+*.log
+
+# Env
+.env
+.env.local
+
+# Don't ignore uploads directory structure
+!uploads/
+!uploads/photos/
+uploads/photos/*
+!uploads/photos/.gitkeep

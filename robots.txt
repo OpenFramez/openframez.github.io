@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /data/
+Disallow: /assets/js/
+Disallow: /scripts/
+Disallow: /docs/
+
+Sitemap: https://betaversion488-oss.github.io/sitemap.xml

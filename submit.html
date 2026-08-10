@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#fafafa">
+  <meta name="color-scheme" content="light dark">
+  <title>ارسال محتوا — پیکسلری</title>
+  <meta name="description" content="چگونه عکس‌های خود را به پیکسلری اضافه کنیم. راهنمای گام به گام ارسال محتوا از طریق GitHub Pull Request.">
+  <link rel="canonical" href="https://betaversion488-oss.github.io/submit.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="ارسال محتوا به پیکسلری">
+  <meta property="og:description" content="راهنمای گام به گام ارسال محتوا از طریق GitHub Pull Request">
+  <meta property="og:locale" content="fa_IR">
+
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" href="assets/icons/favicon-32.png" type="image/png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pixelary">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a href="#main" class="skip-link">پرش به محتوای اصلی</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./" class="logo" aria-label="پیکسلری خانه">
+        <span class="logo-mark" aria-hidden="true">P</span>
+        <span class="logo-text">پیکسلری</span>
+      </a>
+      <div class="header-actions">
+        <button class="icon-btn" data-theme-toggle aria-label="تغییر تم" title="تغییر تم">
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+        </button>
+        <a href="./" class="icon-btn" aria-label="بازگشت به خانه" title="بازگشت">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m12 19-7-7 7-7"/>
+            <path d="M19 12H5"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="container">
+    <article class="page">
+      <h1>ارسال محتوا به پیکسلری</h1>
+      <p class="lead">پیکسلری از مدل PR-based CMS استفاده می‌کند: هر عکس از طریق Pull Request به مخزن اضافه می‌شود.</p>
+
+      <p>پیکسلری به‌صورت کاملاً غیرمتمرکز کار می‌کند. هیچ کاربری حساب ندارد و هیچ سروری برای آپلود مستقیم وجود ندارد. در عوض، شما عکس‌های خود را به‌صورت فایل در مخزن GitHub قرار می‌دهید و یک Pull Request باز می‌کنید. بعد از بررسی، عکس شما در گالری نمایش داده می‌شود. این روش شفاف، قابل‌audit، و کاملاً free است.</p>
+
+      <h2>پیش‌نیازها</h2>
+      <ul>
+        <li>یک حساب GitHub (رایگان)</li>
+        <li>عکس با مجوز آزاد (Creative Commons یا Public Domain) — یعنی عکسی که خودتان گرفته‌اید یا به‌صورت قانونی آزاد شده است</li>
+        <li>ابعاد حداقل <code>1200px</code> در بزرگ‌ترین ضلع</li>
+        <li>فرمت JPEG، PNG یا WebP</li>
+        <li>حجم فایل کمتر از <code>5MB</code> (برای thumbnail) — فایل اصلی می‌تواند تا ۲۵MB باشد</li>
+      </ul>
+
+      <h2>مراحل ارسال</h2>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">۱</div>
+          <div class="step-content">
+            <h3>Fork مخزن</h3>
+            <p>به <a href="https://github.com/betaversion488-oss/betaversion488-oss.github.io" target="_blank" rel="noopener">صفحه مخزن</a> بروید و روی دکمه Fork در بالا-راست کلیک کنید. یک کپی از مخزن در حساب شما ساخته می‌شود.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">۲</div>
+          <div class="step-content">
+            <h3>عکس خود را آپلود کنید</h3>
+            <p>در fork خود، به پوشه <code>uploads/photos/</code> بروید. فایل عکس خود را drag-and-drop کنید یا از دکمه Upload files استفاده کنید. نام فایل را به انگلیسی و توصیفی انتخاب کنید، مثلاً <code>sunset-mountains-alborz.jpg</code>.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">۳</div>
+          <div class="step-content">
+            <h3>متادیتا را در <code>data/photos.json</code> اضافه کنید</h3>
+            <p>فایل <code>data/photos.json</code> را باز کنید و یک entry جدید به پایان آرایه <code>photos</code> اضافه کنید. ساختار دقیق در <a href="https://github.com/betaversion488-oss/betaversion488-oss.github.io/blob/main/docs/CONTRIBUTING.md" target="_blank" rel="noopener">راهنمای مشارکت</a> توضیح داده شده است.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">۴</div>
+          <div class="step-content">
+            <h3>Commit و Pull Request</h3>
+            <p>تغییرات خود را با پیام واضح (مثلاً <code>Add: sunset-mountains-alborz.jpg</code>) commit کنید. سپس به صفحه اصلی fork خود بروید و روی دکمه <code>Compare &amp; pull request</code> کلیک کنید. عنوان و توضیح کامل بنویسید.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">۵</div>
+          <div class="step-content">
+            <h3>بررسی و انتشار</h3>
+            <p>تیم بررسی (فعلاً انسانی، در فازهای بعدی AI) عکس شما را بررسی می‌کند: کیفیت فنی، صحت مجوز، و رعایت قوانین. بعد از تأیید، PR merge می‌شود و عکس شما در عرض چند دقیقه روی گالری نمایش داده می‌شود.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <p><strong>نکته مهم:</strong> فقط عکس‌هایی که خودتان حق انتشارشان را دارید ارسال کنید. عکس‌های دارای کپی‌رایت بدون اجازه صریح صاحب، حذف خواهند شد. ارسال متقلبانه محتوای غیرمجاز ممکن است منجر به block شدن حساب GitHub شما شود.</p>
+      </div>
+
+      <h2>قالب متادیتا</h2>
+      <p>یک entry نمونه در <code>data/photos.json</code>:</p>
+      <pre><code>{
+  "id": "user_0001",
+  "title": "غروب آفتاب در رشته‌کوه البرز",
+  "description": "نمایی از غروب آفتاب روی قله‌های البرز در زمستان.",
+  "category": "nature",
+  "category_label": "Nature & Landscapes",
+  "thumbnail": "uploads/photos/sunset-mountains-alborz.jpg",
+  "full": "uploads/photos/sunset-mountains-alborz.jpg",
+  "width": 4000,
+  "height": 2667,
+  "thumb_width": 800,
+  "thumb_height": 533,
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "author": "Your Name",
+  "author_url": "https://github.com/your-username",
+  "source": "Original work",
+  "uploaded_at": "2026-08-11",
+  "commons_page": ""
+}</code></pre>
+
+      <h2>گزارش تخلف</h2>
+      <p>اگر عکسی را می‌بینید که فکر می‌کنید تخلف قانونی است (کپی‌رایت، حریم خصوصی، محتوای غیرقانونی)، لطفاً از طریق <a href="https://github.com/betaversion488-oss/betaversion488-oss.github.io/issues/new" target="_blank" rel="noopener">GitHub Issues</a> گزارش دهید. در گزارش خود لینک عکس، دلیل گزارش، و (در صورت وجود) لینک منبع اصلی را ذکر کنید. تمام گزارش‌ها در کمتر از ۴۸ ساعت بررسی می‌شوند.</p>
+
+      <h2>سوالات متداول</h2>
+      <h3>آیا برای ارسال محتوا باید برنامه‌نویس باشم؟</h3>
+      <p>در فاز فعلی (MVP)، بله — شما باید با GitHub آشنا باشید. در فاز ۴، اپلیکیشن اندروید برای کاربران غیرفنی در دسترس قرار خواهد گرفت که کل فرآیند را به چند کلیک ساده تبدیل می‌کند.</p>
+
+      <h3>چه نوع محتوایی مجاز است؟</h3>
+      <p>هر محتوای بصری باکیفیت که: (۱) شما حق انتشار آن را دارید، (۲) با مجوز Creative Commons یا Public Domain منتشر می‌شود، (۳) شامل محتوای غیرقانونی، توهین‌آمیز یا NSFW نیست. برای راهنمایی بیشتر، <a href="https://github.com/betaversion488-oss/betaversion488-oss.github.io/blob/main/docs/LEGAL.md" target="_blank" rel="noopener">سند قانونی</a> را ببینید.</p>
+
+      <h3>چقدر طول می‌کشد تا PR من بررسی شود؟</h3>
+      <p>در حال حاضر، هدف ما بررسی در کمتر از ۷۲ ساعت است. در فاز ۵ با استفاده از عوامل AI، این زمان به چند دقیقه کاهش خواهد یافت.</p>
+
+      <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;">
+        <a href="https://github.com/betaversion488-oss/betaversion488-oss.github.io/fork" target="_blank" rel="noopener" class="btn btn-primary">
+          Fork مخزن و شروع کنید
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17 17 7M7 7h10v10"/>
+          </svg>
+        </a>
+        <a href="https://github.com/betaversion488-oss/betaversion488-oss.github.io/blob/main/docs/CONTRIBUTING.md" target="_blank" rel="noopener" class="btn btn-secondary">
+          راهنمای کامل مشارکت
+        </a>
+      </div>
+    </article>
+  </main>
+
+  <nav class="bottom-nav" aria-label="ناوبری اصلی">
+    <a href="./" class="bottom-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>خانه</span>
+    </a>
+    <a href="submit.html" class="bottom-nav-item active" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      <span>ارسال</span>
+    </a>
+    <a href="about.html" class="bottom-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 16v-4M12 8h.01"/>
+      </svg>
+      <span>درباره</span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom" style="border:none;margin:0;padding:0;">
+        <span>© ۲۰۲۶ پیکسلری</span>
+        <span>ساخته‌شده با ❤ روی GitHub Pages</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/ui.js"></script>
+</body>
+</html>
