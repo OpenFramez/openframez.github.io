@@ -1,0 +1,81 @@
+name: Lint & Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate photos.json
+        run: |
+          python3 -c "
+          import json
+          with open('data/photos.json') as f:
+              data = json.load(f)
+          print(f'✓ photos.json is valid JSON')
+          print(f'  Total photos: {data[\"total\"]}')
+          print(f'  Categories: {len(data[\"categories\"])}')
+          assert data['total'] == len(data['photos']), 'total mismatch'
+          for p in data['photos']:
+              assert 'id' in p, f'missing id in photo'
+              assert 'title' in p, f'missing title in {p.get(\"id\")}'
+              assert 'thumbnail' in p, f'missing thumbnail in {p.get(\"id\")}'
+              assert 'license' in p, f'missing license in {p.get(\"id\")}'
+              assert 'author' in p, f'missing author in {p.get(\"id\")}'
+          print(f'✓ All photos have required fields')
+          "
+
+      - name: Validate HTML files
+        run: |
+          for f in index.html photo.html about.html submit.html legal.html 404.html; do
+            if [ -f "$f" ]; then
+              echo "✓ $f exists"
+            else
+              echo "✗ $f missing"
+              exit 1
+            fi
+          done
+
+      - name: Validate PWA manifest
+        run: |
+          python3 -c "
+          import json
+          with open('manifest.json') as f:
+              m = json.load(f)
+          assert m['name'], 'missing name'
+          assert m['icons'], 'missing icons'
+          print(f'✓ manifest.json valid')
+          "
+
+      - name: Check for broken internal links
+        run: |
+          # Get all HTML files
+          HTML_FILES=$(find . -name "*.html" -not -path "./.git/*")
+          for f in $HTML_FILES; do
+            # Extract href="./..." and src="./..." references
+            grep -oE '(href|src)="\.\/[^"]*"' "$f" | while read -r ref; do
+              path=$(echo "$ref" | sed -E 's/.*="\.\/([^"]*)"/\1/')
+              # Skip URLs with ? or # or http
+              if [[ "$path" == *"?"* ]] || [[ "$path" == *"#"* ]] || [[ "$path" == "http"* ]]; then
+                continue
+              fi
+              if [ ! -f "$path" ] && [ ! -f "$(dirname $f)/$path" ]; then
+                echo "⚠ Broken link in $f: $path"
+              fi
+            done
+          done
+          echo "Link check complete"
