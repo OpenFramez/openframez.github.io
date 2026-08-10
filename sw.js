@@ -1,16 +1,20 @@
 /**
- * Pixelary Service Worker
- * Cache-first for static assets, network-first for data, with offline fallback
+ * Pixelary Service Worker — Phase 2
+ * Cache-first for static assets, network-first for data, with offline fallback.
+ * Range-request aware for video streaming (partial content).
  */
 
-const CACHE_VERSION = 'pixelary-v1.0.0';
+const CACHE_VERSION = 'pixelary-v2.0.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DATA_CACHE = `${CACHE_VERSION}-data`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
+const VIDEO_CACHE = `${CACHE_VERSION}-videos`;
 
 const STATIC_ASSETS = [
   './',
   './index.html',
+  './videos.html',
+  './video.html',
   './photo.html',
   './about.html',
   './submit.html',
@@ -21,6 +25,9 @@ const STATIC_ASSETS = [
   './assets/js/db.js',
   './assets/js/app.js',
   './assets/js/photo.js',
+  './assets/js/videos.js',
+  './assets/js/video.js',
+  './assets/js/video-player.js',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap',
 ];
@@ -52,14 +59,43 @@ self.addEventListener('fetch', (event) => {
   // Only handle GET
   if (req.method !== 'GET') return;
 
-  // Skip cross-origin except fonts and wikimedia images
+  // Skip cross-origin except fonts and wikimedia
   const isSameOrigin = url.origin === self.location.origin;
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   const isWikimedia = url.hostname.endsWith('wikimedia.org') || url.hostname.endsWith('wikipedia.org');
 
   if (!isSameOrigin && !isFont && !isWikimedia) return;
 
-  // Data: network-first
+  // ---------- Range requests (video streaming) ----------
+  // For video files from wikimedia, we MUST respect the Range header.
+  // Cache a small video segment only if it's a 206 response and small enough.
+  const isVideoReq = (
+    req.destination === 'video' ||
+    (isWikimedia && (url.pathname.endsWith('.webm') || url.pathname.endsWith('.ogv') || url.pathname.endsWith('.mp4')))
+  );
+
+  if (isVideoReq) {
+    // Network-first with range support; do NOT cache large videos
+    event.respondWith(
+      fetch(req, { headers: req.headers })
+        .then((res) => {
+          // Only cache small successful responses (under 5 MB)
+          const size = parseInt(res.headers.get('content-length') || '0', 10);
+          if (res.ok && size > 0 && size < 5 * 1024 * 1024 && res.status === 200) {
+            const copy = res.clone();
+            caches.open(VIDEO_CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          }
+          return res;
+        })
+        .catch(() => {
+          // Try cache fallback (may have partial content)
+          return caches.match(req).then((cached) => cached || Response.error());
+        })
+    );
+    return;
+  }
+
+  // ---------- Data: network-first ----------
   if (isSameOrigin && url.pathname.startsWith('/data/')) {
     event.respondWith(
       fetch(req)
@@ -73,8 +109,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Images (wikimedia): stale-while-revalidate
-  if (isWikimedia && req.destination === 'image') {
+  // ---------- Images (wikimedia thumbnails & originals): stale-while-revalidate ----------
+  if (isWikimedia && (req.destination === 'image' || url.pathname.includes('/thumb/'))) {
     event.respondWith(
       caches.open(IMAGE_CACHE).then((cache) =>
         cache.match(req).then((cached) => {
@@ -89,18 +125,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: cache-first
+  // ---------- Static assets: cache-first ----------
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
       return fetch(req).then((res) => {
-        // Only cache successful responses
         if (!res || res.status !== 200 || res.type === 'opaque') return res;
         const copy = res.clone();
         caches.open(STATIC_CACHE).then((c) => c.put(req, copy));
         return res;
       }).catch(() => {
-        // Fallback to home for navigation requests
         if (req.mode === 'navigate') return caches.match('./index.html');
       });
     })

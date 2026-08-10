@@ -9,32 +9,37 @@
 │                    کاربر (Browser)                       │
 │  ┌──────────────────────────────────────────────────┐    │
 │  │  HTML + CSS + Vanilla JS                         │    │
-│  │  ├── UI module (theme, toast, lazy load)         │    │
-│  │  ├── DB module (fetch photos.json, search)       │    │
-│  │  ├── App module (gallery rendering)              │    │
-│  │  └── Photo module (detail page)                  │    │
+│  │  ├── UI module (theme, toast, lazy load, helpers)│    │
+│  │  ├── DB module (fetch photos.json + videos.json) │    │
+│  │  ├── App module (photo gallery)                  │    │
+│  │  ├── Photo module (photo detail page)            │    │
+│  │  ├── Videos module (video gallery)        [P2]   │    │
+│  │  ├── Video module (video detail page)     [P2]   │    │
+│  │  └── Video Player (custom Persian player) [P2]   │    │
 │  └──────────────────────────────────────────────────┘    │
 │                          ↕                               │
 │  ┌──────────────────────────────────────────────────┐    │
-│  │  Service Worker (cache, offline)                 │    │
+│  │  Service Worker (cache, offline, range requests) │    │
 │  └──────────────────────────────────────────────────┘    │
 └──────────────────────────────────────────────────────────┘
                           ↕ HTTPS
 ┌──────────────────────────────────────────────────────────┐
 │              GitHub Pages CDN                            │
-│  ├── index.html, photo.html, about.html, ...            │
+│  ├── index.html, videos.html, video.html, photo.html    │
 │  ├── assets/css/style.css                                │
-│  ├── assets/js/{ui,db,app,photo}.js                      │
-│  ├── data/photos.json                                    │
+│  ├── assets/js/{ui,db,app,photo,videos,video,            │
+│  │              video-player}.js                         │
+│  ├── data/photos.json + data/videos.json                 │
 │  └── uploads/photos/* (user-contributed)                 │
 └──────────────────────────────────────────────────────────┘
                           ↑
                 ┌─────────┴─────────┐
                 │                   │
 ┌───────────────┴──────┐  ┌────────┴──────────────┐
-│  Python Scraper      │  │  User Pull Requests   │
-│  (scripts/scrape_*)  │  │  (uploads/photos/ +   │
-│  Runs locally or CI  │  │   data/photos.json)   │
+│  Python Scrapers     │  │  User Pull Requests   │
+│  scrape_commons.py   │  │  (uploads/photos/ +   │
+│  scrape_videos.py    │  │   data/*.json)        │
+│  Runs locally or CI  │  │                       │
 └──────────────────────┘  └───────────────────────┘
                           ↓
                 ┌────────────────────────┐
@@ -42,6 +47,8 @@
                 │  (human, future: AI)   │
                 └────────────────────────┘
 ```
+
+**[P2]** = Phase 2 addition (videos)
 
 ## اصول طراحی
 

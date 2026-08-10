@@ -1,12 +1,12 @@
-# پیکسلری (Pixelary) 📸
+# پیکسلری (Pixelary) 📸 🎬
 
-> یک گالری تصاویر آزاد و بدون سرور — میزبانی‌شده روی GitHub Pages
+> یک گالری تصاویر و ویدیوهای کوتاه آزاد و بدون سرور — میزبانی‌شده روی GitHub Pages
 
 [![Live Demo](https://img.shields.io/badge/live-demo-brightgreen)](https://betaversion488-oss.github.io)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Phase](https://img.shields.io/badge/phase-1%20MVP-orange)](docs/PHASES.md)
+[![Phase](https://img.shields.io/badge/phase-2%20videos-purple)](docs/PHASES.md)
 
-پیکسلری یک پلتفرم نمایش محتوای بصری است که کاملاً روی GitHub Pages اجرا می‌شود — بدون نیاز به سرور، پایگاه‌داده، یا حتی حساب کاربری برای مشاهده. تمام تصاویر از [Wikimedia Commons](https://commons.wikimedia.org) با مجوز Creative Commons یا Public Domain جمع‌آوری شده‌اند.
+پیکسلری یک پلتفرم نمایش محتوای بصری است که کاملاً روی GitHub Pages اجرا می‌شود — بدون نیاز به سرور، پایگاه‌داده، یا حتی حساب کاربری برای مشاهده. تمام عکس‌ها و ویدیوها از [Wikimedia Commons](https://commons.wikimedia.org) با مجوز Creative Commons یا Public Domain جمع‌آوری شده‌اند.
 
 این پروژه نمونه‌ی عملی از معماری **JAMstack** است که در [whitepaper تحقیقاتی](https://github.com/betaversion488-oss/betaversion488-oss.github.io/blob/main/docs/WHITEPAPER.md) توضیح داده شده است.
 
@@ -18,7 +18,8 @@
 - 🌗 **تم تاریک/روشن**: با ذخیره تنظیمات کاربر
 - ⚡ **سریع**: lazy loading، service worker، cache هوشمند
 - 🔍 **جستجوی client-side**: بدون نیاز به backend
-- 🏷️ **فیلتر دسته‌بندی**: ۷+ دسته موضوعی
+- 🏷️ **فیلتر دسته‌بندی**: ۱۴ دسته برای عکس + ۱۶ دسته برای ویدیو
+- 🎬 **ویدیوهای کوتاه**: پخش خودکار هنگام اسکرول، انتخاب کیفیت، دانلود
 - 📲 **PWA**: قابل نصب روی موبایل و دسکتاپ
 - 🔒 **خصوصی‌محور**: بدون analytics، بدون ردیاب، بدون کوکی
 - ♿ **دسترس‌پذیر**: semantic HTML، ARIA، keyboard navigation
@@ -27,18 +28,19 @@
 ## 🏗️ معماری
 
 ```
-┌─────────────────────────────────────────────────┐
-│  GitHub Pages (CDN) — betaversion488-oss.github.io │
-└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│  GitHub Pages (CDN) — betaversion488-oss.github.io   │
+└─────────────────────────────────────────────────────┘
                        ↑
         ┌──────────────┴──────────────┐
         │                             │
-   Static HTML/CSS/JS            data/photos.json
-   (no build step)              (scraped from Wikimedia)
+   Static HTML/CSS/JS       data/photos.json + videos.json
+   (no build step)          (scraped from Wikimedia Commons)
         │                             │
-   Vanilla JS fetches JSON,    Python scraper script
-   renders gallery, handles    runs manually/CI to
-   search, filter, routing     refresh data
+   Vanilla JS fetches JSON,    Python scraper scripts
+   renders gallery + video     (scrape_commons.py +
+   player, handles search,     scrape_videos.py) run via
+   filter, routing             CI weekly refresh
 ```
 
 **Tech Stack:**
@@ -55,7 +57,9 @@
 
 ```
 .
-├── index.html              # صفحه اصلی گالری
+├── index.html              # صفحه اصلی گالری عکس
+├── videos.html             # صفحه گالری ویدیو (فاز ۲)
+├── video.html              # صفحه جزئیات ویدیو (فاز ۲)
 ├── photo.html              # صفحه جزئیات عکس
 ├── about.html              # درباره پروژه
 ├── submit.html             # راهنمای ارسال محتوا
@@ -67,17 +71,22 @@
 ├── sitemap.xml             # SEO
 ├── favicon.ico             # favicon
 ├── assets/
-│   ├── css/style.css       # استایل اصلی
+│   ├── css/style.css       # استایل اصلی (شامل Phase 2)
 │   ├── js/
-│   │   ├── ui.js           # تم، toast، lazy loading
-│   │   ├── db.js           # data layer (load, filter, search)
-│   │   ├── app.js          # gallery page logic
-│   │   └── photo.js        # detail page logic
+│   │   ├── ui.js           # تم، toast، lazy loading، helpers
+│   │   ├── db.js           # data layer (photos + videos)
+│   │   ├── app.js          # gallery page logic (عکس)
+│   │   ├── photo.js        # detail page logic (عکس)
+│   │   ├── videos.js       # gallery page logic (ویدیو)
+│   │   ├── video.js        # detail page logic (ویدیو)
+│   │   └── video-player.js # custom Persian video player
 │   └── icons/              # PWA icons
 ├── data/
-│   └── photos.json         # manifest همه عکس‌ها
+│   ├── photos.json         # manifest همه عکس‌ها
+│   └── videos.json         # manifest همه ویدیوها
 ├── scripts/
-│   ├── scrape_commons.py   # scraper Wikimedia Commons
+│   ├── scrape_commons.py   # scraper عکس از Wikimedia Commons
+│   ├── scrape_videos.py    # scraper ویدیو از Wikimedia Commons
 │   └── gen_icons.py        # generator PWA icons
 └── docs/
     ├── ARCHITECTURE.md     # سند معماری
@@ -108,10 +117,11 @@ open http://localhost:8080
 برای دریافت عکس‌های جدید از Wikimedia Commons:
 
 ```bash
-python3 scripts/scrape_commons.py
+python3 scripts/scrape_commons.py   # عکس‌ها
+python3 scripts/scrape_videos.py    # ویدیوهای کوتاه
 ```
 
-اسکریپت به‌صورت خودکار ۷ دسته‌بندی را scrape می‌کند و `data/photos.json` را به‌روزرسانی می‌کند.
+هر دو اسکریپت به‌صورت خودکار داده‌ها را از Wikimedia Commons جمع‌آوری کرده و فایل‌های `data/photos.json` و `data/videos.json` را به‌روزرسانی می‌کنند. یک گردش‌کار CI هفتگی این کار را به‌صورت خودکار انجام می‌دهد.
 
 ## 📋 نقشه راه
 
@@ -119,8 +129,8 @@ python3 scripts/scrape_commons.py
 
 | فاز | محتوا | وضعیت |
 |-----|--------|--------|
-| ۱ | گالری تصاویر (عکس) | ✅ MVP فعال |
-| ۲ | ویدیوهای کوتاه | 🚧 برنامه‌ریزی شده |
+| ۱ | گالری تصاویر (عکس) | ✅ منتشرشده |
+| ۲ | ویدیوهای کوتاه | ✅ منتشرشده |
 | ۳ | موسیقی و فایل‌های صوتی | 📋 در صف |
 | ۴ | اپلیکیشن اندروید | 📋 در صف |
 | ۵ | عوامل AI برای مرور و تأیید | 📋 در صف |
@@ -152,9 +162,9 @@ python3 scripts/scrape_commons.py
 
 ## 🙏 اعتراف
 
-- [Wikimedia Commons](https://commons.wikimedia.org) — منبع تمام تصاویر
+- [Wikimedia Commons](https://commons.wikimedia.org) — منبع تمام عکس‌ها و ویدیوها
 - [Creative Commons](https://creativecommons.org) — مجوزها
-- تمام عکاسان سخاوتمندی که کارشان را آزاد منتشر کرده‌اند
+- تمام عکاسان و سازندگان ویدیو سخاوتمندی که کارشان را آزاد منتشر کرده‌اند
 
 ---
 

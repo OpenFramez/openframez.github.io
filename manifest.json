@@ -1,7 +1,7 @@
 {
-  "name": "پیکسلری — گالری تصاویر آزاد",
+  "name": "پیکسلری — گالری تصاویر و ویدیوهای آزاد",
   "short_name": "پیکسلری",
-  "description": "گالری تصاویر باکیفیت و آزاد — بدون ورود، سریع، واکنش‌گرا",
+  "description": "گالری تصاویر و ویدیوهای کوتاه باکیفیت و آزاد — بدون ورود، سریع، واکنش‌گرا",
   "lang": "fa-IR",
   "dir": "rtl",
   "start_url": "./",
@@ -10,7 +10,7 @@
   "orientation": "portrait-primary",
   "theme_color": "#6366f1",
   "background_color": "#fafafa",
-  "categories": ["photography", "lifestyle", "entertainment"],
+  "categories": ["photography", "video", "lifestyle", "entertainment"],
   "icons": [
     {
       "src": "assets/icons/icon-192.png",
@@ -27,16 +27,28 @@
   ],
   "shortcuts": [
     {
+      "name": "گالری عکس‌ها",
+      "short_name": "عکس",
+      "url": "./",
+      "description": "مرور عکس‌های باکیفیت"
+    },
+    {
+      "name": "ویدیوهای کوتاه",
+      "short_name": "ویدیو",
+      "url": "./videos.html",
+      "description": "ویدیوهای ۲ تا ۳۰ ثانیه‌ای"
+    },
+    {
       "name": "جستجو",
       "short_name": "جستجو",
       "url": "./?action=search",
-      "description": "جستجوی عکس"
+      "description": "جستجوی محتوا"
     },
     {
       "name": "ارسال محتوا",
       "short_name": "ارسال",
       "url": "./submit.html",
-      "description": "ارسال عکس جدید"
+      "description": "ارسال عکس یا ویدیوی جدید"
     }
   ]
 }

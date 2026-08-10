@@ -1,11 +1,13 @@
 /**
- * Pixelary — Gallery App (home page)
- * Handles: category filter, search, infinite scroll, mobile search overlay
+ * Pixelary — Videos Gallery (Phase 2)
+ * Mirrors app.js (photo gallery) but for videos.
+ * Handles: category filter, search, infinite scroll, mobile search overlay,
+ *          and a small preview-on-hover behavior for desktop.
  */
 
 (function () {
-  const PAGE_SIZE = 24;
-  let state = {
+  const PAGE_SIZE = 12;
+  const state = {
     loaded: 0,
     category: 'all',
     query: '',
@@ -15,7 +17,7 @@
   };
 
   const els = {
-    gallery: document.getElementById('gallery'),
+    gallery: document.getElementById('video-gallery'),
     categoryBar: document.getElementById('category-bar'),
     loading: document.getElementById('gallery-loading'),
     empty: document.getElementById('empty-state'),
@@ -26,16 +28,17 @@
     searchOverlayInput: document.getElementById('search-overlay-input'),
     searchOverlayResults: document.getElementById('search-overlay-results'),
     navSearch: document.getElementById('nav-search'),
+    sortSelect: document.getElementById('sort-select'),
   };
 
   // ---------- Render category chips ----------
   function renderCategories() {
-    const cats = Pixelary.getCategories();
+    const cats = Pixelary.getVideoCategories();
     const html = [
-      `<button class="chip ${state.category === 'all' ? 'active' : ''}" data-cat="all">همه <span class="count">(${Pixelary.getTotal()})</span></button>`,
+      `<button class="chip ${state.category === 'all' ? 'active' : ''}" data-cat="all">همه <span class="count">(${Pixelary.getVideoTotal()})</span></button>`,
       ...cats.map(
         (c) =>
-          `<button class="chip ${state.category === c.slug ? 'active' : ''}" data-cat="${c.slug}">${c.label} <span class="count">(${c.count})</span></button>`
+          `<button class="chip ${state.category === c.slug ? 'active' : ''}" data-cat="${c.slug}">${UI.escapeHtml(c.label)} <span class="count">(${c.count})</span></button>`
       ),
     ].join('');
     els.categoryBar.innerHTML = html;
@@ -60,7 +63,7 @@
       state.rendered = 0;
     }
 
-    state.items = Pixelary.filter({
+    state.items = Pixelary.filterVideos({
       category: state.category === 'all' ? null : state.category,
       query: state.query,
       sort: state.sort,
@@ -77,37 +80,43 @@
 
     const slice = state.items.slice(state.rendered, state.rendered + PAGE_SIZE);
     const frag = document.createDocumentFragment();
-    for (const p of slice) {
-      frag.appendChild(createCard(p));
+    for (const v of slice) {
+      frag.appendChild(createCard(v));
     }
     els.gallery.appendChild(frag);
     state.rendered += slice.length;
     UI.setupLazyImages(els.gallery);
 
-    // If more available, set up sentinel observer
     if (state.rendered < state.items.length) {
       setupInfiniteScroll();
     }
   }
 
-  function createCard(p) {
+  function createCard(v) {
     const card = document.createElement('a');
-    card.href = UI.photoUrl(p.id);
-    card.className = 'photo-card';
-    card.setAttribute('aria-label', `${p.title} — ${p.author}`);
+    card.href = UI.videoUrl(v.id);
+    card.className = 'video-card';
+    card.setAttribute('aria-label', `${v.title} — ${v.artist}`);
+    const aspectClass = `aspect-${(v.aspect || '16:9').replace(':', '-')}`;
+    const durationFa = UI.toPersianDigits(UI.formatDuration(v.duration));
     card.innerHTML = `
       <div class="skeleton"></div>
-      <img data-src="${p.thumbnail}" alt="${UI.escapeHtml(p.title)}" loading="lazy" decoding="async" width="${p.thumb_width || 800}" height="${p.thumb_height || 600}">
-      <span class="license-badge">${UI.escapeHtml(p.license)}</span>
+      <img data-src="${UI.escapeHtml(v.thumb_url)}" alt="${UI.escapeHtml(v.title)}" loading="lazy" decoding="async"
+           width="${v.thumb_width || 640}" height="${v.thumb_height || 360}">
+      <span class="license-badge">${UI.escapeHtml(v.license)}</span>
+      <span class="duration-badge">${durationFa}</span>
+      <div class="play-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </div>
       <div class="overlay">
         <div class="overlay-content">
-          <div class="overlay-title">${UI.escapeHtml(p.title)}</div>
+          <div class="overlay-title">${UI.escapeHtml(v.title)}</div>
           <div class="overlay-author">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
             </svg>
-            ${UI.escapeHtml(p.author)}
+            ${UI.escapeHtml(v.artist)}
           </div>
         </div>
       </div>
@@ -141,16 +150,17 @@
 
   // ---------- Hero stats ----------
   function renderStats() {
-    const stats = Pixelary.getStats();
+    const stats = Pixelary.getVideoStats();
     const nums = els.heroStats.querySelectorAll('.num');
-    if (nums.length >= 3) {
-      nums[0].textContent = stats.total.toLocaleString('fa-IR');
-      nums[1].textContent = stats.categories.toLocaleString('fa-IR');
-      nums[2].textContent = stats.authors.toLocaleString('fa-IR');
+    if (nums.length >= 4) {
+      nums[0].textContent = UI.toPersianDigits(stats.total);
+      nums[1].textContent = UI.toPersianDigits(stats.categories);
+      nums[2].textContent = UI.toPersianDigits(stats.authors);
+      nums[3].textContent = UI.toPersianDigits(UI.formatDuration(stats.totalDuration));
     }
   }
 
-  // ---------- Search (desktop header) ----------
+  // ---------- Search ----------
   let searchDebounce = null;
   function onSearch(query) {
     state.query = query;
@@ -180,19 +190,19 @@
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">برای جستجو تایپ کنید…</div>';
       return;
     }
-    const results = Pixelary.filter({ query, sort: 'newest' }).slice(0, 10);
+    const results = Pixelary.filterVideos({ query, sort: 'newest' }).slice(0, 10);
     if (results.length === 0) {
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">نتیجه‌ای یافت نشد</div>';
       return;
     }
     els.searchOverlayResults.innerHTML = results
       .map(
-        (p) => `
-        <a class="search-result-item" href="${UI.photoUrl(p.id)}">
-          <img src="${p.thumbnail}" alt="" loading="lazy">
+        (v) => `
+        <a class="search-result-item" href="${UI.videoUrl(v.id)}">
+          <img src="${UI.escapeHtml(v.thumb_url)}" alt="" loading="lazy">
           <div class="info">
-            <div class="title">${UI.escapeHtml(p.title)}</div>
-            <div class="meta">${UI.escapeHtml(p.author)} • ${UI.escapeHtml(p.category_label)}</div>
+            <div class="title">${UI.escapeHtml(v.title)}</div>
+            <div class="meta">${UI.escapeHtml(v.artist)} • ${UI.toPersianDigits(UI.formatDuration(v.duration))} • ${UI.escapeHtml(v.category_label || v.category)}</div>
           </div>
         </a>
       `
@@ -203,7 +213,7 @@
   // ---------- Init ----------
   async function init() {
     try {
-      await Pixelary.load();
+      await Pixelary.loadVideos();
     } catch (err) {
       console.error(err);
       els.loading.innerHTML = '<div>خطا در بارگذاری داده‌ها. لطفاً صفحه را تازه‌سازی کنید.</div>';
@@ -212,7 +222,6 @@
     renderStats();
     renderCategories();
 
-    // Check URL params
     const params = new URLSearchParams(window.location.search);
     const q = params.get('q');
     if (q) {
@@ -220,23 +229,21 @@
       if (els.searchInput) els.searchInput.value = q;
     }
     const cat = params.get('cat');
-    if (cat) {
-      state.category = cat;
+    if (cat) state.category = cat;
+    const sort = params.get('sort');
+    if (sort && els.sortSelect) {
+      state.sort = sort;
+      els.sortSelect.value = sort;
     }
 
     renderCategories();
     renderGallery(true);
 
-    // Bind events
     if (els.searchInput) {
       els.searchInput.addEventListener('input', (e) => onSearch(e.target.value));
     }
-    if (els.searchFab) {
-      els.searchFab.addEventListener('click', openSearchOverlay);
-    }
-    if (els.navSearch) {
-      els.navSearch.addEventListener('click', openSearchOverlay);
-    }
+    if (els.searchFab) els.searchFab.addEventListener('click', openSearchOverlay);
+    if (els.navSearch) els.navSearch.addEventListener('click', openSearchOverlay);
     if (els.searchOverlay) {
       els.searchOverlay.addEventListener('click', (e) => {
         if (e.target === els.searchOverlay) closeSearchOverlay();
@@ -245,18 +252,21 @@
     if (els.searchOverlayInput) {
       els.searchOverlayInput.addEventListener('input', (e) => renderOverlayResults(e.target.value));
     }
+    if (els.sortSelect) {
+      els.sortSelect.addEventListener('change', (e) => {
+        state.sort = e.target.value;
+        state.rendered = 0;
+        renderGallery(true);
+      });
+    }
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && els.searchOverlay.classList.contains('active')) {
         closeSearchOverlay();
       }
-      // "/" to focus search
       if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
         e.preventDefault();
-        if (window.innerWidth <= 640) {
-          openSearchOverlay();
-        } else if (els.searchInput) {
-          els.searchInput.focus();
-        }
+        if (window.innerWidth <= 640) openSearchOverlay();
+        else if (els.searchInput) els.searchInput.focus();
       }
     });
   }

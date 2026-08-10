@@ -39,9 +39,42 @@ jobs:
           print(f'✓ All photos have required fields')
           "
 
+      - name: Validate videos.json
+        run: |
+          python3 -c "
+          import json
+          with open('data/videos.json') as f:
+              data = json.load(f)
+          print(f'✓ videos.json is valid JSON')
+          print(f'  Total videos: {data[\"total\"]}')
+          print(f'  Categories: {len(data[\"categories\"])}')
+          assert data['total'] == len(data['videos']), 'total mismatch'
+          required = ['id', 'title', 'file_url', 'thumb_url', 'duration', 'width', 'height', 'license', 'artist', 'sources']
+          for v in data['videos']:
+              for key in required:
+                  assert key in v, f'missing {key} in video {v.get(\"id\")}'
+              assert v['duration'] > 0 and v['duration'] <= 30, f'invalid duration in {v[\"id\"]}: {v[\"duration\"]}'
+              assert len(v['sources']) > 0, f'no sources in {v[\"id\"]}'
+              for s in v['sources']:
+                  assert 'src' in s and 'label' in s, f'bad source in {v[\"id\"]}'
+              lic = v['license'].lower()
+              normalized = ''.join(c for c in lic if c.isalnum())
+              is_free = (
+                  'publicdomain' in normalized or
+                  normalized.startswith('cc0') or
+                  normalized.startswith('ccby') or
+                  normalized.startswith('ccbysa') or
+                  normalized.startswith('gfdl') or
+                  normalized.startswith('pd')
+              )
+              assert is_free, f'non-free license in {v[\"id\"]}: {v[\"license\"]}'
+              assert 'nc' not in lic.lower().replace(' ', ''), f'NC license in {v[\"id\"]}: {v[\"license\"]}'
+          print(f'✓ All videos have required fields, valid durations, free licenses, and sources')
+          "
+
       - name: Validate HTML files
         run: |
-          for f in index.html photo.html about.html submit.html legal.html 404.html; do
+          for f in index.html videos.html video.html photo.html about.html submit.html legal.html 404.html; do
             if [ -f "$f" ]; then
               echo "✓ $f exists"
             else
@@ -63,13 +96,10 @@ jobs:
 
       - name: Check for broken internal links
         run: |
-          # Get all HTML files
           HTML_FILES=$(find . -name "*.html" -not -path "./.git/*")
           for f in $HTML_FILES; do
-            # Extract href="./..." and src="./..." references
             grep -oE '(href|src)="\.\/[^"]*"' "$f" | while read -r ref; do
               path=$(echo "$ref" | sed -E 's/.*="\.\/([^"]*)"/\1/')
-              # Skip URLs with ? or # or http
               if [[ "$path" == *"?"* ]] || [[ "$path" == *"#"* ]] || [[ "$path" == "http"* ]]; then
                 continue
               fi

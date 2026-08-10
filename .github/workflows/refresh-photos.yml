@@ -1,4 +1,4 @@
-name: Refresh Photos
+name: Refresh Photos & Videos
 
 on:
   schedule:
@@ -20,17 +20,20 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Run scraper
+      - name: Refresh photos
         run: python3 scripts/scrape_commons.py
+
+      - name: Refresh videos
+        run: python3 scripts/scrape_videos.py
 
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/photos.json
+          git add data/photos.json data/videos.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: weekly photos refresh [skip ci]"
+            git commit -m "chore: weekly content refresh (photos + videos) [skip ci]"
             git push
           fi

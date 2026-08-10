@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#fafafa">
+  <meta name="theme-color" content="#0a0a0f">
   <meta name="color-scheme" content="light dark">
-  <title>جزئیات عکس — پیکسلری</title>
-  <meta name="description" content="مشاهده تصویر باکیفیت همراه با اطلاعات کامل عکاس، مجوز و توضیحات.">
-  <link rel="canonical" href="https://betaversion488-oss.github.io/photo.html">
+  <title>جزئیات ویدیو — پیکسلری</title>
+  <meta name="description" content="مشاهده ویدیوی کوتاه باکیفیت همراه با اطلاعات کامل سازنده، مجوز و توضیحات.">
+  <link rel="canonical" href="https://betaversion488-oss.github.io/video.html">
 
-  <meta property="og:type" content="article">
-  <meta property="og:title" content="پیکسلری — تصویر">
-  <meta property="og:description" content="تصویر باکیفیت با مجوز آزاد">
+  <meta property="og:type" content="video.other">
+  <meta property="og:title" content="پیکسلری — ویدیو">
+  <meta property="og:description" content="ویدیوی کوتاه باکیفیت با مجوز آزاد">
   <meta property="og:site_name" content="Pixelary">
   <meta property="og:locale" content="fa_IR">
   <meta property="og:image" content="">
+  <meta property="og:video" content="">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="پیکسلری — تصویر">
-  <meta name="twitter:description" content="تصویر باکیفیت با مجوز آزاد">
+  <meta name="twitter:title" content="پیکسلری — ویدیو">
+  <meta name="twitter:description" content="ویدیوی کوتاه باکیفیت با مجوز آزاد">
   <meta name="twitter:image" content="">
 
   <link rel="icon" href="favicon.ico" sizes="any">
@@ -47,7 +48,7 @@
           <circle cx="11" cy="11" r="8"/>
           <path d="m21 21-4.3-4.3"/>
         </svg>
-        <input type="search" id="search-input" placeholder="جستجوی عکس، عکاس، موضوع..." autocomplete="off" aria-label="جستجو">
+        <input type="search" id="search-input" placeholder="جستجوی ویدیو، سازنده، موضوع..." autocomplete="off" aria-label="جستجو">
       </div>
       <div class="header-actions">
         <button class="icon-btn" data-theme-toggle aria-label="تغییر تم" title="تغییر تم">
@@ -59,7 +60,7 @@
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
           </svg>
         </button>
-        <a href="./" class="icon-btn" aria-label="بازگشت به خانه" title="بازگشت">
+        <a href="videos.html" class="icon-btn" aria-label="بازگشت به ویدیوها" title="بازگشت">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="m12 19-7-7 7-7"/>
             <path d="M19 12H5"/>
@@ -70,16 +71,16 @@
   </header>
 
   <main id="main" class="container">
-    <div class="photo-detail" id="photo-detail">
+    <div class="video-detail" id="video-detail">
       <div class="load-more">
         <div class="spinner"></div>
-        <div>در حال بارگذاری عکس…</div>
+        <div>در حال بارگذاری ویدیو…</div>
       </div>
     </div>
 
     <section class="mt-8">
-      <h2 style="margin-bottom: var(--sp-4);">تصاویر مرتبط</h2>
-      <div class="gallery" id="related-gallery"></div>
+      <h2 style="margin-bottom: var(--sp-4);">ویدیوهای مرتبط</h2>
+      <div class="gallery video-gallery" id="related-gallery"></div>
     </section>
   </main>
 
@@ -91,14 +92,14 @@
       </svg>
       <span>خانه</span>
     </a>
-    <a href="videos.html" class="bottom-nav-item">
+    <a href="videos.html" class="bottom-nav-item active" aria-current="page">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="2" y="6" width="14" height="12" rx="2"/>
         <path d="m16 10 6-3v10l-6-3"/>
       </svg>
       <span>ویدیو</span>
     </a>
-    <button class="bottom-nav-item"<button class="bottom-nav-item" id="nav-search">
+    <button class="bottom-nav-item" id="nav-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="11" cy="11" r="8"/>
         <path d="m21 21-4.3-4.3"/>
@@ -122,7 +123,7 @@
 
   <div class="search-overlay" id="search-overlay" role="dialog" aria-modal="true" aria-label="جستجو">
     <div class="search-overlay-content">
-      <input type="search" id="search-overlay-input" placeholder="جستجوی عکس، عکاس، موضوع..." autocomplete="off">
+      <input type="search" id="search-overlay-input" placeholder="جستجوی ویدیو، سازنده، موضوع..." autocomplete="off">
       <div class="search-overlay-results" id="search-overlay-results"></div>
     </div>
   </div>
@@ -138,6 +139,7 @@
 
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/db.js"></script>
-  <script src="assets/js/photo.js"></script>
+  <script src="assets/js/video-player.js"></script>
+  <script src="assets/js/video.js"></script>
 </body>
 </html>

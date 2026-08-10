@@ -155,6 +155,36 @@ const UI = (function () {
   function photoUrl(id) {
     return `photo.html?id=${encodeURIComponent(id)}`;
   }
+  function videoUrl(id) {
+    return `video.html?id=${encodeURIComponent(id)}`;
+  }
+
+  // ---------- Duration formatter ----------
+  function formatDuration(seconds) {
+    if (!seconds || seconds < 0) return '0:00';
+    const s = Math.floor(seconds % 60);
+    const m = Math.floor(seconds / 60) % 60;
+    const h = Math.floor(seconds / 3600);
+    const pad = (n) => String(n).padStart(2, '0');
+    if (h > 0) return `${h}:${pad(m)}:${pad(s)}`;
+    return `${m}:${pad(s)}`;
+  }
+
+  // ---------- File size formatter ----------
+  function formatBytes(bytes) {
+    if (!bytes || bytes < 0) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let i = 0;
+    let n = bytes;
+    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+    return `${n.toFixed(n < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
+  }
+
+  // ---------- Persian digits ----------
+  function toPersianDigits(s) {
+    if (s == null) return '';
+    return String(s).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[+d]);
+  }
 
   return {
     initTheme,
@@ -164,8 +194,12 @@ const UI = (function () {
     escapeHtml,
     initials,
     formatDate,
+    formatDuration,
+    formatBytes,
+    toPersianDigits,
     licenseUrl,
     photoUrl,
+    videoUrl,
   };
 })();
 

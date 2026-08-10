@@ -53,17 +53,92 @@ manifest کامل همه عکس‌ها.
 curl https://betaversion488-oss.github.io/data/photos.json
 ```
 
+### `GET /data/videos.json` *(Phase 2)*
+
+manifest کامل همه ویدیوهای کوتاه (۲-۳۰ ثانیه).
+
+**Response:**
+```json
+{
+  "version": "2.0.0",
+  "phase": 2,
+  "generated_at": "2026-08-11T12:00:00Z",
+  "source": "Wikimedia Commons",
+  "source_url": "https://commons.wikimedia.org",
+  "license_note": "All videos are CC-licensed or public domain...",
+  "duration_range_sec": [2.0, 30.0],
+  "max_file_size_mb": 60.0,
+  "total": 76,
+  "categories": [
+    {"slug": "instrument", "label": "ساز موسیقی"},
+    {"slug": "science", "label": "علم"},
+    ...
+  ],
+  "videos": [
+    {
+      "id": "fv_0001",
+      "title": "...",
+      "description": "...",
+      "category": "science",
+      "category_label": "علم",
+      "commons_title": "File:....webm",
+      "page_url": "https://commons.wikimedia.org/wiki/File:...",
+      "file_url": "https://upload.wikimedia.org/.../original.webm",
+      "thumb_url": "https://upload.wikimedia.org/.../640px-....jpg",
+      "thumb_width": 640,
+      "thumb_height": 480,
+      "duration": 15.52,
+      "width": 2160,
+      "height": 1700,
+      "aspect": "108:85",
+      "size_bytes": 2461083,
+      "mime": "video/webm",
+      "license": "Public domain",
+      "license_url": "",
+      "artist": "NASA Earth Observatory",
+      "artist_url": "",
+      "credit": "...",
+      "uploaded_at": "2026-07-12",
+      "sources": [
+        {
+          "label": "240p",
+          "type": "video/webm; codecs=\"vp9, opus\"",
+          "width": 320,
+          "height": 240,
+          "src": "https://upload.wikimedia.org/.../240p.vp9.webm",
+          "bandwidth": 229456
+        },
+        {
+          "label": "480p",
+          "type": "video/webm; codecs=\"vp9, opus\"",
+          "width": 640,
+          "height": 480,
+          "src": "https://upload.wikimedia.org/.../480p.vp9.webm",
+          "bandwidth": 600000
+        },
+        ...
+      ]
+    }
+  ]
+}
+```
+
+**استفاده:**
+```bash
+curl https://betaversion488-oss.github.io/data/videos.json | jq '.videos[0].sources'
+```
+
 ## ۲. JavaScript Module API
 
 ### `Pixelary` (global)
 
-دسترسی به داده‌ها در browser.
+دسترسی به داده‌ها در browser — شامل متدهای عکس (Phase 1) و ویدیو (Phase 2).
 
-#### Methods
+#### Phase 1 (Photos)
 
 ##### `Pixelary.load(): Promise<Manifest>`
 
-بارگذاری manifest از سرور. cache در memory.
+بارگذاری manifest عکس‌ها. cache در memory.
 
 ```javascript
 const data = await Pixelary.load();
@@ -81,7 +156,7 @@ console.log(photo.title);
 
 ##### `Pixelary.getCategories(): Category[]`
 
-لیست دسته‌بندی‌ها با count.
+لیست دسته‌بندی‌های عکس با count.
 
 ```javascript
 const cats = Pixelary.getCategories();
@@ -110,11 +185,76 @@ const results = Pixelary.filter({
 
 ##### `Pixelary.getStats(): Stats`
 
-آمار کلی.
+آمار کلی عکس‌ها.
 
 ```javascript
 const stats = Pixelary.getStats();
 // {total: 167, categories: 7, authors: 92}
+```
+
+#### Phase 2 (Videos)
+
+##### `Pixelary.loadVideos(): Promise<VideoManifest>`
+
+بارگذاری manifest ویدیوها. cache در memory.
+
+```javascript
+const data = await Pixelary.loadVideos();
+console.log(data.total); // 76
+```
+
+##### `Pixelary.getVideoById(id: string): Video | null`
+
+```javascript
+const v = Pixelary.getVideoById('fv_0001');
+console.log(v.title, v.duration, v.sources);
+```
+
+##### `Pixelary.getVideoCategories(): Category[]`
+
+لیست دسته‌بندی‌های ویدیو (فقط دسته‌هایی که حداقل ۱ ویدیو دارند).
+
+##### `Pixelary.getVideoTotal(): number`
+
+##### `Pixelary.filterVideos(options): Video[]`
+
+```javascript
+const results = Pixelary.filterVideos({
+  category: 'science',    // optional
+  query: 'NASA',          // optional
+  sort: 'newest',         // 'newest' | 'oldest' | 'shortest' | 'longest'
+});
+```
+
+##### `Pixelary.getVideoRelated(video: Video, limit: number = 6): Video[]`
+
+##### `Pixelary.getVideoStats(): VideoStats`
+
+```javascript
+const stats = Pixelary.getVideoStats();
+// {total: 76, categories: 16, authors: 40, totalDuration: 1023}
+```
+
+### `PixelaryPlayer` (global) — Phase 2
+
+Custom video player factory.
+
+```javascript
+const player = PixelaryPlayer.create({
+  container: HTMLElement,      // where to mount
+  video: videoObject,          // entry from videos.json
+  autoplay: true,              // autoplay when scrolled into view
+  loop: true,                  // loop by default
+  compact: false,              // compact mode (no quality menu)
+});
+
+// Methods on returned object:
+player.play();
+player.pause();
+player.togglePlay();
+player.toggleMute();
+player.setSource('720p');  // switch quality
+player.destroy();          // cleanup
 ```
 
 ### `UI` (global)
@@ -163,6 +303,41 @@ Escape کاراکترهای HTML.
 
 ساختن URL صفحه جزئیات عکس.
 
+##### `UI.videoUrl(id: string): string` *(Phase 2)*
+
+ساختن URL صفحه جزئیات ویدیو.
+
+```javascript
+UI.videoUrl('fv_0001'); // 'video.html?id=fv_0001'
+```
+
+##### `UI.formatDuration(seconds: number): string` *(Phase 2)*
+
+فرمت مدت زمان به صورت `M:SS` یا `H:MM:SS`.
+
+```javascript
+UI.formatDuration(24.19); // '0:24'
+UI.formatDuration(3725); // '1:02:05'
+```
+
+##### `UI.formatBytes(bytes: number): string` *(Phase 2)*
+
+فرمت حجم فایل به صورت قابل خواندن.
+
+```javascript
+UI.formatBytes(2461083); // '2.4 MB'
+UI.formatBytes(1024);    // '1 KB'
+```
+
+##### `UI.toPersianDigits(s: string | number): string` *(Phase 2)*
+
+تبدیل ارقام لاتین به فارسی.
+
+```javascript
+UI.toPersianDigits('0:24'); // '۰:۲۴'
+UI.toPersianDigits(42);     // '۴۲'
+```
+
 ## ۳. URL Parameters
 
 ### Index page (`/`)
@@ -174,6 +349,16 @@ Escape کاراکترهای HTML.
 
 مثال: `/?q=mountain&cat=nature`
 
+### Videos page (`/videos.html`) *(Phase 2)*
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `q` | string | جستجوی اولیه |
+| `cat` | string | دسته‌بندی اولیه |
+| `sort` | string | `newest` \| `oldest` \| `shortest` \| `longest` |
+
+مثال: `/videos.html?cat=science&sort=shortest`
+
 ### Photo page (`/photo.html`)
 
 | Parameter | Type | Description |
@@ -181,6 +366,14 @@ Escape کاراکترهای HTML.
 | `id` | string (required) | ID عکس |
 
 مثال: `/photo.html?id=fi_0001`
+
+### Video page (`/video.html`) *(Phase 2)*
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string (required) | ID ویدیو |
+
+مثال: `/video.html?id=fv_0001`
 
 ## ۴. Webhook (آینده)
 

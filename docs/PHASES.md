@@ -35,33 +35,40 @@
 
 ---
 
-## فاز ۲: ویدیوهای کوتاه 🚧
+## فاز ۲: ویدیوهای کوتاه ✅
 
 **هدف:** افزودن پشتیبانی از ویدیوهای کوتاه (۲-۳۰ ثانیه) به گالری.
 
 **محتوا:**
-- ویدیوهای کوتاه از Internet Archive
-- ویدیوهای CC-licensed از Wikimedia Commons
-- ویدیوهای contribute شده توسط کاربران
+- ویدیوهای کوتاه از Wikimedia Commons (با مجوز CC یا Public Domain)
+- ۱۶ دسته‌بندی موضوعی (ساز موسیقی، علم، فضا، زیست‌شناسی، تلسکوپ، تایم‌لپس، طبیعت، سطح، طراحی، آزمایش، انیمیشن، تاریخ، فیزیک، هنر، منظره، موج)
+- کیفیت‌های متعدد برای هر ویدیو (240p تا 2160p) — انتخاب پویا در مرورگر
+- حجم متوسط ۴.۵ مگابایت به‌ازای هر ویدیو
 
-**قابلیت‌های جدید:**
-- Section جداگانه برای ویدیوها
-- Player سفارشی با controls فارسی
-- Loop, mute, autoplay on scroll (مثل اینستاگرام Reels)
-- Quality selector (240p, 480p, 720p)
-- Download با اعتبار کامل
+**قابلیت‌های پیاده‌سازی‌شده:**
+- ✅ Section جداگانه برای ویدیوها (`videos.html`)
+- ✅ Player سفارشی با controls فارسی (Play/Pause, Mute, Loop, Fullscreen, Quality)
+- ✅ Autoplay هنگام اسکرول (IntersectionObserver) — muted, looped
+- ✅ Quality selector پویا (240p / 480p / 720p / 1080p / ...)
+- ✅ Download با اعتبار کامل + لینک به صفحه منبع
+- ✅ صفحه جزئیات با metadata کامل (ابعاد، مدت، حجم، فرمت، کیفیت‌ها)
+- ✅ JSON-LD `VideoObject` برای SEO
+- ✅ Lazy loading تصاویر بندانگشتی (posters)
+- ✅ Service Worker با range-request awareness برای video streaming
+- ✅ Loop toggle (default: فعال)
+- ✅ Keyboard shortcuts (Space, M, F, L, ←/→)
+- ✅ Sort: جدیدترین / قدیمی‌ترین / کوتاه‌ترین / بلندترین
+- ✅ Search و filter بر اساس دسته
+- ✅ Related videos در صفحه جزئیات
 
-**چالش‌های فنی:**
-- **حجم فایل**: ویدیوها بزرگ‌تر از عکس‌ها. راه حل:
-  - ذخیره روی GitHub LFS (محدودیت ۱GB 免费)
-  - یا روی Internet Archive و embed کردن (مثل Wikimedia برای عکس‌ها)
-  - یا استفاده از Cloudflare Stream (free tier)
-- **Bandwidth**: ۱۰۰GB/month کافی نیست برای ویدیو. راه حل:
-  - Cross-hosting: thumbnails روی GitHub، ویدیو روی archive.org
-  - Progressive enhancement: preview با GIF، کلیک برای ویدیو کامل
-- **Performance**: lazy load video, فقط زمانی که نزدیک viewport است
+**تکنولوژی‌ها:**
+- Python scraper (`scripts/scrape_videos.py`) با Wikimedia Commons API
+- Vanilla ES6+ JavaScript (`video-player.js`, `videos.js`, `video.js`)
+- استفاده از `videoinfo` API برای دریافت transcodes چندکیفیته
+- `IntersectionObserver` برای autoplay هوشمند (فقط یک ویدیو همزمان)
+- Service Worker با دفاع در برابر range requests
 
-**نقشه راه:** Q4 2026
+**وضعیت:** ✅ منتشرشده (نسخه ۲.۰.۰)
 
 ---
 
@@ -204,7 +211,7 @@
 | فاز | محتوا | زمان‌بندی | وضعیت |
 |-----|--------|-----------|--------|
 | ۱ | عکس | Q3 2026 | ✅ |
-| ۲ | ویدیو | Q4 2026 | 🚧 |
+| ۲ | ویدیو | Q4 2026 | ✅ |
 | ۳ | صوت | Q1 2027 | 📋 |
 | ۴ | اندروید | Q2 2027 | 📋 |
 | ۵ | AI | Q3 2027 | 📋 |
