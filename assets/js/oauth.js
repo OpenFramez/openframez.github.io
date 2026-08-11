@@ -26,11 +26,12 @@ window.PixelaryOAuth = (function () {
   'use strict';
 
   // ---------- Configuration ----------
-  // OAuth App must be registered at https://github.com/settings/applications/new
-  // by the org owner. Required scopes: `public_repo` (or `repo` for private user repos).
-  // Enable "Device Flow" checkbox during app creation.
-  // REPLACE this placeholder with the real Client ID after registering the OAuth App.
-  var CLIENT_ID = 'Ov23liPLACEHOLDER1234';
+  // OAuth App registered by org owner at https://github.com/settings/applications/new
+  // (or under https://github.com/organizations/betaversion488-oss/settings/applications/new)
+  // Required scopes: `public_repo` (or `repo` for private user repos).
+  // "Enable Device Flow" checkbox MUST be enabled during app creation.
+  // Client ID format: starts with "Ov23li" (20 chars) for OAuth Apps (not GitHub Apps).
+  var CLIENT_ID = 'Ov23liW4P7BP1Ovixftr';
 
   // Token scopes requested from user
   // - public_repo: read/write to user's public repos (sufficient for our use case)
@@ -279,23 +280,13 @@ window.PixelaryOAuth = (function () {
   }
 
   /**
-   * Update the OAuth Client ID (used after the user registers the OAuth App).
-   * Persists to localStorage so we don't need to redeploy.
+   * Update the OAuth Client ID at runtime (development convenience only).
+   * In production, the Client ID is hardcoded above and this is a no-op override.
+   * Disabled localStorage auto-load to prevent stale overrides on production.
    */
   function setClientId(clientId) {
-    localStorage.setItem('pixelary_oauth_client_id', clientId);
     CLIENT_ID = clientId;
   }
-
-  function loadClientId() {
-    var saved = localStorage.getItem('pixelary_oauth_client_id');
-    if (saved && saved.length > 10) {
-      CLIENT_ID = saved;
-    }
-  }
-
-  // Auto-load saved client ID
-  loadClientId();
 
   return {
     login: login,
