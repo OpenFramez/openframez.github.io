@@ -1,0 +1,9 @@
+name = "pixelary-oauth"
+main = "oauth-proxy.js"
+compatibility_date = "2024-09-01"
+
+# Deploy with: wrangler deploy
+# After deploy, note the URL (e.g. https://pixelary-oauth.<your-subdomain>.workers.dev)
+# Then update /assets/js/oauth.js OAUTH_PROXY_BASE to:
+#   'https://pixelary-oauth.<your-subdomain>.workers.dev/?url='
+# and update the proxied() function to URL-encode the upstream URL.

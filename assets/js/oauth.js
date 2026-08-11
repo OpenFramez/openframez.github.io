@@ -33,6 +33,28 @@ window.PixelaryOAuth = (function () {
   // Client ID format: starts with "Ov23li" (20 chars) for OAuth Apps (not GitHub Apps).
   var CLIENT_ID = 'Ov23liW4P7BP1Ovixftr';
 
+  // ---------- CORS Proxy ----------
+  // GitHub's OAuth Device Flow endpoints (/login/device/code and /login/oauth/access_token)
+  // do NOT support CORS — they were designed for CLI/mobile apps, not browser apps.
+  // A static site on github.io therefore cannot call them directly; the browser blocks
+  // the request with "Failed to fetch".
+  //
+  // To make Device Flow work from a static site, we route the two OAuth endpoints through
+  // a CORS proxy. The proxy is a transparent pass-through — it only adds CORS headers.
+  //
+  // For production, deploy your OWN proxy (see /cloudflare-worker/oauth-proxy.js in this repo).
+  // Set the deployed Worker URL as OAUTH_PROXY_BASE, e.g.
+  //   'https://pixelary-oauth.YOUR-SUBDOMAIN.workers.dev/?url='
+  //
+  // The default below uses proxy.cors.sh — a public CORS proxy that supports POST + JSON.
+  // Suitable for testing. For production with high traffic or sensitive data, deploy your own.
+  var OAUTH_PROXY_BASE = 'https://proxy.cors.sh/';
+
+  // Wrap a GitHub OAuth URL with the proxy prefix
+  function proxied(url) {
+    return OAUTH_PROXY_BASE + url;
+  }
+
   // Token scopes requested from user
   // - public_repo: read/write to user's public repos (sufficient for our use case)
   // - read:user:   read user profile (login, avatar) to display in UI
@@ -106,7 +128,7 @@ window.PixelaryOAuth = (function () {
    * Returns { device_code, user_code, verification_uri, expires_in, interval }
    */
   function requestDeviceCode() {
-    return fetch('https://github.com/login/device/code', {
+    return fetch(proxied('https://github.com/login/device/code'), {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -120,6 +142,8 @@ window.PixelaryOAuth = (function () {
       if (!res.ok) {
         return res.json().then(function (err) {
           throw new Error(err.error_description || err.error || 'Failed to start OAuth flow');
+        }).catch(function () {
+          throw new Error('خطا در ارتباط با GitHub (HTTP ' + res.status + ')');
         });
       }
       return res.json();
@@ -142,7 +166,7 @@ window.PixelaryOAuth = (function () {
           return;
         }
 
-        fetch('https://github.com/login/oauth/access_token', {
+        fetch(proxied('https://github.com/login/oauth/access_token'), {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
