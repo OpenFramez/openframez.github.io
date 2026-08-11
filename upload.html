@@ -6,12 +6,12 @@
   <meta name="theme-color" content="#fafafa">
   <meta name="color-scheme" content="light dark">
   <title>ارسال محتوا — پیکسلری</title>
-  <meta name="description" content="عکس یا ویدیوی خود را به پیکسلری اضافه کنید. آپلود راحت با چند کلیک — بدون نیاز به دانش فنی.">
+  <meta name="description" content="عکس یا ویدیوی خود را در مخزن شخصی خود آپلود کنید. آپلود راحت با چند کلیک — بدون نیاز به دانش فنی.">
   <link rel="canonical" href="https://betaversion488-oss.github.io/upload.html">
 
   <meta property="og:type" content="article">
   <meta property="og:title" content="ارسال محتوا به پیکسلری">
-  <meta property="og:description" content="آپلود راحت عکس و ویدیو با چند کلیک — بدون نیاز به دانش فنی">
+  <meta property="og:description" content="آپلود راحت عکس و ویدیو در مخزن شخصی شما با چند کلیک">
   <meta property="og:locale" content="fa_IR">
 
   <link rel="icon" href="favicon.ico" sizes="any">
@@ -61,301 +61,349 @@
     <!-- Hero -->
     <section class="upload-hero">
       <h1>ارسال محتوا</h1>
-      <p class="lead">عکس یا ویدیوی خود را در چند کلیک به پیکسلری اضافه کنید. بدون نیاز به حساب کاربری یا دانش فنی.</p>
+      <p class="lead">عکس یا ویدیوی خود را در مخزن شخصی‌تان آپلود کنید. محتوا روی حساب GitHub شما ذخیره می‌شود — کاملاً متعلق به شما.</p>
+
+      <!-- User chip (shown after login) -->
+      <div id="userChip" class="user-chip hidden">
+        <img id="userAvatar" src="" alt="" class="user-avatar">
+        <span id="userName" class="user-name"></span>
+        <button id="logoutBtn" class="btn btn-ghost btn-sm">خروج</button>
+      </div>
     </section>
 
-    <!-- Step indicator -->
-    <ol class="step-indicator" id="stepIndicator">
-      <li class="step active" data-step="1">
-        <span class="step-dot">۱</span>
-        <span class="step-label">انتخاب فایل</span>
-      </li>
-      <li class="step" data-step="2">
-        <span class="step-dot">۲</span>
-        <span class="step-label">تکمیل اطلاعات</span>
-      </li>
-      <li class="step" data-step="3">
-        <span class="step-dot">۳</span>
-        <span class="step-label">ارسال</span>
-      </li>
-    </ol>
-
-    <!-- Step 1: File picker -->
-    <section class="upload-step" id="step1" data-step-panel="1">
-      <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="انتخاب فایل برای آپلود">
-        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" hidden>
-        <div class="dropzone-inner">
-          <div class="dropzone-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-          </div>
-          <h2>فایل را اینجا رها کنید</h2>
-          <p>یا یکی از گزینه‌های زیر را انتخاب کنید</p>
-          <div class="dropzone-actions">
-            <button type="button" class="btn btn-primary" data-pick="gallery">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="9" cy="9" r="2"/>
-                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-              </svg>
-              <span>از گالری</span>
-            </button>
-            <button type="button" class="btn btn-secondary" data-pick="camera">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
-                <circle cx="12" cy="13" r="3"/>
-              </svg>
-              <span>از دوربین</span>
-            </button>
-            <button type="button" class="btn btn-secondary" data-pick="record-video">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="2" y="6" width="14" height="12" rx="2"/>
-                <path d="m16 10 6-3v10l-6-3"/>
-              </svg>
-              <span>ضبط ویدیو</span>
-            </button>
-          </div>
+    <!-- AUTH GATE: shown when user is not logged in -->
+    <section id="authGate" class="auth-gate">
+      <div class="auth-card">
+        <div class="auth-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+          </svg>
         </div>
-      </div>
-
-      <div class="upload-tips">
-        <h3>راهنمای سریع</h3>
-        <ul>
-          <li><strong>عکس:</strong> فرمت JPEG، PNG یا WebP — حداکثر ۵ مگابایت</li>
-          <li><strong>ویدیو:</strong> فرمت MP4 یا WebM — حداکثر ۵۰ مگابایت — ترجیحاً کوتاه (زیر ۶۰ ثانیه)</li>
-          <li><strong>محتوا:</strong> فقط محتوایی که خودتان خلق کرده‌اید یا حق انتشار آن را دارید</li>
-          <li><strong>مجوز:</strong> با ارسال، محتوای شما تحت مجوز Creative Commons منتشر خواهد شد</li>
-          <li><strong>ذخیره:</strong> فایل‌ها مستقیماً در مخزن GitHub پیکسلری ذخیره می‌شوند</li>
+        <h2>برای ارسال محتوا وارد GitHub شوید</h2>
+        <p>برای حفظ مالکیت محتوای شما، فایل‌ها در مخزن شخصی شما روی GitHub ذخیره می‌شوند. این کار نیاز به ورود از طریق GitHub دارد.</p>
+        <ul class="auth-features">
+          <li>✓ محتوا روی حساب خود شما ذخیره می‌شود — کاملاً متعلق به شما</li>
+          <li>✓ در هر زمان می‌توانید محتوا را حذف کنید</li>
+          <li>✓ ما به پسورد شما دسترسی نداریم — فقط اجازه نوشتن در مخزن</li>
+          <li>✓ مخزن شخصی شما به‌صورت خودکار ساخته می‌شود (یک‌بار)</li>
         </ul>
+        <div id="loginStatus" class="login-status hidden"></div>
+        <div id="deviceCodeCard" class="device-code-card hidden">
+          <h3>کد را در GitHub وارد کنید</h3>
+          <ol>
+            <li>به صفحه <a id="verificationLink" href="https://github.com/login/device" target="_blank" rel="noopener">github.com/login/device</a> بروید</li>
+            <li>کد زیر را وارد کنید:</li>
+          </ol>
+          <div class="device-code-display">
+            <code id="userCodeDisplay">XXXX-XXXX</code>
+          </div>
+          <p class="device-code-hint">صفحه GitHub را در تب دیگری باز کرده‌اید. کد را کپی و در آنجا وارد کنید.</p>
+        </div>
+        <button id="loginBtn" class="btn btn-primary btn-lg">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          <span>ورود با GitHub</span>
+        </button>
+        <p class="auth-footer">با ورود، شما مجوز می‌دهید پیکسلری یک مخزن عمومی به نام <code>pixelary-uploads</code> در حساب شما ایجاد کند و فایل‌های آپلودی را در آن ذخیره کند.</p>
       </div>
     </section>
 
-    <!-- Step 2: Metadata form -->
-    <section class="upload-step hidden" id="step2" data-step-panel="2">
-      <div class="upload-form-card">
-        <!-- Preview -->
-        <div class="upload-preview" id="previewContainer">
-          <div class="preview-media" id="previewMedia"></div>
-          <div class="preview-info">
-            <div class="preview-filename" id="previewFilename"></div>
-            <div class="preview-meta" id="previewMeta"></div>
-            <button type="button" class="btn btn-ghost btn-sm" id="changeFileBtn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-                <path d="M21 3v5h-5"/>
-                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-                <path d="M3 21v-5h5"/>
+    <!-- UPLOAD CONTENT: shown after login -->
+    <div id="uploadContent" class="hidden">
+      <!-- Step indicator -->
+      <ol class="step-indicator" id="stepIndicator">
+        <li class="step active" data-step="1">
+          <span class="step-dot">۱</span>
+          <span class="step-label">انتخاب فایل</span>
+        </li>
+        <li class="step" data-step="2">
+          <span class="step-dot">۲</span>
+          <span class="step-label">تکمیل اطلاعات</span>
+        </li>
+        <li class="step" data-step="3">
+          <span class="step-dot">۳</span>
+          <span class="step-label">ارسال</span>
+        </li>
+      </ol>
+
+      <!-- Step 1: File picker -->
+      <section class="upload-step" id="step1" data-step-panel="1">
+        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="انتخاب فایل برای آپلود">
+          <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" hidden>
+          <div class="dropzone-inner">
+            <div class="dropzone-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-              <span>تغییر فایل</span>
-            </button>
+            </div>
+            <h2>فایل را اینجا رها کنید</h2>
+            <p>یا یکی از گزینه‌های زیر را انتخاب کنید</p>
+            <div class="dropzone-actions">
+              <button type="button" class="btn btn-primary" data-pick="gallery">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="9" cy="9" r="2"/>
+                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                </svg>
+                <span>از گالری</span>
+              </button>
+              <button type="button" class="btn btn-secondary" data-pick="camera">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                  <circle cx="12" cy="13" r="3"/>
+                </svg>
+                <span>از دوربین</span>
+              </button>
+              <button type="button" class="btn btn-secondary" data-pick="record-video">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="2" y="6" width="14" height="12" rx="2"/>
+                  <path d="m16 10 6-3v10l-6-3"/>
+                </svg>
+                <span>ضبط ویدیو</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <form id="uploadForm" novalidate>
-          <div class="form-field">
-            <label for="title">عنوان <span class="required">*</span></label>
-            <input type="text" id="title" name="title" required maxlength="120" placeholder="مثلاً: غروب آفتاب در رشته‌کوه البرز">
-            <small class="form-hint">یک عنوان توصیفی و کوتاه بنویسید</small>
-          </div>
+        <div class="upload-tips">
+          <h3>راهنمای سریع</h3>
+          <ul>
+            <li><strong>عکس:</strong> فرمت JPEG، PNG یا WebP — حداکثر ۵ مگابایت</li>
+            <li><strong>ویدیو:</strong> فرمت MP4 یا WebM — حداکثر ۵۰ مگابایت — ترجیحاً کوتاه (زیر ۶۰ ثانیه)</li>
+            <li><strong>محتوا:</strong> فقط محتوایی که خودتان خلق کرده‌اید یا حق انتشار آن را دارید</li>
+            <li><strong>مجوز:</strong> با ارسال، محتوای شما تحت مجوز Creative Commons منتشر خواهد شد</li>
+            <li><strong>ذخیره‌سازی:</strong> فایل‌ها در مخزن شخصی شما (<code id="userRepoHint">{username}/pixelary-uploads</code>) ذخیره می‌شوند</li>
+          </ul>
+        </div>
+      </section>
 
-          <div class="form-field">
-            <label for="description">توضیحات</label>
-            <textarea id="description" name="description" maxlength="500" rows="3" placeholder="توضیح بیشتر در مورد محتوا، محل拍摄، زمینه و..."></textarea>
-            <small class="form-hint"><span id="descCount">۰</span> / ۵۰۰ کاراکتر</small>
-          </div>
-
-          <div class="form-field">
-            <label for="category">دسته‌بندی <span class="required">*</span></label>
-            <select id="category" name="category" required>
-              <option value="">یک دسته انتخاب کنید...</option>
-              <optgroup label="عکس">
-                <option value="nature">طبیعت و مناظر</option>
-                <option value="architecture">معماری</option>
-                <option value="wildlife">حیات وحش</option>
-                <option value="space">فضا و نجوم</option>
-                <option value="food">غذا و نوشیدنی</option>
-                <option value="travel">سفر و شهرها</option>
-                <option value="art">هنر و نقاشی</option>
-                <option value="sports">ورزش</option>
-                <option value="people">مردم</option>
-                <option value="technology">تکنولوژی</option>
-              </optgroup>
-              <optgroup label="ویدیو">
-                <option value="music">موسیقی</option>
-                <option value="science">علم</option>
-                <option value="animation">انیمیشن</option>
-                <option value="timelapse">تایم‌لپس</option>
-                <option value="experiment">آزمایش</option>
-                <option value="history">تاریخ</option>
-                <option value="vintage_ad">تبلیغات قدیمی</option>
-              </optgroup>
-              <option value="other">سایر</option>
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label for="author">نام شما (برای اعتبار)</label>
-            <input type="text" id="author" name="author" maxlength="60" placeholder="نام شما یا نام مستعار">
-            <small class="form-hint">این نام به‌عنوان خالق محتوا نمایش داده خواهد شد</small>
-          </div>
-
-          <div class="form-field">
-            <label>مجوز انتشار <span class="required">*</span></label>
-            <div class="license-options">
-              <label class="license-option">
-                <input type="radio" name="license" value="CC BY 4.0" required checked>
-                <div class="license-card">
-                  <div class="license-icon">CC BY</div>
-                  <div class="license-text">
-                    <strong>Creative Commons Attribution 4.0</strong>
-                    <span>اجازه استفاده، تغییر و انتشار با ذکر نام</span>
-                  </div>
-                </div>
-              </label>
-              <label class="license-option">
-                <input type="radio" name="license" value="CC BY-SA 4.0">
-                <div class="license-card">
-                  <div class="license-icon">CC BY-SA</div>
-                  <div class="license-text">
-                    <strong>Creative Commons Attribution-ShareAlike 4.0</strong>
-                    <span>مانند بالا، اما نسخه‌های مشتق باید تحت همان مجوز باشند</span>
-                  </div>
-                </div>
-              </label>
-              <label class="license-option">
-                <input type="radio" name="license" value="CC0">
-                <div class="license-card">
-                  <div class="license-icon">CC0</div>
-                  <div class="license-text">
-                    <strong>Public Domain Dedication</strong>
-                    <span>بدون هیچ حقوقی — کاملاً آزاد برای هر استفاده‌ای</span>
-                  </div>
-                </div>
-              </label>
+      <!-- Step 2: Metadata form -->
+      <section class="upload-step hidden" id="step2" data-step-panel="2">
+        <div class="upload-form-card">
+          <div class="upload-preview" id="previewContainer">
+            <div class="preview-media" id="previewMedia"></div>
+            <div class="preview-info">
+              <div class="preview-filename" id="previewFilename"></div>
+              <div class="preview-meta" id="previewMeta"></div>
+              <button type="button" class="btn btn-ghost btn-sm" id="changeFileBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                  <path d="M21 3v5h-5"/>
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                  <path d="M3 21v-5h5"/>
+                </svg>
+                <span>تغییر فایل</span>
+              </button>
             </div>
           </div>
 
-          <div class="form-field">
-            <label class="checkbox-field">
-              <input type="checkbox" id="ownershipConfirm" required>
-              <span>تأیید می‌کنم که این محتوا را خودم خلق کرده‌ام و حق انتشار آن را دارم. همچنین می‌دانم که محتوای غیرقانونی، توهین‌آمیز یا دارای کپی‌رایت بدون اطلاع حذف خواهد شد.</span>
-            </label>
+          <form id="uploadForm" novalidate>
+            <div class="form-field">
+              <label for="title">عنوان <span class="required">*</span></label>
+              <input type="text" id="title" name="title" required maxlength="120" placeholder="مثلاً: غروب آفتاب در رشته‌کوه البرز">
+              <small class="form-hint">یک عنوان توصیفی و کوتاه بنویسید</small>
+            </div>
+
+            <div class="form-field">
+              <label for="description">توضیحات</label>
+              <textarea id="description" name="description" maxlength="500" rows="3" placeholder="توضیح بیشتر در مورد محتوا، محل拍摄، زمینه و..."></textarea>
+              <small class="form-hint"><span id="descCount">۰</span> / ۵۰۰ کاراکتر</small>
+            </div>
+
+            <div class="form-field">
+              <label for="category">دسته‌بندی <span class="required">*</span></label>
+              <select id="category" name="category" required>
+                <option value="">یک دسته انتخاب کنید...</option>
+                <optgroup label="عکس">
+                  <option value="nature">طبیعت و مناظر</option>
+                  <option value="architecture">معماری</option>
+                  <option value="wildlife">حیات وحش</option>
+                  <option value="space">فضا و نجوم</option>
+                  <option value="food">غذا و نوشیدنی</option>
+                  <option value="travel">سفر و شهرها</option>
+                  <option value="art">هنر و نقاشی</option>
+                  <option value="sports">ورزش</option>
+                  <option value="people">مردم</option>
+                  <option value="technology">تکنولوژی</option>
+                </optgroup>
+                <optgroup label="ویدیو">
+                  <option value="music">موسیقی</option>
+                  <option value="science">علم</option>
+                  <option value="animation">انیمیشن</option>
+                  <option value="timelapse">تایم‌لپس</option>
+                  <option value="experiment">آزمایش</option>
+                  <option value="history">تاریخ</option>
+                  <option value="vintage_ad">تبلیغات قدیمی</option>
+                </optgroup>
+                <option value="other">سایر</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="author">نام شما (برای اعتبار)</label>
+              <input type="text" id="author" name="author" maxlength="60" placeholder="نام شما یا نام مستعار">
+              <small class="form-hint">این نام به‌عنوان خالق محتوا نمایش داده خواهد شد</small>
+            </div>
+
+            <div class="form-field">
+              <label>مجوز انتشار <span class="required">*</span></label>
+              <div class="license-options">
+                <label class="license-option">
+                  <input type="radio" name="license" value="CC BY 4.0" required checked>
+                  <div class="license-card">
+                    <div class="license-icon">CC BY</div>
+                    <div class="license-text">
+                      <strong>Creative Commons Attribution 4.0</strong>
+                      <span>اجازه استفاده، تغییر و انتشار با ذکر نام</span>
+                    </div>
+                  </div>
+                </label>
+                <label class="license-option">
+                  <input type="radio" name="license" value="CC BY-SA 4.0">
+                  <div class="license-card">
+                    <div class="license-icon">CC BY-SA</div>
+                    <div class="license-text">
+                      <strong>Creative Commons Attribution-ShareAlike 4.0</strong>
+                      <span>مانند بالا، اما نسخه‌های مشتق باید تحت همان مجوز باشند</span>
+                    </div>
+                  </div>
+                </label>
+                <label class="license-option">
+                  <input type="radio" name="license" value="CC0">
+                  <div class="license-card">
+                    <div class="license-icon">CC0</div>
+                    <div class="license-text">
+                      <strong>Public Domain Dedication</strong>
+                      <span>بدون هیچ حقوقی — کاملاً آزاد برای هر استفاده‌ای</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="checkbox-field">
+                <input type="checkbox" id="ownershipConfirm" required>
+                <span>تأیید می‌کنم که این محتوا را خودم خلق کرده‌ام و حق انتشار آن را دارم. همچنین می‌دانم که محتوای غیرقانونی، توهین‌آمیز یا دارای کپی‌رایت بدون اطلاع حذف خواهد شد.</span>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-ghost" id="backToStep1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+                <span>بازگشت</span>
+              </button>
+              <button type="submit" class="btn btn-primary" id="submitBtn">
+                <span>ارسال محتوا</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m22 2-7 20-4-9-9-4Z"/>
+                  <path d="M22 2 11 13"/>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Step 3: Progress / Success -->
+      <section class="upload-step hidden" id="step3" data-step-panel="3">
+        <div class="upload-progress-card" id="progressCard">
+          <div class="progress-state" id="progressState">
+            <div class="progress-spinner" aria-hidden="true">
+              <svg viewBox="0 0 50 50">
+                <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="80 200" stroke-dashoffset="0">
+                  <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1.2s" repeatCount="indefinite"/>
+                </circle>
+              </svg>
+            </div>
+            <h2 id="progressTitle">در حال آماده‌سازی...</h2>
+            <p id="progressMessage">لطفاً صبر کنید</p>
           </div>
 
-          <div class="form-actions">
-            <button type="button" class="btn btn-ghost" id="backToStep1">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="m9 18 6-6-6-6"/>
-              </svg>
-              <span>بازگشت</span>
-            </button>
-            <button type="submit" class="btn btn-primary" id="submitBtn">
-              <span>ارسال محتوا</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="m22 2-7 20-4-9-9-4Z"/>
-                <path d="M22 2 11 13"/>
-              </svg>
-            </button>
+          <div class="progress-bar-container" id="progressBarContainer">
+            <div class="progress-bar">
+              <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-bar-label">
+              <span id="progressPercent">۰٪</span>
+              <span id="progressStage"></span>
+            </div>
           </div>
-        </form>
-      </div>
-    </section>
 
-    <!-- Step 3: Progress / Success -->
-    <section class="upload-step hidden" id="step3" data-step-panel="3">
-      <div class="upload-progress-card" id="progressCard">
-        <div class="progress-state" id="progressState">
-          <div class="progress-spinner" aria-hidden="true">
-            <svg viewBox="0 0 50 50">
-              <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="80 200" stroke-dashoffset="0">
-                <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1.2s" repeatCount="indefinite"/>
-              </circle>
+          <div class="progress-steps-list">
+            <div class="progress-step-item" data-stage="upload">
+              <span class="progress-step-icon">۱</span>
+              <span class="progress-step-text">آپلود فایل به مخزن شما</span>
+              <span class="progress-step-status" data-status="pending">در انتظار</span>
+            </div>
+            <div class="progress-step-item" data-stage="metadata">
+              <span class="progress-step-icon">۲</span>
+              <span class="progress-step-text">به‌روزرسانی فهرست محتوا</span>
+              <span class="progress-step-status" data-status="pending">در انتظار</span>
+            </div>
+            <div class="progress-step-item" data-stage="review">
+              <span class="progress-step-icon">۳</span>
+              <span class="progress-step-text">ثبت در فهرست مرکزی</span>
+              <span class="progress-step-status" data-status="pending">در انتظار</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Success state -->
+        <div class="upload-success-card hidden" id="successCard">
+          <div class="success-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
           </div>
-          <h2 id="progressTitle">در حال آماده‌سازی...</h2>
-          <p id="progressMessage">لطفاً صبر کنید</p>
+          <h2>محتوای شما در مخزن شخصی‌تان آپلود شد!</h2>
+          <p>فایل شما در مخزن GitHub خودتان ذخیره شد. در ظرف یک ساعت، گالری پیکسلری به‌طور خودکار محتوای شما را در فهرست مرکزی نمایش خواهد داد.</p>
+          <div class="success-links">
+            <a href="#" id="userRepoLink" target="_blank" rel="noopener" class="btn btn-secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+              </svg>
+              <span>مشاهده مخزن من</span>
+            </a>
+            <a href="#" id="userFileLink" target="_blank" rel="noopener" class="btn btn-ghost">
+              <span>مشاهده فایل آپلودشده</span>
+            </a>
+          </div>
+          <div class="success-actions">
+            <button type="button" class="btn btn-primary" id="uploadAnother">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              <span>ارسال محتوای دیگر</span>
+            </button>
+            <a href="./" class="btn btn-ghost">بازگشت به خانه</a>
+          </div>
         </div>
 
-        <div class="progress-bar-container" id="progressBarContainer">
-          <div class="progress-bar">
-            <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
-          </div>
-          <div class="progress-bar-label">
-            <span id="progressPercent">۰٪</span>
-            <span id="progressStage"></span>
-          </div>
-        </div>
-
-        <div class="progress-steps-list">
-          <div class="progress-step-item" data-stage="upload">
-            <span class="progress-step-icon">۱</span>
-            <span class="progress-step-text">آپلود فایل</span>
-            <span class="progress-step-status" data-status="pending">در انتظار</span>
-          </div>
-          <div class="progress-step-item" data-stage="metadata">
-            <span class="progress-step-icon">۲</span>
-            <span class="progress-step-text">ارسال متادیتا</span>
-            <span class="progress-step-status" data-status="pending">در انتظار</span>
-          </div>
-          <div class="progress-step-item" data-stage="review">
-            <span class="progress-step-icon">۳</span>
-            <span class="progress-step-text">در صف بررسی</span>
-            <span class="progress-step-status" data-status="pending">در انتظار</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Success state -->
-      <div class="upload-success-card hidden" id="successCard">
-        <div class="success-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-        </div>
-        <h2>محتوای شما با موفقیت ارسال شد!</h2>
-        <p>ممنون از همکاری شما. محتوای شما در صف بررسی است و پس از تأیید، در گالری پیکسلری نمایش داده خواهد شد.</p>
-        <div class="success-issue-link" id="issueLinkContainer">
-          <a href="#" id="issueLink" target="_blank" rel="noopener" class="btn btn-secondary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <!-- Error state -->
+        <div class="upload-error-card hidden" id="errorCard">
+          <div class="error-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"/>
               <line x1="12" y1="8" x2="12" y2="12"/>
               <line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
-            <span>پیگیری وضعیت ارسال</span>
-          </a>
+          </div>
+          <h2>خطا در ارسال</h2>
+          <p id="errorMessage">متأسفانه در ارسال محتوا خطایی رخ داد. لطفاً دوباره تلاش کنید.</p>
+          <div class="error-actions">
+            <button type="button" class="btn btn-primary" id="retryBtn">تلاش مجدد</button>
+            <button type="button" class="btn btn-ghost" id="startOverBtn">شروع از ابتدا</button>
+          </div>
         </div>
-        <div class="success-actions">
-          <button type="button" class="btn btn-primary" id="uploadAnother">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-            <span>ارسال محتوای دیگر</span>
-          </button>
-          <a href="./" class="btn btn-ghost">بازگشت به خانه</a>
-        </div>
-      </div>
-
-      <!-- Error state -->
-      <div class="upload-error-card hidden" id="errorCard">
-        <div class="error-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-        </div>
-        <h2>خطا در ارسال</h2>
-        <p id="errorMessage">متأسفانه در ارسال محتوا خطایی رخ داد. لطفاً دوباره تلاش کنید.</p>
-        <div class="error-actions">
-          <button type="button" class="btn btn-primary" id="retryBtn">تلاش مجدد</button>
-          <button type="button" class="btn btn-ghost" id="startOverBtn">شروع از ابتدا</button>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
 
   <nav class="bottom-nav" aria-label="ناوبری اصلی">
@@ -405,6 +453,9 @@
   </footer>
 
   <script src="assets/js/ui.js"></script>
+  <script src="assets/js/federated.js"></script>
+  <script src="assets/js/oauth.js"></script>
+  <script src="assets/js/repo.js"></script>
   <script src="assets/js/upload.js"></script>
 </body>
 </html>

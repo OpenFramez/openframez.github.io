@@ -1,11 +1,11 @@
 /**
- * Pixelary Service Worker — Phase 4 (User Uploads)
+ * Pixelary Service Worker — Phase 5 (Federated Uploads)
  * Cache-first for static assets, network-first for data, with offline fallback.
  * Range-request aware for video streaming (partial content).
- * Serves Wikimedia Commons, Internet Archive, and catbox.moe (user uploads).
+ * Serves Wikimedia Commons, Internet Archive, and user *.github.io repos.
  */
 
-const CACHE_VERSION = 'pixelary-v4.0.0';
+const CACHE_VERSION = 'pixelary-v5.0.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DATA_CACHE = `${CACHE_VERSION}-data`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -28,13 +28,18 @@ const STATIC_ASSETS = [
   './assets/css/upload.css',
   './assets/js/ui.js',
   './assets/js/db.js',
+  './assets/js/federated.js',
   './assets/js/app.js',
   './assets/js/photo.js',
   './assets/js/videos.js',
   './assets/js/video.js',
   './assets/js/video-player.js',
   './assets/js/reels.js',
+  './assets/js/oauth.js',
+  './assets/js/repo.js',
   './assets/js/upload.js',
+  './data/registry.json',
+  './data/federated.json',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap',
 ];
@@ -66,18 +71,22 @@ self.addEventListener('fetch', (event) => {
   // Only handle GET
   if (req.method !== 'GET') return;
 
-  // Skip cross-origin except fonts, wikimedia, Internet Archive, and catbox.moe (user uploads)
+  // Skip cross-origin except fonts, wikimedia, Internet Archive, github.com (OAuth + API), and *.github.io (user uploads)
   const isSameOrigin = url.origin === self.location.origin;
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   const isWikimedia = url.hostname.endsWith('wikimedia.org') || url.hostname.endsWith('wikipedia.org');
   const isArchiveOrg = url.hostname === 'archive.org' || url.hostname.endsWith('.archive.org');
-  const isCatbox = url.hostname === 'catbox.moe' || url.hostname === 'files.catbox.moe';
   const isGitHubApi = url.hostname === 'api.github.com';
+  const isGitHubOAuth = url.hostname === 'github.com'; // OAuth Device Flow + raw.githubusercontent
+  const isUserPages = url.hostname.endsWith('.github.io'); // user-uploaded content served from Pages
+  const isRawGithub = url.hostname === 'raw.githubusercontent.com';
 
   // Don't intercept GitHub API calls (they need their own auth headers)
   if (isGitHubApi) return;
+  // Don't intercept OAuth calls
+  if (isGitHubOAuth && (url.pathname.startsWith('/login/') || url.pathname.startsWith('/login/oauth/'))) return;
 
-  if (!isSameOrigin && !isFont && !isWikimedia && !isArchiveOrg && !isCatbox) return;
+  if (!isSameOrigin && !isFont && !isWikimedia && !isArchiveOrg && !isUserPages && !isRawGithub) return;
 
   // ---------- Range requests (video streaming) ----------
   // For video files from wikimedia or archive.org, we MUST respect the Range header.

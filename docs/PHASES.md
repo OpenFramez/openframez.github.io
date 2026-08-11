@@ -214,7 +214,82 @@ GitHub Action → افزودن به data/photos.json یا videos.json → commit
 
 ---
 
-## فاز ۵: عوامل هوش مصنوعی 📋
+## فاز ۴: آپلود راحت محتوا (PWA) ✅ → بازنویسی شد در فاز ۵
+
+**توجه:** معماری فاز ۴ (استفاده از bot PAT در client-side JS و آپلود همه محتوا به مخزن مرکزی) در فاز ۵ به‌طور کامل بازنویسی شد. دلیل: محتوای همه کاربران روی یک اکانت متمرکز می‌شد و PAT ربات در معرض خطر بود. توضیحات فاز ۵ زیر را ببینید.
+
+---
+
+## فاز ۵: معماری Federated — آپلود به مخزن شخصی کاربر ✅
+
+**هدف:** هر کاربر محتوای خود را در **مخزن GitHub شخصی خودش** آپلود کند. مالکیت کاملاً واضح، حذف آسان، فضای نامحدود، بدون نشت PAT.
+
+**مشکل فاز ۴ که حل شد:**
+- ❌ همه محتوا در یک مخزن مرکزی انباشته می‌شد → محدودیت 5GB سریع پر می‌شد
+- ❌ PAT ربات در client-side JS قابل استخراج بود (حتی با obfuscation)
+- ❌ مالکیت محتوا مختلط می‌شد
+- ❌ کاربر نمی‌توانست محتوای خود را مستقلاً حذف کند
+
+**معماری جدید (Federated):**
+```
+کاربر ← OAuth Device Flow ← GitHub خودش
+  ↓
+بررسی: آیا {username}/pixelary-uploads وجود دارد؟
+  ↓ NO
+ایجاد خودکار مخزن (با README + manifest.json + GitHub Pages)
+  ↓
+آپلود فایل به uploads/{timestamp}-{slug}.{ext}
+  ↓
+به‌روزرسانی manifest.json (لیست محتواهای کاربر)
+  ↓
+ثبت در registry.json مرکزی (یک API call با bot PAT)
+  ↓
+GitHub Action ساعتانه ← manifest.json همه کاربران را merge می‌کند → data/federated.json
+  ↓
+گالری پیکسلری federated.json را می‌خواند و محتوای همه کاربران را نمایش می‌دهد
+```
+
+**قابلیت‌های پیاده‌سازی‌شده:**
+- ✅ **OAuth Device Flow** برای ورود امن کاربران غیرفنی (`assets/js/oauth.js`)
+  - کاربر کد ۸ کاراکتری را در github.com/login/device وارد می‌کند
+  - توکن در localStorage ذخیره می‌شود (7 روز TTL)
+  - اسکوپ: `public_repo,read:user` — فقط دسترسی به مخازن عمومی کاربر
+- ✅ **ساخت خودکار مخزن شخصی** (`assets/js/repo.js`)
+  - مخزن `{username}/pixelary-uploads` به‌صورت خودکار ساخته می‌شود
+  - GitHub Pages به‌صورت خودکار فعال می‌شود
+  - README و manifest.json اولیه ایجاد می‌شوند
+- ✅ **آپلود به مخزن کاربر** (نه مخزن مرکزی)
+  - فایل‌های ≤1MB: GitHub Contents API
+  - فایل‌های >1MB: Git Blobs API (تا 100MB)
+  - مسیر: `uploads/{timestamp}-{rand}-{slug}.{ext}`
+- ✅ **manifest.json به‌روزرسانی می‌شود** با هر آپلود
+- ✅ **ثبت در registry.json مرکزی** (تنها استفاده باقی‌مانده از bot PAT — فقط append به یک JSON)
+- ✅ **GitHub Action ساعتانه** (`aggregate-federation.yml`) همه manifestها را تجمیع می‌کند
+- ✅ **federated.json** برای گالری — شامل تمام محتوای همه کاربران ثبت‌شده
+- ✅ **Service Worker v5.0.0** با پشتیبانی از `*.github.io` و `raw.githubusercontent.com`
+- ✅ **UI احراز هویت**: auth gate، user chip، device code display، logout
+- ✅ گالری اصلی (index.html) محتوای فدرال‌شده را با محتوای Wikimedia ادغام می‌کند
+
+**مزایا:**
+- ✓ مالکیت کاملاً واضح — هر کاربر محتوای خودش
+- ✓ فضای ذخیره‌سازی نامحدود (هر کاربر 5GB جداگانه)
+- ✓ حذف آسان — کاربر فقط فایل را از مخزن خود حذف می‌کند
+- ✓ نشت PAT ربات فقط روی registry.json تأثیر دارد (یک فایل JSON)
+- ✓ مقیاس‌پذیر — هزاران کاربر بدون فشار روی مخزن مرکزی
+
+**نصب OAuth App (یک‌بار، توسط مدیر):**
+1. به https://github.com/settings/applications/new بروید
+2. Application name: `Pixelary Uploader`
+3. Homepage URL: `https://betaversion488-oss.github.io`
+4. Authorization callback URL: `https://betaversion488-oss.github.io/upload.html` (برای Device Flow لازم نیست ولی GitHub آن را می‌خواهد)
+5. **Enable Device Flow** checkbox را تیک بزنید
+6. Client ID را کپی کنید و در `assets/js/oauth.js` جایگزین `Ov23liPLACEHOLDER1234` کنید
+
+**وضعیت:** ✅ منتشرشده (نسخه ۵.۰.۰) — OAuth App هنوز باید توسط مدیر ساخته شود
+
+---
+
+## فاز ۶: عوامل هوش مصنوعی 📋
 
 **هدف:** خودکارسازی فرآیندهای مرور، تأیید و مدیریت محتوا با AI.
 

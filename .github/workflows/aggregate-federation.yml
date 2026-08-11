@@ -1,0 +1,48 @@
+name: Aggregate Federation
+
+# Aggregates all registered user repos' manifests into a single federated.json
+# Triggers:
+#   - Hourly schedule (keeps catalog fresh as users upload)
+#   - On push to data/registry.json (immediate update when new user registers)
+#   - Manual dispatch
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # every hour at :00
+  push:
+    branches: [main]
+    paths:
+      - 'data/registry.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run aggregator
+        run: python3 scripts/aggregate_federation.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "pixelary-bot"
+          git config user.email "bot@pixelary.local"
+          git add data/federated.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: refresh federated.json [skip ci]"
+            git push
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

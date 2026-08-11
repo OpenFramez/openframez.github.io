@@ -28,12 +28,44 @@
     navSearch: document.getElementById('nav-search'),
   };
 
+  // ---------- Merge categories from multiple sources ----------
+  function mergeCategories(wmCats, fedCats) {
+    const counts = {};
+    const labels = {};
+    for (const c of wmCats) {
+      counts[c.slug] = (counts[c.slug] || 0) + c.count;
+      if (!labels[c.slug]) labels[c.slug] = c.label;
+    }
+    for (const c of fedCats) {
+      counts[c.slug] = (counts[c.slug] || 0) + c.count;
+      if (!labels[c.slug]) labels[c.slug] = c.label;
+    }
+    const seen = new Set();
+    const merged = [];
+    for (const c of wmCats) {
+      if (seen.has(c.slug)) continue;
+      seen.add(c.slug);
+      merged.push({ slug: c.slug, label: c.label, count: counts[c.slug] || 0 });
+    }
+    for (const c of fedCats) {
+      if (seen.has(c.slug)) continue;
+      seen.add(c.slug);
+      merged.push({ slug: c.slug, label: c.label, count: counts[c.slug] || 0 });
+    }
+    return merged.filter((c) => c.count > 0).sort((a, b) => b.count - a.count);
+  }
+
   // ---------- Render category chips ----------
   function renderCategories() {
-    const cats = Pixelary.getCategories();
+    // Merge Wikimedia categories with federated user-submitted categories
+    const wmCats = Pixelary.getCategories();
+    const fedCats = window.PixelaryFederation ? PixelaryFederation.getCategories() : [];
+    const merged = mergeCategories(wmCats, fedCats);
+    const total = Pixelary.getTotal() + (window.PixelaryFederation ? PixelaryFederation.getPhotosTotal() : 0);
+
     const html = [
-      `<button class="chip ${state.category === 'all' ? 'active' : ''}" data-cat="all">همه <span class="count">(${Pixelary.getTotal()})</span></button>`,
-      ...cats.map(
+      `<button class="chip ${state.category === 'all' ? 'active' : ''}" data-cat="all">همه <span class="count">(${total})</span></button>`,
+      ...merged.map(
         (c) =>
           `<button class="chip ${state.category === c.slug ? 'active' : ''}" data-cat="${c.slug}">${c.label} <span class="count">(${c.count})</span></button>`
       ),
@@ -65,6 +97,38 @@
       query: state.query,
       sort: state.sort,
     });
+
+    // Merge federated (user-submitted) photos
+    if (window.PixelaryFederation) {
+      const fedItems = PixelaryFederation.filter({
+        type: 'photo',
+        category: state.category === 'all' ? null : state.category,
+        query: state.query,
+        sort: state.sort,
+      }).map((item) => ({
+        id: item.id,
+        title: item.title,
+        author: item.author,
+        category: item.category,
+        category_label: item.category_label,
+        license: item.license,
+        description: item.description || '',
+        thumbnail: item.thumbnail_url || item.file_url,
+        thumb_width: item.width,
+        thumb_height: item.height,
+        uploaded_at: item.uploaded_at,
+        source: 'federated',
+        source_user: item.source_user,
+        source_url: item.source_url,
+      }));
+      state.items = state.items.concat(fedItems);
+      // Re-sort the merged list
+      if (state.sort === 'newest') {
+        state.items.sort((a, b) => (b.uploaded_at || '').localeCompare(a.uploaded_at || ''));
+      } else if (state.sort === 'oldest') {
+        state.items.sort((a, b) => (a.uploaded_at || '').localeCompare(b.uploaded_at || ''));
+      }
+    }
 
     if (state.items.length === 0) {
       els.loading.classList.add('hidden');
@@ -142,11 +206,12 @@
   // ---------- Hero stats ----------
   function renderStats() {
     const stats = Pixelary.getStats();
+    const fedStats = window.PixelaryFederation ? PixelaryFederation.getStats() : { total: 0, contributors: 0, categories: 0 };
     const nums = els.heroStats.querySelectorAll('.num');
     if (nums.length >= 3) {
-      nums[0].textContent = stats.total.toLocaleString('fa-IR');
-      nums[1].textContent = stats.categories.toLocaleString('fa-IR');
-      nums[2].textContent = stats.authors.toLocaleString('fa-IR');
+      nums[0].textContent = (stats.total + fedStats.total).toLocaleString('fa-IR');
+      nums[1].textContent = (stats.categories + fedStats.categories).toLocaleString('fa-IR');
+      nums[2].textContent = (stats.authors + fedStats.contributors).toLocaleString('fa-IR');
     }
   }
 
@@ -204,6 +269,14 @@
   async function init() {
     try {
       await Pixelary.load();
+      // Load federated content in parallel (non-fatal on failure)
+      if (window.PixelaryFederation) {
+        try {
+          await PixelaryFederation.load();
+        } catch (e) {
+          console.warn('Federated content load failed (non-fatal):', e);
+        }
+      }
     } catch (err) {
       console.error(err);
       els.loading.innerHTML = '<div>خطا در بارگذاری داده‌ها. لطفاً صفحه را تازه‌سازی کنید.</div>';

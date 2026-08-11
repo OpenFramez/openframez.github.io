@@ -1,0 +1,5 @@
+{
+  "users": [],
+  "last_updated": null,
+  "description": "Central registry of federated Pixelary contributors. Each user who uploads content via the upload page is registered here. The aggregate-federation GitHub Action reads this file and builds data/federated.json by fetching each user's manifest.json from their own pixelary-uploads repo."
+}

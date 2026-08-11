@@ -1,24 +1,22 @@
 /**
- * Pixelary — Upload Page Logic (Phase 4)
+ * Pixelary — Upload Page Logic (Phase 5 — Federated Upload)
  *
- * Easy content upload for non-technical users.
- * Flow: pick file → fill metadata → upload to GitHub repo → create Issue
+ * Easy content upload for non-technical users via OAuth Device Flow.
  *
- * Architecture:
- *   - File is uploaded directly to the GitHub repo via the Contents API
- *     (for files ≤ 1MB) or Git Blobs API (for larger files, up to 100MB)
- *   - File is stored at uploads/user/{timestamp}-{random}.{ext}
- *   - File is served from https://betaversion488-oss.github.io/uploads/user/...
- *   - GitHub Issue is created with metadata for moderator review
- *   - GitHub Action auto-processes approved submissions
+ * NEW Architecture (Phase 5):
+ *   - User signs in with THEIR OWN GitHub account via OAuth Device Flow
+ *   - On first upload, a `pixelary-uploads` repo is auto-created on their account
+ *   - File is uploaded to their own repo (uploads/{timestamp}-{slug}.{ext})
+ *   - File is served from https://{username}.github.io/pixelary-uploads/uploads/...
+ *   - Entry is appended to their manifest.json
+ *   - Central registry is updated (single API call) so aggregator picks them up
  *
- * SECURITY NOTE:
- *   The embedded GitHub PAT is for a bot account with `public_repo` scope only.
- *   Anyone can extract it from client-side JS, but the worst they can do is
- *   create files in uploads/user/ or create issues (both visible, both revertable).
+ * OLD Architecture (Phase 4 — REMOVED):
+ *   - Bot PAT embedded in client-side JS (SECURITY RISK)
+ *   - All user content dumped into central betaversion488-oss repo (mixed ownership)
  *
- *   For production use, replace this with a serverless proxy (Cloudflare Worker,
- *   Vercel function, etc.) that holds the PAT as an environment variable.
+ * Bot PAT is still used for ONE purpose only: appending to data/registry.json
+ * when a user registers. This is the minimal scope — never used for content upload.
  *
  * @author Pixelary Team
  */
@@ -27,29 +25,8 @@
   'use strict';
 
   // ---------- Configuration ----------
-  // NOTE: This PAT is for a bot account with `public_repo` scope only.
-  // Rotate regularly. Replace with a serverless proxy for production.
-  // prettier-ignore
-  var GITHUB_TOKEN = (function(){
-    // Obfuscated to discourage casual extraction (NOT real security).
-    var p = [103,104,112,95,113,114,83,55,75,112,73,99,107,90,49,49,82,102,53,109,53,74,56,54,79,87,109,119,98,84,79,106,103,57,50,98,76,81,67,101];
-    var s = '';
-    for (var i = 0; i < p.length; i++) s += String.fromCharCode(p[i]);
-    return s;
-  })();
-
-  var REPO_OWNER = 'betaversion488-oss';
-  var REPO_NAME = 'betaversion488-oss.github.io';
-  var REPO_BRANCH = 'main';
-  var GITHUB_API_BASE = 'https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME;
-  var GITHUB_ISSUES_API = GITHUB_API_BASE + '/issues';
-  var UPLOAD_DIR = 'uploads/user';
-
-  // Page URL used to construct the public file URL
-  var PUBLIC_BASE = 'https://betaversion488-oss.github.io';
-
-  var MAX_PHOTO_SIZE = 5 * 1024 * 1024; // 5 MB (GitHub Contents API friendly)
-  var MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50 MB (Git Blobs API limit is 100MB)
+  var MAX_PHOTO_SIZE = 5 * 1024 * 1024; // 5 MB
+  var MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50 MB (GitHub API limit is 100MB)
 
   var ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   var ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
@@ -65,53 +42,126 @@
   // ---------- State ----------
   var state = {
     file: null,
-    fileType: null, // 'photo' | 'video'
+    fileType: null,
     fileDimensions: { width: 0, height: 0 },
     duration: 0,
     currentStep: 1,
-    fileRepoPath: null,
-    filePublicUrl: null,
-    issueNumber: null,
-    issueUrl: null,
+    auth: null, // { token, user }
+    userRepoReady: false,
+    uploadResult: null,
   };
 
   // ---------- DOM References ----------
   var $ = function (sel) { return document.querySelector(sel); };
   var $$ = function (sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); };
 
-  var dropzone, fileInput, step1Panel, step2Panel, step3Panel;
-  var previewMedia, previewFilename, previewMeta;
-  var uploadForm, submitBtn;
-  var progressCard, successCard, errorCard;
-  var progressBarFill, progressPercent, progressStage, progressTitle, progressMessage;
-  var issueLink;
-
   // ---------- Initialization ----------
   function init() {
-    dropzone = $('#dropzone');
-    fileInput = $('#fileInput');
-    step1Panel = $('#step1');
-    step2Panel = $('#step2');
-    step3Panel = $('#step3');
-    previewMedia = $('#previewMedia');
-    previewFilename = $('#previewFilename');
-    previewMeta = $('#previewMeta');
-    uploadForm = $('#uploadForm');
-    submitBtn = $('#submitBtn');
-    progressCard = $('#progressCard');
-    successCard = $('#successCard');
-    errorCard = $('#errorCard');
-    progressBarFill = $('#progressBarFill');
-    progressPercent = $('#progressPercent');
-    progressStage = $('#progressStage');
-    progressTitle = $('#progressTitle');
-    progressMessage = $('#progressMessage');
-    issueLink = $('#issueLink');
-
     bindEvents();
+    checkAuthState();
   }
 
+  function checkAuthState() {
+    var auth = window.PixelaryOAuth.getAuth();
+    if (auth) {
+      state.auth = auth;
+      showLoggedInState(auth.user);
+    } else {
+      showLoggedOutState();
+    }
+  }
+
+  // ---------- Auth UI ----------
+  function showLoggedOutState() {
+    var authGate = $('#authGate');
+    var uploadContent = $('#uploadContent');
+    if (authGate) authGate.classList.remove('hidden');
+    if (uploadContent) uploadContent.classList.add('hidden');
+
+    var loginBtn = $('#loginBtn');
+    if (loginBtn) {
+      loginBtn.addEventListener('click', startLogin);
+    }
+  }
+
+  function showLoggedInState(user) {
+    var authGate = $('#authGate');
+    var uploadContent = $('#uploadContent');
+    if (authGate) authGate.classList.add('hidden');
+    if (uploadContent) uploadContent.classList.remove('hidden');
+
+    // Update user chip
+    var userChip = $('#userChip');
+    if (userChip) {
+      userChip.classList.remove('hidden');
+      var avatar = $('#userAvatar');
+      var name = $('#userName');
+      if (avatar && user.avatar_url) avatar.src = user.avatar_url;
+      if (name) name.textContent = user.name || user.login;
+    }
+
+    var logoutBtn = $('#logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function () {
+        window.PixelaryOAuth.logout().then(function () {
+          state.auth = null;
+          location.reload();
+        });
+      });
+    }
+  }
+
+  function startLogin() {
+    var loginBtn = $('#loginBtn');
+    var loginStatus = $('#loginStatus');
+    var deviceCodeCard = $('#deviceCodeCard');
+    var userCodeDisplay = $('#userCodeDisplay');
+    var verificationLink = $('#verificationLink');
+
+    if (loginBtn) loginBtn.disabled = true;
+    if (loginStatus) loginStatus.classList.remove('hidden');
+    if (loginStatus) loginStatus.textContent = 'در حال دریافت کد از GitHub...';
+
+    window.PixelaryOAuth.login(function (deviceResp) {
+      // Show device code to user
+      if (loginStatus) loginStatus.classList.add('hidden');
+      if (deviceCodeCard) deviceCodeCard.classList.remove('hidden');
+
+      // Format user code with hyphen for readability (XXXX-XXXX)
+      var userCode = deviceResp.user_code;
+      if (userCodeDisplay) userCodeDisplay.textContent = userCode;
+
+      // Verification link
+      if (verificationLink) {
+        verificationLink.href = deviceResp.verification_uri || 'https://github.com/login/device';
+        verificationLink.textContent = deviceResp.verification_uri || 'https://github.com/login/device';
+      }
+
+      // Auto-open GitHub device page in new tab
+      window.open(deviceResp.verification_uri || 'https://github.com/login/device', '_blank');
+    }).then(function (result) {
+      // Login successful
+      state.auth = result;
+      if (deviceCodeCard) deviceCodeCard.classList.add('hidden');
+      if (loginBtn) loginBtn.disabled = false;
+      UI.toast('خوش آمدید، ' + (result.user.name || result.user.login) + '!', 'success', 4000);
+      showLoggedInState(result.user);
+    }).catch(function (err) {
+      console.error('Login failed:', err);
+      if (deviceCodeCard) deviceCodeCard.classList.add('hidden');
+      if (loginBtn) loginBtn.disabled = false;
+      if (loginStatus) loginStatus.classList.add('hidden');
+      UI.toast(err.message || 'خطا در ورود به GitHub', 'error', 6000);
+    });
+  }
+
+  // ---------- Event Binding ----------
   function bindEvents() {
+    var dropzone = $('#dropzone');
+    var fileInput = $('#fileInput');
+
+    if (!dropzone || !fileInput) return; // Not on upload page
+
     // Dropzone click
     dropzone.addEventListener('click', function () {
       fileInput.click();
@@ -145,10 +195,10 @@
       }
     });
 
-    // Pick buttons (gallery / camera / record-video)
+    // Pick buttons
     $$('[data-pick]').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
-        e.stopPropagation(); // prevent dropzone click
+        e.stopPropagation();
         var mode = btn.getAttribute('data-pick');
         setFileInputMode(mode);
         fileInput.click();
@@ -163,50 +213,69 @@
     });
 
     // Change file button
-    $('#changeFileBtn').addEventListener('click', function () {
-      resetFile();
-      goToStep(1);
-    });
+    var changeFileBtn = $('#changeFileBtn');
+    if (changeFileBtn) {
+      changeFileBtn.addEventListener('click', function () {
+        resetFile();
+        goToStep(1);
+      });
+    }
 
     // Back to step 1
-    $('#backToStep1').addEventListener('click', function () {
-      goToStep(1);
-    });
+    var backToStep1 = $('#backToStep1');
+    if (backToStep1) {
+      backToStep1.addEventListener('click', function () { goToStep(1); });
+    }
 
-    // Description character count
+    // Description char count
     var desc = $('#description');
     var descCount = $('#descCount');
-    desc.addEventListener('input', function () {
-      descCount.textContent = UI.toPersianDigits(String(desc.value.length));
-    });
+    if (desc && descCount) {
+      desc.addEventListener('input', function () {
+        descCount.textContent = UI.toPersianDigits(String(desc.value.length));
+      });
+    }
 
     // Form submit
-    uploadForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      handleSubmit();
-    });
+    var uploadForm = $('#uploadForm');
+    if (uploadForm) {
+      uploadForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        handleSubmit();
+      });
+    }
 
     // Success: upload another
-    $('#uploadAnother').addEventListener('click', function () {
-      resetAll();
-      goToStep(1);
-    });
+    var uploadAnother = $('#uploadAnother');
+    if (uploadAnother) {
+      uploadAnother.addEventListener('click', function () {
+        resetAll();
+        goToStep(1);
+      });
+    }
 
     // Error: retry
-    $('#retryBtn').addEventListener('click', function () {
-      hideError();
-      handleSubmit();
-    });
+    var retryBtn = $('#retryBtn');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', function () {
+        hideError();
+        handleSubmit();
+      });
+    }
 
     // Error: start over
-    $('#startOverBtn').addEventListener('click', function () {
-      resetAll();
-      goToStep(1);
-    });
+    var startOverBtn = $('#startOverBtn');
+    if (startOverBtn) {
+      startOverBtn.addEventListener('click', function () {
+        resetAll();
+        goToStep(1);
+      });
+    }
   }
 
   // ---------- File Input Mode ----------
   function setFileInputMode(mode) {
+    var fileInput = $('#fileInput');
     fileInput.removeAttribute('capture');
     fileInput.removeAttribute('accept');
 
@@ -225,7 +294,6 @@
   function handleFile(file) {
     if (!file) return;
 
-    // Determine type
     var isPhoto = ALLOWED_PHOTO_TYPES.indexOf(file.type) >= 0;
     var isVideo = ALLOWED_VIDEO_TYPES.indexOf(file.type) >= 0;
 
@@ -234,7 +302,6 @@
       return;
     }
 
-    // Size check
     var maxSize = isPhoto ? MAX_PHOTO_SIZE : MAX_VIDEO_SIZE;
     var maxLabel = isPhoto ? '۵ مگابایت' : '۵۰ مگابایت';
     if (file.size > maxSize) {
@@ -245,7 +312,6 @@
     state.file = file;
     state.fileType = isPhoto ? 'photo' : 'video';
 
-    // Get dimensions and duration
     if (isPhoto) {
       getPhotoDimensions(file, function (dims) {
         state.fileDimensions = dims;
@@ -281,11 +347,7 @@
     var video = document.createElement('video');
     video.preload = 'metadata';
     video.onloadedmetadata = function () {
-      cb({
-        width: video.videoWidth,
-        height: video.videoHeight,
-        duration: video.duration,
-      });
+      cb({ width: video.videoWidth, height: video.videoHeight, duration: video.duration });
       URL.revokeObjectURL(url);
     };
     video.onerror = function () {
@@ -296,8 +358,12 @@
   }
 
   function showPreview(file) {
-    previewMedia.innerHTML = '';
+    var previewMedia = $('#previewMedia');
+    var previewFilename = $('#previewFilename');
+    var previewMeta = $('#previewMeta');
+    if (!previewMedia) return;
 
+    previewMedia.innerHTML = '';
     var url = URL.createObjectURL(file);
     if (state.fileType === 'photo') {
       var img = document.createElement('img');
@@ -335,10 +401,14 @@
     state.fileType = null;
     state.fileDimensions = { width: 0, height: 0 };
     state.duration = 0;
-    fileInput.value = '';
-    previewMedia.innerHTML = '';
-    previewFilename.textContent = '';
-    previewMeta.textContent = '';
+    var fileInput = $('#fileInput');
+    if (fileInput) fileInput.value = '';
+    var previewMedia = $('#previewMedia');
+    if (previewMedia) previewMedia.innerHTML = '';
+    var previewFilename = $('#previewFilename');
+    if (previewFilename) previewFilename.textContent = '';
+    var previewMeta = $('#previewMeta');
+    if (previewMeta) previewMeta.textContent = '';
   }
 
   // ---------- Step Navigation ----------
@@ -374,6 +444,12 @@
       return;
     }
 
+    if (!state.auth || !state.auth.token) {
+      UI.toast('برای ارسال محتوا ابتدا باید وارد GitHub شوید', 'error', 5000);
+      showLoggedOutState();
+      return;
+    }
+
     var formData = collectFormData();
     if (!formData) return;
 
@@ -381,32 +457,43 @@
     goToStep(3);
     showProgress();
 
-    // Start upload pipeline:
-    // 1. Read file as base64
-    // 2. Upload to GitHub repo (Contents API for ≤1MB, Git Blobs API for larger)
-    // 3. Create GitHub Issue
+    // Pipeline:
+    // 1. Ensure user repo exists (create if not)
+    // 2. Read file as base64
+    // 3. Upload to user repo
+    // 4. Append to manifest.json
+    // 5. Register in central registry (first time only)
     readFileAsBase64(state.file)
       .then(function (base64) {
         updateProgressStage('upload', 'active');
-        updateProgressPercent(10, 'در حال آماده‌سازی فایل...');
-        return uploadFileToRepo(state.file, base64, formData);
+        updateProgressPercent(5, 'در حال بررسی حساب کاربری...');
+        return ensureUserRepo();
+      })
+      .then(function () {
+        updateProgressPercent(15, 'در حال آماده‌سازی فایل...');
+        return base64OfFile(state.file);
+      })
+      .then(function (base64) {
+        updateProgressPercent(20, 'در حال آپلود فایل به مخزن شما...');
+        return uploadToUserRepo(state.file, base64, state.formData);
       })
       .then(function (fileInfo) {
-        state.fileRepoPath = fileInfo.path;
-        state.filePublicUrl = fileInfo.publicUrl;
+        state.uploadResult = fileInfo;
         updateProgressStage('upload', 'done');
         updateProgressStage('metadata', 'active');
-        updateProgressPercent(70, 'در حال ارسال متادیتا...');
-        return createGitHubIssue(formData, fileInfo);
+        updateProgressPercent(70, 'در حال به‌روزرسانی فهرست محتوا...');
+        return appendToUserManifest(state.formData, fileInfo);
       })
-      .then(function (issue) {
-        state.issueNumber = issue.number;
-        state.issueUrl = issue.html_url;
+      .then(function () {
         updateProgressStage('metadata', 'done');
         updateProgressStage('review', 'active');
+        updateProgressPercent(90, 'در حال ثبت در فهرست مرکزی...');
+        return registerInCentralRegistry();
+      })
+      .then(function () {
         updateProgressPercent(100, 'تکمیل شد!');
         setTimeout(function () {
-          showSuccess(issue);
+          showSuccess(state.uploadResult);
         }, 800);
       })
       .catch(function (err) {
@@ -415,18 +502,38 @@
       });
   }
 
+  // Wrap readFileAsBase64 to return both raw result and the parsed base64
+  function readFileAsBase64(file) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var result = reader.result;
+        var commaIdx = result.indexOf(',');
+        if (commaIdx < 0) {
+          reject(new Error('Invalid data URL'));
+          return;
+        }
+        resolve(result.slice(commaIdx + 1));
+      };
+      reader.onerror = function () { reject(new Error('خطا در خواندن فایل')); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Alias — readFileAsBase64 already returns the raw base64
+  function base64OfFile(file) {
+    return readFileAsBase64(file);
+  }
+
   function collectFormData() {
     var title = $('#title').value.trim();
     var description = $('#description').value.trim();
     var category = $('#category').value;
-    var author = $('#author').value.trim() || 'کاربر ناشناس';
+    var author = $('#author').value.trim() || state.auth.user.name || state.auth.user.login;
     var license = '';
     var licenseInputs = $$('input[name="license"]');
     for (var i = 0; i < licenseInputs.length; i++) {
-      if (licenseInputs[i].checked) {
-        license = licenseInputs[i].value;
-        break;
-      }
+      if (licenseInputs[i].checked) { license = licenseInputs[i].value; break; }
     }
     var ownership = $('#ownershipConfirm').checked;
 
@@ -452,344 +559,115 @@
     };
   }
 
-  // ---------- File Reading ----------
-  function readFileAsBase64(file) {
-    return new Promise(function (resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function () {
-        // reader.result is "data:<mime>;base64,<base64data>"
-        var result = reader.result;
-        var commaIdx = result.indexOf(',');
-        if (commaIdx < 0) {
-          reject(new Error('Invalid data URL'));
-          return;
+  // ---------- Ensure User Repo Exists ----------
+  function ensureUserRepo() {
+    if (state.userRepoReady) return Promise.resolve();
+    var username = state.auth.user.login;
+    var token = state.auth.token;
+
+    return window.PixelaryRepo.repoExists(token, username)
+      .then(function (exists) {
+        if (exists) {
+          state.userRepoReady = true;
+          return null;
         }
-        resolve(result.slice(commaIdx + 1));
-      };
-      reader.onerror = function () {
-        reject(new Error('خطا در خواندن فایل'));
-      };
-      reader.readAsDataURL(file);
-    });
+        updateProgressPercent(10, 'در حال ایجاد مخزن شخصی شما... (یک‌بار برای همیشه)');
+        return window.PixelaryRepo.createRepo(token, username, state.auth.user)
+          .then(function () {
+            state.userRepoReady = true;
+          });
+      });
   }
 
-  // ---------- Upload to GitHub Repo ----------
+  // ---------- Upload to User Repo ----------
   function generateFilePath(file, formData) {
     var ext = ALLOWED_EXTENSIONS[file.type] || 'bin';
     var ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     var rand = Math.random().toString(36).slice(2, 8);
-    // Sanitize title for filename
     var slug = (formData.title || 'upload')
       .replace(/[^\u0600-\u06FFa-zA-Z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .slice(0, 30)
       .toLowerCase();
-    return UPLOAD_DIR + '/' + ts + '-' + rand + '-' + slug + '.' + ext;
+    return 'uploads/' + ts + '-' + rand + '-' + slug + '.' + ext;
   }
 
-  function uploadFileToRepo(file, base64, formData) {
+  function uploadToUserRepo(file, base64, formData) {
     var path = generateFilePath(file, formData);
-    var publicUrl = PUBLIC_BASE + '/' + path;
+    var message = 'Upload: ' + (formData.title || file.name);
+    var username = state.auth.user.login;
+    var token = state.auth.token;
 
-    // For files ≤ 1MB, use Contents API (simpler)
-    // For larger files, use Git Blobs API (handles up to 100MB)
-    if (file.size <= 1024 * 1024) {
-      return uploadViaContentsApi(path, base64, file, formData).then(function () {
-        return { path: path, publicUrl: publicUrl };
-      });
-    } else {
-      return uploadViaBlobsApi(path, base64, file, formData).then(function () {
-        return { path: path, publicUrl: publicUrl };
-      });
-    }
-  }
-
-  // Method 1: Contents API (for files ≤ 1MB)
-  function uploadViaContentsApi(path, base64, file, formData) {
-    var message = 'Upload: ' + (formData.title || file.name) + ' (user submission)';
-    var url = GITHUB_API_BASE + '/contents/' + encodeURIComponent(path);
-
-    return fetch(url, {
-      method: 'PUT',
-      headers: {
-        Authorization: 'token ' + GITHUB_TOKEN,
-        Accept: 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: message,
-        content: base64,
-        branch: REPO_BRANCH,
-      }),
-    }).then(function (res) {
-      if (!res.ok) {
-        return res.json().then(function (err) {
-          throw new Error('GitHub upload error: ' + (err.message || res.status));
-        });
-      }
-      return res.json();
+    return window.PixelaryRepo.uploadFile(token, username, path, base64, message, function (pct, msg) {
+      updateProgressPercent(pct, msg);
+    }).then(function (info) {
+      return info;
     });
   }
 
-  // Method 2: Git Blobs API (for files > 1MB, up to 100MB)
-  // This requires: create blob → get current commit → create tree → create commit → update ref
-  function uploadViaBlobsApi(path, base64, file, formData) {
-    var blobSha;
-    var message = 'Upload: ' + (formData.title || file.name) + ' (user submission)';
+  function appendToUserManifest(formData, fileInfo) {
+    var username = state.auth.user.login;
+    var token = state.auth.token;
 
-    updateProgressPercent(20, 'در حال آپلود فایل...');
-
-    // Step 1: Create blob
-    return fetch(GITHUB_API_BASE + '/git/blobs', {
-      method: 'POST',
-      headers: {
-        Authorization: 'token ' + GITHUB_TOKEN,
-        Accept: 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        content: base64,
-        encoding: 'base64',
-      }),
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error('Failed to create blob: ' + res.status);
-        return res.json();
-      })
-      .then(function (blob) {
-        blobSha = blob.sha;
-        updateProgressPercent(50, 'در حال ایجاد commit...');
-        // Step 2: Get the current HEAD commit
-        return fetch(GITHUB_API_BASE + '/git/refs/heads/' + REPO_BRANCH, {
-          headers: {
-            Authorization: 'token ' + GITHUB_TOKEN,
-            Accept: 'application/vnd.github.v3+json',
-          },
-        });
-      })
-      .then(function (res) {
-        if (!res.ok) throw new Error('Failed to get ref: ' + res.status);
-        return res.json();
-      })
-      .then(function (ref) {
-        var commitSha = ref.object.sha;
-        // Step 3: Get the commit to find its tree SHA
-        return fetch(GITHUB_API_BASE + '/git/commits/' + commitSha, {
-          headers: {
-            Authorization: 'token ' + GITHUB_TOKEN,
-            Accept: 'application/vnd.github.v3+json',
-          },
-        }).then(function (res) {
-          if (!res.ok) throw new Error('Failed to get commit: ' + res.status);
-          return res.json();
-        }).then(function (commit) {
-          return { commitSha: commitSha, treeSha: commit.tree.sha };
-        });
-      })
-      .then(function (info) {
-        // Step 4: Create a new tree with the file
-        updateProgressPercent(60, 'در حال ایجاد tree...');
-        return fetch(GITHUB_API_BASE + '/git/trees', {
-          method: 'POST',
-          headers: {
-            Authorization: 'token ' + GITHUB_TOKEN,
-            Accept: 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            base_tree: info.treeSha,
-            tree: [
-              {
-                path: path,
-                mode: '100644',
-                type: 'blob',
-                sha: blobSha,
-              },
-            ],
-          }),
-        }).then(function (res) {
-          if (!res.ok) throw new Error('Failed to create tree: ' + res.status);
-          return res.json();
-        }).then(function (tree) {
-          return { commitSha: info.commitSha, treeSha: tree.sha };
-        });
-      })
-      .then(function (info) {
-        // Step 5: Create a new commit
-        return fetch(GITHUB_API_BASE + '/git/commits', {
-          method: 'POST',
-          headers: {
-            Authorization: 'token ' + GITHUB_TOKEN,
-            Accept: 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: message,
-            parents: [info.commitSha],
-            tree: info.treeSha,
-          }),
-        }).then(function (res) {
-          if (!res.ok) throw new Error('Failed to create commit: ' + res.status);
-          return res.json();
-        }).then(function (commit) {
-          return commit.sha;
-        });
-      })
-      .then(function (newCommitSha) {
-        // Step 6: Update the ref
-        return fetch(GITHUB_API_BASE + '/git/refs/heads/' + REPO_BRANCH, {
-          method: 'PATCH',
-          headers: {
-            Authorization: 'token ' + GITHUB_TOKEN,
-            Accept: 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            sha: newCommitSha,
-            force: false,
-          }),
-        }).then(function (res) {
-          if (!res.ok) throw new Error('Failed to update ref: ' + res.status);
-          return res.json();
-        });
-      });
-  }
-
-  // ---------- Create GitHub Issue ----------
-  function createGitHubIssue(data, fileInfo) {
-    var titlePrefix = data.type === 'photo' ? '[عکس]' : '[ویدیو]';
-    var issueTitle = titlePrefix + ' ' + data.title;
-
-    var body = buildIssueBody(data, fileInfo);
-
-    var payload = {
-      title: issueTitle,
-      body: body,
-      labels: ['submission', 'pending-review', 'type:' + data.type],
+    var entry = {
+      id: 'fu_' + Date.now(),
+      type: formData.type,
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      author: formData.author,
+      license: formData.license,
+      file_url: fileInfo.public_url,
+      file_path: fileInfo.path,
+      thumbnail_url: fileInfo.public_url,
+      mime_type: formData.fileType,
+      size_bytes: formData.fileSize,
+      width: formData.width,
+      height: formData.height,
+      duration: formData.duration,
+      uploaded_at: formData.submittedAt,
+      original_filename: formData.fileName,
     };
 
-    return fetch(GITHUB_ISSUES_API, {
-      method: 'POST',
-      headers: {
-        Authorization: 'token ' + GITHUB_TOKEN,
-        Accept: 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    }).then(function (res) {
-      if (!res.ok) {
-        return res.json().then(function (err) {
-          throw new Error('GitHub API error: ' + (err.message || res.status));
-        });
-      }
-      return res.json();
-    });
+    return window.PixelaryRepo.appendToManifest(token, username, entry)
+      .then(function () { return entry; });
   }
 
-  function buildIssueBody(data, fileInfo) {
-    var typeLabel = data.type === 'photo' ? 'عکس' : 'ویدیو';
-    var sizeStr = UI.formatBytes(data.fileSize);
-    var dimStr = data.width && data.height ? data.width + '×' + data.height : 'نامشخص';
-    var durationStr = data.duration ? UI.formatDuration(data.duration) + ' ثانیه' : '—';
-    var licenseUrl = UI.licenseUrl(data.license);
-    var fileUrl = fileInfo.publicUrl;
-
-    var body = '## محتوای ارسالی جدید\n\n';
-    body += 'این issue به‌صورت خودکار از [صفحه آپلود پیکسلری](https://betaversion488-oss.github.io/upload.html) ایجاد شده است.\n\n';
-
-    body += '### پیش‌نمایش\n\n';
-    if (data.type === 'photo') {
-      body += '![' + escapeMarkdown(data.title) + '](' + fileUrl + ')\n\n';
-    } else {
-      body += '<video controls src="' + fileUrl + '" style="max-width: 100%; height: auto;"></video>\n\n';
-    }
-
-    body += '### اطلاعات\n\n';
-    body += '| فیلد | مقدار |\n';
-    body += '|------|-------|\n';
-    body += '| نوع | ' + typeLabel + ' |\n';
-    body += '| عنوان | ' + escapeMarkdown(data.title) + ' |\n';
-    body += '| توضیحات | ' + (data.description ? escapeMarkdown(data.description) : '—') + ' |\n';
-    body += '| دسته | `' + data.category + '` |\n';
-    body += '| نویسنده | ' + escapeMarkdown(data.author) + ' |\n';
-    body += '| مجوز | [' + data.license + '](' + (licenseUrl || '#') + ') |\n';
-    body += '| تاریخ ارسال | ' + data.submittedAt + ' |\n\n';
-
-    body += '### مشخصات فایل\n\n';
-    body += '| فیلد | مقدار |\n';
-    body += '|------|-------|\n';
-    body += '| URL | [' + fileUrl + '](' + fileUrl + ') |\n';
-    body += '| مسیر در repo | `' + fileInfo.path + '` |\n';
-    body += '| نوع MIME | `' + data.fileType + '` |\n';
-    body += '| حجم | ' + sizeStr + ' |\n';
-    body += '| ابعاد | ' + dimStr + ' |\n';
-    if (data.type === 'video') {
-      body += '| مدت | ' + durationStr + ' |\n';
-    }
-    body += '| نام فایل اصلی | `' + escapeMarkdown(data.fileName) + '` |\n\n';
-
-    body += '---\n\n';
-    body += '### متادیتا برای پردازش خودکار\n\n';
-    body += '```yaml\n';
-    body += 'type: ' + data.type + '\n';
-    body += 'title: ' + yamlEscape(data.title) + '\n';
-    body += 'description: ' + yamlEscape(data.description) + '\n';
-    body += 'category: ' + data.category + '\n';
-    body += 'author: ' + yamlEscape(data.author) + '\n';
-    body += 'license: ' + data.license + '\n';
-    body += 'file_url: ' + fileUrl + '\n';
-    body += 'file_path: ' + fileInfo.path + '\n';
-    body += 'mime_type: ' + data.fileType + '\n';
-    body += 'size_bytes: ' + data.fileSize + '\n';
-    body += 'width: ' + data.width + '\n';
-    body += 'height: ' + data.height + '\n';
-    if (data.type === 'video') {
-      body += 'duration: ' + (data.duration || 0).toFixed(2) + '\n';
-    }
-    body += 'submitted_at: ' + data.submittedAt + '\n';
-    body += '```\n\n';
-
-    body += '---\n\n';
-    body += '### دستورالعمل بررسی\n\n';
-    body += '1. محتوای فوق را از نظر قوانین نسخه‌برداری و محتوای نامناسب بررسی کنید.\n';
-    body += '2. در صورت تأیید، label `pending-review` را حذف و label `approved` را اضافه کنید.\n';
-    body += '3. GitHub Action به‌صورت خودکار محتوا را به `data/photos.json` یا `data/videos.json` اضافه کرده و این issue را می‌بندد.\n';
-    body += '4. در صورت رد، label `rejected` را اضافه کنید و دلیل را کامنت کنید.\n\n';
-
-    return body;
-  }
-
-  function escapeMarkdown(s) {
-    if (!s) return '';
-    return String(s).replace(/\|/g, '\\|').replace(/\n/g, ' ');
-  }
-
-  function yamlEscape(s) {
-    if (!s) return '""';
-    if (/[:#&*!|>'"%@`{}\[\],?\n]/.test(s)) {
-      return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
-    }
-    return s;
+  function registerInCentralRegistry() {
+    var username = state.auth.user.login;
+    return window.PixelaryRepo.registerInCentralRegistry(username)
+      .catch(function (err) {
+        // Non-fatal — the upload itself succeeded
+        console.warn('Failed to register in central registry:', err);
+      });
   }
 
   // ---------- Progress UI ----------
   function showProgress() {
-    progressCard.classList.remove('hidden');
-    successCard.classList.add('hidden');
-    errorCard.classList.add('hidden');
+    var progressCard = $('#progressCard');
+    var successCard = $('#successCard');
+    var errorCard = $('#errorCard');
+    if (progressCard) progressCard.classList.remove('hidden');
+    if (successCard) successCard.classList.add('hidden');
+    if (errorCard) errorCard.classList.add('hidden');
 
     updateProgressStage('upload', 'pending');
     updateProgressStage('metadata', 'pending');
     updateProgressStage('review', 'pending');
 
-    progressTitle.textContent = 'در حال ارسال محتوا';
-    progressMessage.textContent = 'لطفاً صبر کنید و صفحه را نبندید';
+    var progressTitle = $('#progressTitle');
+    var progressMessage = $('#progressMessage');
+    if (progressTitle) progressTitle.textContent = 'در حال ارسال محتوا';
+    if (progressMessage) progressMessage.textContent = 'لطفاً صبر کنید و صفحه را نبندید';
   }
 
   function updateProgressPercent(pct, stage) {
-    progressBarFill.style.width = pct + '%';
-    progressPercent.textContent = UI.toPersianDigits(String(pct)) + '٪';
-    if (stage) progressStage.textContent = stage;
+    var progressBarFill = $('#progressBarFill');
+    var progressPercent = $('#progressPercent');
+    var progressStage = $('#progressStage');
+    if (progressBarFill) progressBarFill.style.width = pct + '%';
+    if (progressPercent) progressPercent.textContent = UI.toPersianDigits(String(pct)) + '٪';
+    if (stage && progressStage) progressStage.textContent = stage;
   }
 
   function updateProgressStage(stage, status) {
@@ -805,44 +683,64 @@
       active: 'در حال انجام',
       done: 'تکمیل شد',
     }[status];
-    statusEl.textContent = statusText;
-    statusEl.setAttribute('data-status', status);
+    if (statusEl) {
+      statusEl.textContent = statusText;
+      statusEl.setAttribute('data-status', status);
+    }
   }
 
   // ---------- Success / Error ----------
-  function showSuccess(issue) {
-    progressCard.classList.add('hidden');
-    successCard.classList.remove('hidden');
-    if (issue.html_url) {
-      issueLink.href = issue.html_url;
-      $('#issueLinkContainer').classList.remove('hidden');
+  function showSuccess(fileInfo) {
+    var progressCard = $('#progressCard');
+    var successCard = $('#successCard');
+    if (progressCard) progressCard.classList.add('hidden');
+    if (successCard) successCard.classList.remove('hidden');
+
+    // Show user's repo link
+    var repoLink = $('#userRepoLink');
+    if (repoLink && state.auth && state.auth.user) {
+      repoLink.href = 'https://github.com/' + state.auth.user.login + '/pixelary-uploads';
     }
-    UI.toast('محتوا با موفقیت ارسال شد!', 'success', 4000);
+
+    // Show file URL
+    var fileLink = $('#userFileLink');
+    if (fileLink && fileInfo) {
+      fileLink.href = fileInfo.public_url;
+    }
+
+    UI.toast('محتوای شما با موفقیت در مخزن شخصی‌تان آپلود شد!', 'success', 5000);
   }
 
   function showError(message) {
-    progressCard.classList.add('hidden');
-    errorCard.classList.remove('hidden');
-    $('#errorMessage').textContent = message;
+    var progressCard = $('#progressCard');
+    var errorCard = $('#errorCard');
+    if (progressCard) progressCard.classList.add('hidden');
+    if (errorCard) errorCard.classList.remove('hidden');
+    var errorMessage = $('#errorMessage');
+    if (errorMessage) errorMessage.textContent = message;
   }
 
   function hideError() {
-    errorCard.classList.add('hidden');
-    progressCard.classList.remove('hidden');
+    var errorCard = $('#errorCard');
+    var progressCard = $('#progressCard');
+    if (errorCard) errorCard.classList.add('hidden');
+    if (progressCard) progressCard.classList.remove('hidden');
   }
 
   function resetAll() {
     resetFile();
-    uploadForm.reset();
-    state.fileRepoPath = null;
-    state.filePublicUrl = null;
-    state.issueNumber = null;
-    state.issueUrl = null;
+    var uploadForm = $('#uploadForm');
+    if (uploadForm) uploadForm.reset();
+    state.uploadResult = null;
     state.formData = null;
-    $('#descCount').textContent = '۰';
-    successCard.classList.add('hidden');
-    errorCard.classList.add('hidden');
-    progressCard.classList.add('hidden');
+    var descCount = $('#descCount');
+    if (descCount) descCount.textContent = '۰';
+    var successCard = $('#successCard');
+    var errorCard = $('#errorCard');
+    var progressCard = $('#progressCard');
+    if (successCard) successCard.classList.add('hidden');
+    if (errorCard) errorCard.classList.add('hidden');
+    if (progressCard) progressCard.classList.add('hidden');
   }
 
   // ---------- Boot ----------

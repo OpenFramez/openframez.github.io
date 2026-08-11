@@ -106,6 +106,31 @@ jobs:
           print(f'✓ All IA videos have required fields, valid durations (<=60s), and free licenses')
           "
 
+      - name: Validate registry.json and federated.json
+        run: |
+          python3 -c "
+          import json
+          with open('data/registry.json') as f:
+              reg = json.load(f)
+          assert 'users' in reg, 'registry missing users field'
+          assert isinstance(reg['users'], list), 'users must be a list'
+          for u in reg['users']:
+              assert 'login' in u, f'registry user missing login: {u}'
+              assert 'repo' in u, f'registry user missing repo: {u}'
+          print(f'✓ registry.json valid ({len(reg[\"users\"])} users)')
+
+          with open('data/federated.json') as f:
+              fed = json.load(f)
+          assert 'items' in fed, 'federated missing items field'
+          assert isinstance(fed['items'], list), 'items must be a list'
+          for item in fed['items']:
+              assert 'id' in item, f'federated item missing id'
+              assert 'type' in item, f'federated item missing type'
+              assert 'source_user' in item, f'federated item missing source_user'
+              assert 'file_url' in item, f'federated item missing file_url'
+          print(f'✓ federated.json valid ({len(fed[\"items\"])} items)')
+          "
+
       - name: Validate HTML files
         run: |
           for f in index.html videos.html video.html reels.html photo.html about.html upload.html submit.html legal.html 404.html; do
