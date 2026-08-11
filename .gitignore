@@ -38,3 +38,6 @@ build/
 !uploads/photos/
 uploads/photos/*
 !uploads/photos/.gitkeep
+!uploads/user/
+uploads/user/*
+!uploads/user/.gitkeep
