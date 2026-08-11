@@ -192,7 +192,7 @@
   }
 
   function renderRelated(video) {
-    const related = Pixelary.getVideoRelated(video, 10);
+    const related = Pixelary.getAllVideoRelated(video, 10);
     if (!related.length) {
       els.related.parentElement.classList.add('hidden');
       return;
@@ -266,7 +266,8 @@
 
   async function init() {
     try {
-      await Pixelary.loadVideos();
+      // Load both sources in parallel — IA failure is non-fatal
+      await Pixelary.loadAllVideos();
     } catch (err) {
       console.error(err);
       fail('خطا در بارگذاری داده‌ها.');
@@ -279,7 +280,8 @@
       fail('شناسه ویدیو مشخص نیست.');
       return;
     }
-    const video = Pixelary.getVideoById(id);
+    // Unified lookup: handles both Wikimedia (fv_*) and Internet Archive (ia_*) IDs
+    const video = Pixelary.getAnyVideoById(id);
     if (!video) {
       fail(`ویدیو با شناسه ${id} یافت نشد.`);
       return;

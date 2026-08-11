@@ -1,10 +1,11 @@
 /**
- * Pixelary Service Worker — Phase 2
+ * Pixelary Service Worker — Phase 2.5 (Reels + Internet Archive)
  * Cache-first for static assets, network-first for data, with offline fallback.
  * Range-request aware for video streaming (partial content).
+ * Serves both Wikimedia Commons and Internet Archive video sources.
  */
 
-const CACHE_VERSION = 'pixelary-v2.0.0';
+const CACHE_VERSION = 'pixelary-v2.5.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DATA_CACHE = `${CACHE_VERSION}-data`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -15,12 +16,14 @@ const STATIC_ASSETS = [
   './index.html',
   './videos.html',
   './video.html',
+  './reels.html',
   './photo.html',
   './about.html',
   './submit.html',
   './legal.html',
   './404.html',
   './assets/css/style.css',
+  './assets/css/reels.css',
   './assets/js/ui.js',
   './assets/js/db.js',
   './assets/js/app.js',
@@ -28,6 +31,7 @@ const STATIC_ASSETS = [
   './assets/js/videos.js',
   './assets/js/video.js',
   './assets/js/video-player.js',
+  './assets/js/reels.js',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap',
 ];
@@ -59,19 +63,21 @@ self.addEventListener('fetch', (event) => {
   // Only handle GET
   if (req.method !== 'GET') return;
 
-  // Skip cross-origin except fonts and wikimedia
+  // Skip cross-origin except fonts, wikimedia, and Internet Archive
   const isSameOrigin = url.origin === self.location.origin;
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   const isWikimedia = url.hostname.endsWith('wikimedia.org') || url.hostname.endsWith('wikipedia.org');
+  const isArchiveOrg = url.hostname === 'archive.org' || url.hostname.endsWith('.archive.org');
 
-  if (!isSameOrigin && !isFont && !isWikimedia) return;
+  if (!isSameOrigin && !isFont && !isWikimedia && !isArchiveOrg) return;
 
   // ---------- Range requests (video streaming) ----------
-  // For video files from wikimedia, we MUST respect the Range header.
+  // For video files from wikimedia or archive.org, we MUST respect the Range header.
   // Cache a small video segment only if it's a 206 response and small enough.
   const isVideoReq = (
     req.destination === 'video' ||
-    (isWikimedia && (url.pathname.endsWith('.webm') || url.pathname.endsWith('.ogv') || url.pathname.endsWith('.mp4')))
+    (isWikimedia && (url.pathname.endsWith('.webm') || url.pathname.endsWith('.ogv') || url.pathname.endsWith('.mp4'))) ||
+    (isArchiveOrg && url.pathname.endsWith('.mp4'))
   );
 
   if (isVideoReq) {
@@ -109,8 +115,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // ---------- Images (wikimedia thumbnails & originals): stale-while-revalidate ----------
-  if (isWikimedia && (req.destination === 'image' || url.pathname.includes('/thumb/'))) {
+  // ---------- Images (wikimedia + archive.org thumbnails): stale-while-revalidate ----------
+  if ((isWikimedia || isArchiveOrg) && (req.destination === 'image' || url.pathname.includes('/thumb/') || url.pathname.includes('.jpg') || url.pathname.includes('.png'))) {
     event.respondWith(
       caches.open(IMAGE_CACHE).then((cache) =>
         cache.match(req).then((cached) => {

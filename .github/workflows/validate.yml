@@ -72,9 +72,43 @@ jobs:
           print(f'✓ All videos have required fields, valid durations, free licenses, and sources')
           "
 
+      - name: Validate videos_ia.json
+        run: |
+          python3 -c "
+          import json
+          with open('data/videos_ia.json') as f:
+              data = json.load(f)
+          print(f'✓ videos_ia.json is valid JSON')
+          print(f'  Total IA videos: {data[\"total\"]}')
+          print(f'  Categories: {len(data[\"categories\"])}')
+          assert data['total'] == len(data['videos']), 'total mismatch'
+          required = ['id', 'title', 'file_url', 'thumb_url', 'duration', 'width', 'height', 'license', 'artist', 'ia_identifier', 'page_url', 'source', 'collection']
+          for v in data['videos']:
+              for key in required:
+                  assert key in v, f'missing {key} in IA video {v.get(\"id\")}'
+              assert v['id'].startswith('ia_'), f'bad ID prefix in {v[\"id\"]}'
+              assert v['duration'] > 0 and v['duration'] <= 60, f'invalid duration in {v[\"id\"]}: {v[\"duration\"]}'
+              assert v['source'] == 'Internet Archive', f'bad source field in {v[\"id\"]}'
+              assert v['file_url'].startswith('https://archive.org/download/'), f'bad file_url in {v[\"id\"]}'
+              assert v['page_url'].startswith('https://archive.org/details/'), f'bad page_url in {v[\"id\"]}'
+              lic = v['license'].lower()
+              normalized = ''.join(c for c in lic if c.isalnum())
+              is_free = (
+                  'publicdomain' in normalized or
+                  normalized.startswith('cc0') or
+                  normalized.startswith('ccby') or
+                  normalized.startswith('ccbysa') or
+                  normalized.startswith('gfdl') or
+                  normalized.startswith('pd')
+              )
+              assert is_free, f'non-free license in {v[\"id\"]}: {v[\"license\"]}'
+              assert 'nc' not in lic.lower().replace(' ', ''), f'NC license in {v[\"id\"]}: {v[\"license\"]}'
+          print(f'✓ All IA videos have required fields, valid durations (<=60s), and free licenses')
+          "
+
       - name: Validate HTML files
         run: |
-          for f in index.html videos.html video.html photo.html about.html submit.html legal.html 404.html; do
+          for f in index.html videos.html video.html reels.html photo.html about.html submit.html legal.html 404.html; do
             if [ -f "$f" ]; then
               echo "✓ $f exists"
             else

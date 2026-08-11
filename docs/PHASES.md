@@ -72,6 +72,51 @@
 
 ---
 
+## فاز ۲.۵: ریلز + اینترنت آرکایو ✅
+
+**هدف:** افزودن حالت «ریلز» تمام‌صفحه عمودی (مانند اینستاگرام ریلز / تیک‌تاک) و غنی‌سازی کاتالوگ ویدیوها با scrape از Internet Archive.
+
+**محتوای جدید:**
+- ۴۸ ویدیوی کوتاه (۵ تا ۶۰ ثانیه) از Internet Archive
+  - ۴۲ تبلیغات قدیمی از مجموعه AdViews (Duke University Libraries) — ۱۹۵۰ تا ۱۹۸۰
+  - ۵ کلیپ آرشیوی/هنری از Prelinger Archives (Amateur film, Countdown leader, Bongo Boards, etc.)
+  - ۱ ویدیوی آموزشی ("Time Savers for House Makers")
+- همه با مجوز Public Domain یا CC (فقط مجوزهای آزاد؛ NC/ND رد شدند)
+- منبع: `https://archive.org/details/<id>` و `https://archive.org/download/<id>/<file>`
+
+**قابلیت‌های جدید:**
+- ✅ صفحه ریلز (`reels.html`) با scroll-snap عمودی (یک ریل در هر viewport)
+- ✅ پخش خودکار هنگام اسکرول (IntersectionObserver، threshold 0.6)
+- ✅ فقط یک ویدیو همزمان پخش می‌کند (بقیه متوقف و unload می‌شوند — مدیریت پهنای باند)
+- ✅ کنترل‌های لمسی: تک‌ضربه = play/pause، دوضربه = پسندیدن (با animation قلب)
+- ✅ نوار پیشرفت در بالا (قابل کلیک برای seek)
+- ✅ ریل عملیات در سمت چپ (RTL): پسندیدن، صدا، اشتراک، تکرار
+- ✅ Overlay پایین: عنوان، سازنده، مجوز، توضیح، لینک‌های منبع/دانلود/جزئیات
+- ✅ حرکات کلیدبری: ↑/↓ یا j/k برای ناوبری، space برای play/pause، m برای mute، l برای like
+- ✅ Anchor hash برای اشتراک‌گذاری موقعیت (مثلاً `reels.html#ia_0001`)
+- ✅ Lazy loading: تنها ۸ ریل اول رندر می‌شوند، باقی هنگام نیاز (حدود ۳ ریل تا انتها)
+- ✅ شیوه‌نامه RTL کامل با پشتیبانی safe-area (notch)، `100dvh` برای mobile URL bar
+- ✅ در دسکتاپ، فید در یک ستون ۴۸۰px در مرکز صفحه (حس app-like)
+
+**ادغام با کاتالوگ موجود:**
+- ✅ گالری `videos.html` اکنون هم ویدیوهای Wikimedia و هم IA را به‌صورت interleaved نمایش می‌دهد
+- ✅ صفحه جزئیات `video.html` با هر دو نوع ID کار می‌کند (`fv_*` و `ia_*`)
+- ✅ ویدیوهای مرتبط از هر دو منبع پیشنهاد می‌شوند
+- ✅ آمار ترکیبی (مجموع ویدیوها، دسته‌ها، سازندگان، مدت زمان)
+- ✅ جستجو در هر دو منبع به‌طور همزمان
+- ✅ Service Worker v2.5.0: cache برای `archive.org` (تصاویر + ویدیو)، range-request aware
+
+**اسکریپر Python:**
+- `scripts/scrape_internet_archive.py` — advancedsearch.php + metadata API
+- فیلتر duration ≤ 60s، فیلتر حجم ≤ 10MB، فیلتر مجوز آزاد
+- انتخاب کوچکترین derivative با کیفیت ≥ 240p
+- نرمال‌سازی schema برای تطابق با `videos.json`
+- Cleanup خودکار: حذف opensource_movies نامعتبر، re-categorize بر اساس عنوان
+
+**وضعیت:** ✅ منتشرشده (نسخه ۲.۵.۰)
+
+---
+
 ## فاز ۳: موسیقی و فایل‌های صوتی 📋
 
 **هدف:** افزودن بخش موسیقی و podcast با محتوای آزاد.

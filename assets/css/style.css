@@ -1707,3 +1707,30 @@ code, pre { font-family: var(--font-mono); font-size: 0.875em; }
   transform: scaleX(-1);
 }
 
+/* Reels promo banner — distinct gradient styling */
+.promo-banner-reels {
+  border: 1px solid color-mix(in srgb, var(--brand-3) 30%, var(--border));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--brand-1) 8%, var(--bg-elevated)) 0%,
+    color-mix(in srgb, var(--brand-3) 12%, var(--bg-elevated)) 100%
+  );
+}
+.promo-banner-reels:hover {
+  border-color: var(--brand-3);
+}
+.promo-banner-icon-reels {
+  background: linear-gradient(135deg, var(--brand-3), var(--brand-2)) !important;
+}
+.promo-banner-reels .promo-banner-text strong {
+  color: var(--brand-3);
+  background: linear-gradient(135deg, var(--brand-2), var(--brand-3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.promo-banner-reels .promo-banner-arrow {
+  color: var(--brand-3);
+}
+

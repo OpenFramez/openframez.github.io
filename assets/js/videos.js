@@ -1,8 +1,9 @@
 /**
- * Pixelary — Videos Gallery (Phase 2)
+ * Pixelary — Videos Gallery (Phase 2 + 2.5)
  * Mirrors app.js (photo gallery) but for videos.
- * Handles: category filter, search, infinite scroll, mobile search overlay,
- *          and a small preview-on-hover behavior for desktop.
+ * Loads BOTH Wikimedia Commons (videos.json) and Internet Archive (videos_ia.json)
+ * sources in parallel and merges them via Pixelary.filterAllVideos().
+ * Handles: category filter, search, infinite scroll, mobile search overlay.
  */
 
 (function () {
@@ -33,9 +34,10 @@
 
   // ---------- Render category chips ----------
   function renderCategories() {
-    const cats = Pixelary.getVideoCategories();
+    const cats = Pixelary.getAllVideoCategories();
+    const totalAll = Pixelary.getCombinedVideoStats().total;
     const html = [
-      `<button class="chip ${state.category === 'all' ? 'active' : ''}" data-cat="all">همه <span class="count">(${Pixelary.getVideoTotal()})</span></button>`,
+      `<button class="chip ${state.category === 'all' ? 'active' : ''}" data-cat="all">همه <span class="count">(${totalAll})</span></button>`,
       ...cats.map(
         (c) =>
           `<button class="chip ${state.category === c.slug ? 'active' : ''}" data-cat="${c.slug}">${UI.escapeHtml(c.label)} <span class="count">(${c.count})</span></button>`
@@ -63,7 +65,7 @@
       state.rendered = 0;
     }
 
-    state.items = Pixelary.filterVideos({
+    state.items = Pixelary.filterAllVideos({
       category: state.category === 'all' ? null : state.category,
       query: state.query,
       sort: state.sort,
@@ -150,7 +152,7 @@
 
   // ---------- Hero stats ----------
   function renderStats() {
-    const stats = Pixelary.getVideoStats();
+    const stats = Pixelary.getCombinedVideoStats();
     const nums = els.heroStats.querySelectorAll('.num');
     if (nums.length >= 4) {
       nums[0].textContent = UI.toPersianDigits(stats.total);
@@ -190,7 +192,7 @@
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">برای جستجو تایپ کنید…</div>';
       return;
     }
-    const results = Pixelary.filterVideos({ query, sort: 'newest' }).slice(0, 10);
+    const results = Pixelary.filterAllVideos({ query, sort: 'newest' }).slice(0, 10);
     if (results.length === 0) {
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">نتیجه‌ای یافت نشد</div>';
       return;
@@ -213,7 +215,7 @@
   // ---------- Init ----------
   async function init() {
     try {
-      await Pixelary.loadVideos();
+      await Pixelary.loadAllVideos();
     } catch (err) {
       console.error(err);
       els.loading.innerHTML = '<div>خطا در بارگذاری داده‌ها. لطفاً صفحه را تازه‌سازی کنید.</div>';

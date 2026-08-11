@@ -221,6 +221,264 @@ const Pixelary = (function () {
     };
   }
 
+  // ---------- Internet Archive videos cache (Phase 2.5) ----------
+  let iaCache = null;
+  let iaPromise = null;
+
+  async function loadIAVideos() {
+    if (iaCache) return iaCache;
+    if (iaPromise) return iaPromise;
+    iaPromise = fetch('./data/videos_ia.json', { cache: 'no-store' })
+      .then((r) => {
+        if (!r.ok) throw new Error('Failed to load videos_ia.json: ' + r.status);
+        return r.json();
+      })
+      .then((data) => {
+        iaCache = data;
+        iaCache._searchIndex = data.videos.map((v) => {
+          const text = (
+            v.title + ' ' +
+            (v.description || '') + ' ' +
+            (v.artist || '') + ' ' +
+            v.category + ' ' +
+            (v.category_label || '') + ' ' +
+            (v.credit || '') + ' ' +
+            (v.collection || '')
+          ).toLowerCase();
+          return { id: v.id, text };
+        });
+        return iaCache;
+      })
+      .catch((err) => {
+        iaPromise = null;
+        throw err;
+      });
+    return iaPromise;
+  }
+
+  function getIAVideoById(id) {
+    if (!iaCache) return null;
+    return iaCache.videos.find((v) => v.id === id) || null;
+  }
+
+  function getIAVideoCategories() {
+    if (!iaCache) return [];
+    const counts = {};
+    for (const v of iaCache.videos) {
+      counts[v.category] = (counts[v.category] || 0) + 1;
+    }
+    return (iaCache.categories || [])
+      .map((c) => ({ ...c, count: counts[c.slug] || 0 }))
+      .filter((c) => c.count > 0);
+  }
+
+  function getIAVideoTotal() {
+    return iaCache ? iaCache.videos.length : 0;
+  }
+
+  function filterIAVideos({ category = null, query = null, sort = 'newest' } = {}) {
+    if (!iaCache) return [];
+    let list = iaCache.videos.slice();
+    if (category && category !== 'all') {
+      list = list.filter((v) => v.category === category);
+    }
+    if (query && query.trim()) {
+      const q = query.trim().toLowerCase();
+      const tokens = q.split(/\s+/).filter(Boolean);
+      list = list
+        .map((v) => {
+          const entry = iaCache._searchIndex.find((e) => e.id === v.id);
+          if (!entry) return { v, score: 0 };
+          let score = 0;
+          for (const t of tokens) {
+            if (entry.text.includes(t)) score += 1;
+            if (v.title.toLowerCase().includes(t)) score += 2;
+          }
+          return { v, score };
+        })
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map((x) => x.v);
+    }
+    if (sort === 'newest') {
+      list.sort((a, b) => (b.uploaded_at || '').localeCompare(a.uploaded_at || ''));
+    } else if (sort === 'oldest') {
+      list.sort((a, b) => (a.uploaded_at || '').localeCompare(b.uploaded_at || ''));
+    } else if (sort === 'shortest') {
+      list.sort((a, b) => (a.duration || 0) - (b.duration || 0));
+    } else if (sort === 'longest') {
+      list.sort((a, b) => (b.duration || 0) - (a.duration || 0));
+    }
+    return list;
+  }
+
+  /**
+   * Unified lookup: search both Wikimedia and IA video caches.
+   * Used by video.html so detail page works for both sources.
+   */
+  function getAnyVideoById(id) {
+    if (!id) return null;
+    // IA IDs start with "ia_"
+    if (id.startsWith('ia_')) return getIAVideoById(id);
+    return getVideoById(id);
+  }
+
+  /**
+   * Combined filter across both caches — useful for unified galleries.
+   */
+  function filterAllVideos({ category = null, query = null, sort = 'newest' } = {}) {
+    const wm = filterVideos({ category, query, sort });
+    const ia = filterIAVideos({ category, query, sort });
+    // Interleave: 1 from each, alternating
+    const merged = [];
+    const maxLen = Math.max(wm.length, ia.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (ia[i]) merged.push(ia[i]);
+      if (wm[i]) merged.push(wm[i]);
+    }
+    // Re-sort the merged list by upload date if requested
+    if (sort === 'newest') {
+      merged.sort((a, b) => (b.uploaded_at || '').localeCompare(a.uploaded_at || ''));
+    } else if (sort === 'oldest') {
+      merged.sort((a, b) => (a.uploaded_at || '').localeCompare(b.uploaded_at || ''));
+    } else if (sort === 'shortest') {
+      merged.sort((a, b) => (a.duration || 0) - (b.duration || 0));
+    } else if (sort === 'longest') {
+      merged.sort((a, b) => (b.duration || 0) - (a.duration || 0));
+    }
+    return merged;
+  }
+
+  function getCombinedVideoStats() {
+    const wmStats = getVideoStats();
+    const iaStats = iaCache ? {
+      total: iaCache.videos.length,
+      authors: new Set(iaCache.videos.map((v) => v.artist)).size,
+      totalDuration: iaCache.videos.reduce((s, v) => s + (v.duration || 0), 0),
+    } : { total: 0, authors: 0, totalDuration: 0 };
+    return {
+      total: wmStats.total + iaStats.total,
+      authors: wmStats.authors + iaStats.authors,
+      totalDuration: wmStats.totalDuration + iaStats.totalDuration,
+      // For category count, deduplicate by slug since both sources may share slugs
+      categories: new Set([
+        ...((videoCache && videoCache.categories.map((c) => c.slug)) || []),
+        ...((iaCache && iaCache.categories.map((c) => c.slug)) || []),
+      ]).size,
+    };
+  }
+
+  /**
+   * Combined categories across Wikimedia + Internet Archive video caches.
+   * Merges counts for shared slugs, preserves label from whichever source
+   * defines it first (Wikimedia preferred since it has more categories).
+   */
+  function getAllVideoCategories() {
+    const counts = {};
+    const labels = {};
+    if (videoCache) {
+      for (const v of videoCache.videos) {
+        counts[v.category] = (counts[v.category] || 0) + 1;
+        if (!labels[v.category]) labels[v.category] = v.category_label || v.category;
+      }
+    }
+    if (iaCache) {
+      for (const v of iaCache.videos) {
+        counts[v.category] = (counts[v.category] || 0) + 1;
+        if (!labels[v.category]) labels[v.category] = v.category_label || v.category;
+      }
+    }
+    // Merge with category metadata from both sources
+    const seen = new Set();
+    const merged = [];
+    if (videoCache) {
+      for (const c of videoCache.categories) {
+        if (seen.has(c.slug)) continue;
+        seen.add(c.slug);
+        merged.push({ slug: c.slug, label: c.label, count: counts[c.slug] || 0 });
+      }
+    }
+    if (iaCache) {
+      for (const c of iaCache.categories) {
+        if (seen.has(c.slug)) continue;
+        seen.add(c.slug);
+        merged.push({ slug: c.slug, label: c.label, count: counts[c.slug] || 0 });
+      }
+    }
+    // Add any stragglers (categories that appear in videos but not in metadata)
+    for (const [slug, label] of Object.entries(labels)) {
+      if (seen.has(slug)) continue;
+      seen.add(slug);
+      merged.push({ slug, label, count: counts[slug] || 0 });
+    }
+    return merged.filter((c) => c.count > 0).sort((a, b) => b.count - a.count);
+  }
+
+  /**
+   * Load both Wikimedia and IA video caches in parallel.
+   * Returns once both are loaded (or failed). IA failure is non-fatal.
+   */
+  async function loadAllVideos() {
+    const promises = [loadVideos()];
+    promises.push(
+      loadIAVideos().catch((err) => {
+        console.warn('IA videos failed to load, continuing with Wikimedia only:', err);
+        return null;
+      })
+    );
+    await Promise.all(promises);
+    return {
+      wikimedia: videoCache,
+      internetArchive: iaCache,
+    };
+  }
+
+  /**
+   * Combined related-videos lookup across both caches.
+   * Prefers same-category from the same source, then cross-source, then any.
+   */
+  function getAllVideoRelated(video, limit = 10) {
+    if (!video) return [];
+    const same = [];
+    const sameCatOtherSource = [];
+    const others = [];
+
+    const isIa = video.source === 'Internet Archive';
+
+    if (videoCache) {
+      for (const v of videoCache.videos) {
+        if (v.id === video.id) continue;
+        if (v.category === video.category) {
+          if (!isIa) same.push(v);
+          else sameCatOtherSource.push(v);
+        } else {
+          others.push(v);
+        }
+      }
+    }
+    if (iaCache) {
+      for (const v of iaCache.videos) {
+        if (v.id === video.id) continue;
+        if (v.category === video.category) {
+          if (isIa) same.push(v);
+          else sameCatOtherSource.push(v);
+        } else {
+          others.push(v);
+        }
+      }
+    }
+
+    // Interleave same-cat (same source) with same-cat (other source), then others
+    const merged = [];
+    const maxSame = Math.max(same.length, sameCatOtherSource.length);
+    for (let i = 0; i < maxSame; i++) {
+      if (same[i]) merged.push(same[i]);
+      if (sameCatOtherSource[i]) merged.push(sameCatOtherSource[i]);
+    }
+    for (const v of others) merged.push(v);
+    return merged.slice(0, limit);
+  }
+
   return {
     // Photos (Phase 1)
     load,
@@ -230,7 +488,7 @@ const Pixelary = (function () {
     filter,
     getRelated,
     getStats,
-    // Videos (Phase 2)
+    // Videos (Phase 2 — Wikimedia)
     loadVideos,
     getVideoById,
     getVideoCategories,
@@ -238,5 +496,18 @@ const Pixelary = (function () {
     filterVideos,
     getVideoRelated,
     getVideoStats,
+    // Internet Archive Videos (Phase 2.5)
+    loadIAVideos,
+    getIAVideoById,
+    getIAVideoCategories,
+    getIAVideoTotal,
+    filterIAVideos,
+    // Combined (Wikimedia + IA)
+    loadAllVideos,
+    getAnyVideoById,
+    filterAllVideos,
+    getCombinedVideoStats,
+    getAllVideoCategories,
+    getAllVideoRelated,
   };
 })();

@@ -10,7 +10,7 @@
   "orientation": "portrait-primary",
   "theme_color": "#6366f1",
   "background_color": "#fafafa",
-  "categories": ["photography", "video", "lifestyle", "entertainment"],
+  "categories": ["photography", "video", "lifestyle", "entertainment", "education"],
   "icons": [
     {
       "src": "assets/icons/icon-192.png",
@@ -36,7 +36,13 @@
       "name": "ویدیوهای کوتاه",
       "short_name": "ویدیو",
       "url": "./videos.html",
-      "description": "ویدیوهای ۲ تا ۳۰ ثانیه‌ای"
+      "description": "ویدیوهای ۲ تا ۶۰ ثانیه‌ای"
+    },
+    {
+      "name": "ریلز",
+      "short_name": "ریلز",
+      "url": "./reels.html",
+      "description": "ویدیوهای کوتاه تمام‌صفحه عمودی"
     },
     {
       "name": "جستجو",

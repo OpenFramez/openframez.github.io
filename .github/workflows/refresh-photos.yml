@@ -26,14 +26,72 @@ jobs:
       - name: Refresh videos
         run: python3 scripts/scrape_videos.py
 
+      - name: Refresh Internet Archive videos
+        run: python3 scripts/scrape_internet_archive.py
+
+      - name: Cleanup IA videos (remove junk + re-categorize)
+        run: python3 -c "
+          import json, re
+          from pathlib import Path
+          p = Path('data/videos_ia.json')
+          data = json.loads(p.read_text(encoding='utf-8'))
+
+          AD_KW = ['commercial', 'advert', 'ad:', 'promo', 'folgers', 'lucky strike', 'coca-cola', 'pepsi', 'camel', 'marlboro', 'ford', 'chevrolet', 'westinghouse', 'shell oil', 'esso', 'mobil']
+          ART_KW = ['amateur film', 'experimental', 'avant-garde', 'countdown leader', 'technicolor', 'bongo board', 'earthquake aftermath', 'animation', 'short film']
+          EDU_KW = ['time saver', 'how to', 'tutorial', 'lesson', 'educational', 'school', 'study', 'learn', 'guide', 'instruction', 'training']
+
+          def detect_cat(v):
+              text = (v.get('title','') + ' ' + v.get('description','')).lower()
+              for kw in AD_KW:
+                  if kw in text: return 'vintage_ad', 'تبلیغات قدیمی'
+              for kw in ART_KW:
+                  if kw in text: return 'art', 'هنر'
+              for kw in EDU_KW:
+                  if kw in text: return 'educational', 'آموزشی'
+              if v.get('collection') == 'prelinger': return 'archival', 'آرشیوی'
+              if v.get('collection') == 'adviews': return 'vintage_ad', 'تبلیغات قدیمی'
+              return 'archival', 'آرشیوی'
+
+          def is_junk(v):
+              if v.get('collection') == 'opensource_movies':
+                  title = v.get('title','').lower()
+                  if not any(ind in title for ind in ['public domain','archive','newsreel','pathe']):
+                      return True
+              return False
+
+          kept = [v for v in data['videos'] if not is_junk(v)]
+          for v in kept:
+              new_cat, new_label = detect_cat(v)
+              v['category'] = new_cat
+              v['category_label'] = new_label
+          for i, v in enumerate(kept, start=1):
+              v['id'] = f'ia_{i:04d}'
+
+          counts, labels = {}, {}
+          for v in kept:
+              counts[v['category']] = counts.get(v['category'], 0) + 1
+              labels[v['category']] = v['category_label']
+
+          cat_meta = []
+          for slug in ['vintage_ad','archival','art','educational']:
+              if slug in counts:
+                  cat_meta.append({'slug':slug,'label':labels[slug],'count':counts[slug]})
+
+          data['videos'] = kept
+          data['categories'] = cat_meta
+          data['total'] = len(kept)
+          p.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+          print(f'Cleanup: {len(kept)} videos after pruning')
+          "
+
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/photos.json data/videos.json
+          git add data/photos.json data/videos.json data/videos_ia.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: weekly content refresh (photos + videos) [skip ci]"
+            git commit -m "chore: weekly content refresh (photos + videos + IA videos) [skip ci]"
             git push
           fi

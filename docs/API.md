@@ -235,6 +235,73 @@ const stats = Pixelary.getVideoStats();
 // {total: 76, categories: 16, authors: 40, totalDuration: 1023}
 ```
 
+#### Phase 2.5 (Internet Archive + Combined)
+
+##### `Pixelary.loadIAVideos(): Promise<IAVideoManifest>`
+
+بارگذاری manifest ویدیوهای Internet Archive (`data/videos_ia.json`). cache در memory.
+
+```javascript
+const iaData = await Pixelary.loadIAVideos();
+console.log(iaData.total); // 48
+console.log(iaData.videos[0].source); // 'Internet Archive'
+console.log(iaData.videos[0].ia_identifier); // 'dmbb00506'
+```
+
+##### `Pixelary.getIAVideoById(id: string): Video | null`
+
+```javascript
+const v = Pixelary.getIAVideoById('ia_0001');
+console.log(v.title, v.collection, v.license);
+```
+
+##### `Pixelary.loadAllVideos(): Promise<{wikimedia, internetArchive}>`
+
+بارگذاری همزمان هر دو منبع (Wikimedia + IA). در صورت شکست IA، فقط Wikimedia برمی‌گردد.
+
+```javascript
+const { wikimedia, internetArchive } = await Pixelary.loadAllVideos();
+console.log(`WM: ${wikimedia.videos.length}, IA: ${internetArchive.videos.length}`);
+```
+
+##### `Pixelary.getAnyVideoById(id: string): Video | null`
+
+Lookup یکپارچه — تشخیص خودکار منبع از روی prefix (`fv_*` → Wikimedia، `ia_*` → IA).
+
+```javascript
+const v1 = Pixelary.getAnyVideoById('fv_0001'); // Wikimedia
+const v2 = Pixelary.getAnyVideoById('ia_0001'); // Internet Archive
+```
+
+##### `Pixelary.filterAllVideos(options): Video[]`
+
+فیلتر ترکیبی در هر دو منبع — نتایج interleaved (یکی در میان از هر منبع).
+
+```javascript
+const results = Pixelary.filterAllVideos({
+  category: 'vintage_ad',
+  query: 'coffee',
+  sort: 'newest',
+});
+// Alternates: ia[0], wm[0], ia[1], wm[1], ...
+```
+
+##### `Pixelary.getAllVideoCategories(): Category[]`
+
+دسته‌بندی‌های ادغام‌شده از هر دو منبع، با شمارش ترکیبی. مرتب بر اساس تعداد.
+
+##### `Pixelary.getCombinedVideoStats(): CombinedStats`
+
+```javascript
+const stats = Pixelary.getCombinedVideoStats();
+// {total: 124, categories: 18, authors: 53, totalDuration: 2456}
+// total = Wikimedia total + IA total
+```
+
+##### `Pixelary.getAllVideoRelated(video: Video, limit: number = 10): Video[]`
+
+ویدیوهای مرتبط از هر دو منبع — اولویت با same-category از همان منبع، سپس cross-source.
+
 ### `PixelaryPlayer` (global) — Phase 2
 
 Custom video player factory.
