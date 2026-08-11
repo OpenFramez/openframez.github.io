@@ -108,7 +108,7 @@ jobs:
 
       - name: Validate HTML files
         run: |
-          for f in index.html videos.html video.html reels.html photo.html about.html submit.html legal.html 404.html; do
+          for f in index.html videos.html video.html reels.html photo.html about.html upload.html submit.html legal.html 404.html; do
             if [ -f "$f" ]; then
               echo "✓ $f exists"
             else

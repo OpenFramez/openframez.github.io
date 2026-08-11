@@ -1,11 +1,11 @@
 /**
- * Pixelary Service Worker — Phase 2.5 (Reels + Internet Archive)
+ * Pixelary Service Worker — Phase 4 (User Uploads)
  * Cache-first for static assets, network-first for data, with offline fallback.
  * Range-request aware for video streaming (partial content).
- * Serves both Wikimedia Commons and Internet Archive video sources.
+ * Serves Wikimedia Commons, Internet Archive, and catbox.moe (user uploads).
  */
 
-const CACHE_VERSION = 'pixelary-v2.5.0';
+const CACHE_VERSION = 'pixelary-v4.0.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DATA_CACHE = `${CACHE_VERSION}-data`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -19,11 +19,13 @@ const STATIC_ASSETS = [
   './reels.html',
   './photo.html',
   './about.html',
+  './upload.html',
   './submit.html',
   './legal.html',
   './404.html',
   './assets/css/style.css',
   './assets/css/reels.css',
+  './assets/css/upload.css',
   './assets/js/ui.js',
   './assets/js/db.js',
   './assets/js/app.js',
@@ -32,6 +34,7 @@ const STATIC_ASSETS = [
   './assets/js/video.js',
   './assets/js/video-player.js',
   './assets/js/reels.js',
+  './assets/js/upload.js',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap',
 ];
@@ -63,13 +66,18 @@ self.addEventListener('fetch', (event) => {
   // Only handle GET
   if (req.method !== 'GET') return;
 
-  // Skip cross-origin except fonts, wikimedia, and Internet Archive
+  // Skip cross-origin except fonts, wikimedia, Internet Archive, and catbox.moe (user uploads)
   const isSameOrigin = url.origin === self.location.origin;
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   const isWikimedia = url.hostname.endsWith('wikimedia.org') || url.hostname.endsWith('wikipedia.org');
   const isArchiveOrg = url.hostname === 'archive.org' || url.hostname.endsWith('.archive.org');
+  const isCatbox = url.hostname === 'catbox.moe' || url.hostname === 'files.catbox.moe';
+  const isGitHubApi = url.hostname === 'api.github.com';
 
-  if (!isSameOrigin && !isFont && !isWikimedia && !isArchiveOrg) return;
+  // Don't intercept GitHub API calls (they need their own auth headers)
+  if (isGitHubApi) return;
+
+  if (!isSameOrigin && !isFont && !isWikimedia && !isArchiveOrg && !isCatbox) return;
 
   // ---------- Range requests (video streaming) ----------
   // For video files from wikimedia or archive.org, we MUST respect the Range header.
@@ -115,8 +123,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // ---------- Images (wikimedia + archive.org thumbnails): stale-while-revalidate ----------
-  if ((isWikimedia || isArchiveOrg) && (req.destination === 'image' || url.pathname.includes('/thumb/') || url.pathname.includes('.jpg') || url.pathname.includes('.png'))) {
+  // ---------- Images (wikimedia + archive.org + catbox.moe thumbnails): stale-while-revalidate ----------
+  if ((isWikimedia || isArchiveOrg || isCatbox) && (req.destination === 'image' || url.pathname.includes('/thumb/') || url.pathname.match(/\.(jpg|jpeg|png|webp)$/i))) {
     event.respondWith(
       caches.open(IMAGE_CACHE).then((cache) =>
         cache.match(req).then((cached) => {
@@ -127,6 +135,23 @@ self.addEventListener('fetch', (event) => {
           return cached || network;
         })
       )
+    );
+    return;
+  }
+
+  // ---------- Catbox.moe video streaming (user uploads): network-first with range support ----------
+  if (isCatbox && (req.destination === 'video' || url.pathname.match(/\.(mp4|webm|mov)$/i))) {
+    event.respondWith(
+      fetch(req, { headers: req.headers })
+        .then((res) => {
+          const size = parseInt(res.headers.get('content-length') || '0', 10);
+          if (res.ok && size > 0 && size < 20 * 1024 * 1024 && res.status === 200) {
+            const copy = res.clone();
+            caches.open(VIDEO_CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          }
+          return res;
+        })
+        .catch(() => caches.match(req).then((cached) => cached || Response.error()))
     );
     return;
   }

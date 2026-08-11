@@ -1734,3 +1734,29 @@ code, pre { font-family: var(--font-mono); font-size: 0.875em; }
   color: var(--brand-3);
 }
 
+/* Upload promo banner — green/teal accent */
+.promo-banner-upload {
+  border: 1px solid color-mix(in srgb, #10b981 30%, var(--border));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, #10b981 8%, var(--bg-elevated)) 0%,
+    color-mix(in srgb, var(--brand-1) 8%, var(--bg-elevated)) 100%
+  );
+}
+.promo-banner-upload:hover {
+  border-color: #10b981;
+}
+.promo-banner-icon-upload {
+  background: linear-gradient(135deg, #10b981, var(--brand-1)) !important;
+}
+.promo-banner-upload .promo-banner-text strong {
+  background: linear-gradient(135deg, #10b981, var(--brand-1));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.promo-banner-upload .promo-banner-arrow {
+  color: #10b981;
+}
+

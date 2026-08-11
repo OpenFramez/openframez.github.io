@@ -141,30 +141,76 @@
 
 ---
 
-## فاز ۴: اپلیکیشن اندروید 📋
+## فاز ۴: آپلود راحت محتوا (PWA) ✅
 
-**هدف:** اپلیکیشن اندروید برای کاربران غیرفنی برای ارسال آسان محتوا.
+**هدف:** امکان آپلود راحت محتوا توسط کاربران غیرفنی — بدون نیاز به حساب GitHub یا دانش فنی.
 
-**قابلیت‌ها:**
-- انتخاب عکس/ویدیو از گالری موبایل
-- Crop و edit اساسی (rotate, resize)
-- افزودن metadata (title, description, category)
-- OAuth با GitHub (Device Flow)
-- ساخت PR به‌صورت خودکار
-- مشاهده وضعیت PR
-- دریافت notification وقتی PR merge شد
+**رویکرد:**
+
+به جای ساخت APK اندروید بومی، یک **PWA (Progressive Web App)** قابل نصب روی اندروید ساخته شد. این رویکرد مزایای زیر را دارد:
+- روی همه دستگاه‌ها (اندروید، iOS، دسکتاپ) کار می‌کند
+- با "Add to Home Screen" مثل اپ بومی نصب می‌شود
+- به دوربین و گالری دسترسی دارد (Web APIs)
+- نیازی به نصب APK (و فعال‌سازی "منابع ناشناخته") ندارد
+- به‌روزرسانی آن فوری و بی‌دردسر است
+
+**قابلیت‌های پیاده‌سازی‌شده:**
+- ✅ صفحه آپلود فارسی RTL (`upload.html`) با UX سه مرحله‌ای:
+  1. انتخاب فایل (drag-and-drop، گالری، دوربین، یا ضبط ویدیو)
+  2. تکمیل فرم متادیتا (عنوان، توضیحات، دسته، نویسنده، مجوز)
+  3. ارسال با نوار پیشرفت و بازخورد زنده
+- ✅ پیش‌نمایش فایل قبل از ارسال (عکس یا ویدیو)
+- ✅ اعتبارسنجی فایل (نوع، حجم، ابعاد)
+- ✅ آپلود فایل به catbox.moe (هاست رایگان، بدون ثبت‌نام، تا ۲۰۰MB)
+- ✅ ساخت GitHub Issue به‌صورت خودکار با:
+  - پیش‌نمایش محتوا (تصویر/ویدیو)
+  - جدول اطلاعات کامل
+  - بلوک YAML برای پردازش خودکار
+  - labels: `submission`, `pending-review`, `type:photo|video`
+- ✅ نوار پیشرفت با درصد و مرحله (آپلود → متادیتا → در صف بررسی)
+- ✅ صفحه موفقیت با لینک به Issue برای پیگیری
+- ✅ صفحه خطا با امکان تلاش مجدد
+- ✅ Service Worker v4.0.0: cache برای upload.html، upload.css، upload.js + پشتیبانی از catbox.moe
+- ✅ GitHub Action (`process-submission.yml`) برای پردازش خودکار Issues:
+  - Trigger: وقتی label `approved` به Issue اضافه می‌شود
+  - Parse YAML metadata از بدنه Issue
+  - اعتبارسنجی فیلدها و مجوز
+  - افزودن entry به `data/photos.json` یا `data/videos.json`
+  - Comment با نتیجه و بستن Issue
+- ✅ بنر تبلیغاتی روی صفحه اصلی (سبز برای تمایز)
+- ✅ آیکون "ارسال" در bottom navigation (جایگزین submit.html)
+- ✅ `submit.html` اکنون به‌صورت خودکار به `upload.html` redirect می‌شود
+
+**فرآیند کار کاربر:**
+```
+کاربر → upload.html → انتخاب فایل → تکمیل فرم → کلیک ارسال
+  ↓
+آپلود به catbox.moe (با نوار پیشرفت)
+  ↓
+ساخت GitHub Issue (با embedded bot PAT)
+  ↓
+مدیر Issues را بررسی می‌کند → افزودن label "approved"
+  ↓
+GitHub Action → افزودن به data/photos.json یا videos.json → commit → close Issue
+  ↓
+محتوا در گالری نمایش داده می‌شود
+```
+
+**امنیت:**
+- PAT استفاده‌شده در client-side JS متعلق به یک **bot account جداگانه** با اسکوپ `public_repo` است
+- بدترین حالت: ایجاد Issueهای اسپم (که قابل حذف هستند)
+- توصیه برای production: استفاده از serverless proxy (Cloudflare Worker، Vercel function)
+- چرخش منظم PAT توصیه می‌شود
 
 **تکنولوژی‌ها:**
-- **React Native** (cross-platform) یا **Kotlin** (native Android)
-- **GitHub OAuth Device Flow** برای authentication بدون WebView
-- **Expo** برای build و distribution آسان
+- Web APIs: File, FileReader, URL.createObjectURL, MediaDevices (camera capture)
+- XHR برای upload progress tracking
+- fetch API برای GitHub Issues API
+- catbox.moe API (هاست رایگان فایل)
+- GitHub Actions + Python برای پردازش خودکار
+- YAML metadata block برای parsing ساده
 
-**چالش‌ها:**
-- **OAuth Security**: Device Flow مناسب‌ترین برای اپ‌های موبایل
-- **File Upload**: GitHub API محدودیت ۱۰۰MB/file دارد
-- **User Experience**: باید ساده‌تر از Instagram باشد
-
-**نقشه راه:** Q2 2027
+**وضعیت:** ✅ منتشرشده (نسخه ۴.۰.۰)
 
 ---
 
@@ -257,8 +303,9 @@
 |-----|--------|-----------|--------|
 | ۱ | عکس | Q3 2026 | ✅ |
 | ۲ | ویدیو | Q4 2026 | ✅ |
+| ۲.۵ | ریلز + IA | Q4 2026 | ✅ |
 | ۳ | صوت | Q1 2027 | 📋 |
-| ۴ | اندروید | Q2 2027 | 📋 |
+| ۴ | آپلود راحت (PWA) | Q4 2026 | ✅ |
 | ۵ | AI | Q3 2027 | 📋 |
 | ۶ | نرم‌افزار | Q4 2027 | 📋 |
 

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#fafafa">
+  <meta name="color-scheme" content="light dark">
+  <title>ارسال محتوا — پیکسلری</title>
+  <meta name="description" content="عکس یا ویدیوی خود را به پیکسلری اضافه کنید. آپلود راحت با چند کلیک — بدون نیاز به دانش فنی.">
+  <link rel="canonical" href="https://betaversion488-oss.github.io/upload.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="ارسال محتوا به پیکسلری">
+  <meta property="og:description" content="آپلود راحت عکس و ویدیو با چند کلیک — بدون نیاز به دانش فنی">
+  <meta property="og:locale" content="fa_IR">
+
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" href="assets/icons/favicon-32.png" type="image/png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pixelary">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/upload.css">
+</head>
+<body>
+  <a href="#main" class="skip-link">پرش به محتوای اصلی</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./" class="logo" aria-label="پیکسلری خانه">
+        <span class="logo-mark" aria-hidden="true">P</span>
+        <span class="logo-text">پیکسلری</span>
+      </a>
+      <div class="header-actions">
+        <button class="icon-btn" data-theme-toggle aria-label="تغییر تم" title="تغییر تم">
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+        </button>
+        <a href="./" class="icon-btn" aria-label="بازگشت به خانه" title="بازگشت">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m12 19-7-7 7-7"/>
+            <path d="M19 12H5"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="container upload-page">
+    <!-- Hero -->
+    <section class="upload-hero">
+      <h1>ارسال محتوا</h1>
+      <p class="lead">عکس یا ویدیوی خود را در چند کلیک به پیکسلری اضافه کنید. بدون نیاز به حساب کاربری یا دانش فنی.</p>
+    </section>
+
+    <!-- Step indicator -->
+    <ol class="step-indicator" id="stepIndicator">
+      <li class="step active" data-step="1">
+        <span class="step-dot">۱</span>
+        <span class="step-label">انتخاب فایل</span>
+      </li>
+      <li class="step" data-step="2">
+        <span class="step-dot">۲</span>
+        <span class="step-label">تکمیل اطلاعات</span>
+      </li>
+      <li class="step" data-step="3">
+        <span class="step-dot">۳</span>
+        <span class="step-label">ارسال</span>
+      </li>
+    </ol>
+
+    <!-- Step 1: File picker -->
+    <section class="upload-step" id="step1" data-step-panel="1">
+      <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="انتخاب فایل برای آپلود">
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" hidden>
+        <div class="dropzone-inner">
+          <div class="dropzone-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <h2>فایل را اینجا رها کنید</h2>
+          <p>یا یکی از گزینه‌های زیر را انتخاب کنید</p>
+          <div class="dropzone-actions">
+            <button type="button" class="btn btn-primary" data-pick="gallery">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="9" cy="9" r="2"/>
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+              </svg>
+              <span>از گالری</span>
+            </button>
+            <button type="button" class="btn btn-secondary" data-pick="camera">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                <circle cx="12" cy="13" r="3"/>
+              </svg>
+              <span>از دوربین</span>
+            </button>
+            <button type="button" class="btn btn-secondary" data-pick="record-video">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="6" width="14" height="12" rx="2"/>
+                <path d="m16 10 6-3v10l-6-3"/>
+              </svg>
+              <span>ضبط ویدیو</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="upload-tips">
+        <h3>راهنمای سریع</h3>
+        <ul>
+          <li><strong>عکس:</strong> فرمت JPEG، PNG یا WebP — حداکثر ۲۵ مگابایت</li>
+          <li><strong>ویدیو:</strong> فرمت MP4 یا WebM — حداکثر ۱۰۰ مگابایت — ترجیحاً کوتاه (زیر ۶۰ ثانیه)</li>
+          <li><strong>محتوا:</strong> فقط محتوایی که خودتان خلق کرده‌اید یا حق انتشار آن را دارید</li>
+          <li><strong>مجوز:</strong> با ارسال، محتوای شما تحت مجوز Creative Commons منتشر خواهد شد</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Step 2: Metadata form -->
+    <section class="upload-step hidden" id="step2" data-step-panel="2">
+      <div class="upload-form-card">
+        <!-- Preview -->
+        <div class="upload-preview" id="previewContainer">
+          <div class="preview-media" id="previewMedia"></div>
+          <div class="preview-info">
+            <div class="preview-filename" id="previewFilename"></div>
+            <div class="preview-meta" id="previewMeta"></div>
+            <button type="button" class="btn btn-ghost btn-sm" id="changeFileBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                <path d="M21 3v5h-5"/>
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                <path d="M3 21v-5h5"/>
+              </svg>
+              <span>تغییر فایل</span>
+            </button>
+          </div>
+        </div>
+
+        <form id="uploadForm" novalidate>
+          <div class="form-field">
+            <label for="title">عنوان <span class="required">*</span></label>
+            <input type="text" id="title" name="title" required maxlength="120" placeholder="مثلاً: غروب آفتاب در رشته‌کوه البرز">
+            <small class="form-hint">یک عنوان توصیفی و کوتاه بنویسید</small>
+          </div>
+
+          <div class="form-field">
+            <label for="description">توضیحات</label>
+            <textarea id="description" name="description" maxlength="500" rows="3" placeholder="توضیح بیشتر در مورد محتوا، محل拍摄، زمینه و..."></textarea>
+            <small class="form-hint"><span id="descCount">۰</span> / ۵۰۰ کاراکتر</small>
+          </div>
+
+          <div class="form-field">
+            <label for="category">دسته‌بندی <span class="required">*</span></label>
+            <select id="category" name="category" required>
+              <option value="">یک دسته انتخاب کنید...</option>
+              <optgroup label="عکس">
+                <option value="nature">طبیعت و مناظر</option>
+                <option value="architecture">معماری</option>
+                <option value="wildlife">حیات وحش</option>
+                <option value="space">فضا و نجوم</option>
+                <option value="food">غذا و نوشیدنی</option>
+                <option value="travel">سفر و شهرها</option>
+                <option value="art">هنر و نقاشی</option>
+                <option value="sports">ورزش</option>
+                <option value="people">مردم</option>
+                <option value="technology">تکنولوژی</option>
+              </optgroup>
+              <optgroup label="ویدیو">
+                <option value="music">موسیقی</option>
+                <option value="science">علم</option>
+                <option value="animation">انیمیشن</option>
+                <option value="timelapse">تایم‌لپس</option>
+                <option value="experiment">آزمایش</option>
+                <option value="history">تاریخ</option>
+                <option value="vintage_ad">تبلیغات قدیمی</option>
+              </optgroup>
+              <option value="other">سایر</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="author">نام شما (برای اعتبار)</label>
+            <input type="text" id="author" name="author" maxlength="60" placeholder="نام شما یا نام مستعار">
+            <small class="form-hint">این نام به‌عنوان خالق محتوا نمایش داده خواهد شد</small>
+          </div>
+
+          <div class="form-field">
+            <label>مجوز انتشار <span class="required">*</span></label>
+            <div class="license-options">
+              <label class="license-option">
+                <input type="radio" name="license" value="CC BY 4.0" required checked>
+                <div class="license-card">
+                  <div class="license-icon">CC BY</div>
+                  <div class="license-text">
+                    <strong>Creative Commons Attribution 4.0</strong>
+                    <span>اجازه استفاده، تغییر و انتشار با ذکر نام</span>
+                  </div>
+                </div>
+              </label>
+              <label class="license-option">
+                <input type="radio" name="license" value="CC BY-SA 4.0">
+                <div class="license-card">
+                  <div class="license-icon">CC BY-SA</div>
+                  <div class="license-text">
+                    <strong>Creative Commons Attribution-ShareAlike 4.0</strong>
+                    <span>مانند بالا، اما نسخه‌های مشتق باید تحت همان مجوز باشند</span>
+                  </div>
+                </div>
+              </label>
+              <label class="license-option">
+                <input type="radio" name="license" value="CC0">
+                <div class="license-card">
+                  <div class="license-icon">CC0</div>
+                  <div class="license-text">
+                    <strong>Public Domain Dedication</strong>
+                    <span>بدون هیچ حقوقی — کاملاً آزاد برای هر استفاده‌ای</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="checkbox-field">
+              <input type="checkbox" id="ownershipConfirm" required>
+              <span>تأیید می‌کنم که این محتوا را خودم خلق کرده‌ام و حق انتشار آن را دارم. همچنین می‌دانم که محتوای غیرقانونی، توهین‌آمیز یا دارای کپی‌رایت بدون اطلاع حذف خواهد شد.</span>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" id="backToStep1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+              <span>بازگشت</span>
+            </button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <span>ارسال محتوا</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m22 2-7 20-4-9-9-4Z"/>
+                <path d="M22 2 11 13"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Step 3: Progress / Success -->
+    <section class="upload-step hidden" id="step3" data-step-panel="3">
+      <div class="upload-progress-card" id="progressCard">
+        <div class="progress-state" id="progressState">
+          <div class="progress-spinner" aria-hidden="true">
+            <svg viewBox="0 0 50 50">
+              <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="80 200" stroke-dashoffset="0">
+                <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1.2s" repeatCount="indefinite"/>
+              </circle>
+            </svg>
+          </div>
+          <h2 id="progressTitle">در حال آماده‌سازی...</h2>
+          <p id="progressMessage">لطفاً صبر کنید</p>
+        </div>
+
+        <div class="progress-bar-container" id="progressBarContainer">
+          <div class="progress-bar">
+            <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+          </div>
+          <div class="progress-bar-label">
+            <span id="progressPercent">۰٪</span>
+            <span id="progressStage"></span>
+          </div>
+        </div>
+
+        <div class="progress-steps-list">
+          <div class="progress-step-item" data-stage="upload">
+            <span class="progress-step-icon">۱</span>
+            <span class="progress-step-text">آپلود فایل</span>
+            <span class="progress-step-status" data-status="pending">در انتظار</span>
+          </div>
+          <div class="progress-step-item" data-stage="metadata">
+            <span class="progress-step-icon">۲</span>
+            <span class="progress-step-text">ارسال متادیتا</span>
+            <span class="progress-step-status" data-status="pending">در انتظار</span>
+          </div>
+          <div class="progress-step-item" data-stage="review">
+            <span class="progress-step-icon">۳</span>
+            <span class="progress-step-text">در صف بررسی</span>
+            <span class="progress-step-status" data-status="pending">در انتظار</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success state -->
+      <div class="upload-success-card hidden" id="successCard">
+        <div class="success-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <h2>محتوای شما با موفقیت ارسال شد!</h2>
+        <p>ممنون از همکاری شما. محتوای شما در صف بررسی است و پس از تأیید، در گالری پیکسلری نمایش داده خواهد شد.</p>
+        <div class="success-issue-link" id="issueLinkContainer">
+          <a href="#" id="issueLink" target="_blank" rel="noopener" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>پیگیری وضعیت ارسال</span>
+          </a>
+        </div>
+        <div class="success-actions">
+          <button type="button" class="btn btn-primary" id="uploadAnother">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            <span>ارسال محتوای دیگر</span>
+          </button>
+          <a href="./" class="btn btn-ghost">بازگشت به خانه</a>
+        </div>
+      </div>
+
+      <!-- Error state -->
+      <div class="upload-error-card hidden" id="errorCard">
+        <div class="error-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <h2>خطا در ارسال</h2>
+        <p id="errorMessage">متأسفانه در ارسال محتوا خطایی رخ داد. لطفاً دوباره تلاش کنید.</p>
+        <div class="error-actions">
+          <button type="button" class="btn btn-primary" id="retryBtn">تلاش مجدد</button>
+          <button type="button" class="btn btn-ghost" id="startOverBtn">شروع از ابتدا</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="ناوبری اصلی">
+    <a href="./" class="bottom-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>خانه</span>
+    </a>
+    <a href="videos.html" class="bottom-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="2" y="6" width="14" height="12" rx="2"/>
+        <path d="m16 10 6-3v10l-6-3"/>
+      </svg>
+      <span>ویدیو</span>
+    </a>
+    <a href="reels.html" class="bottom-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="7" y="2" width="10" height="20" rx="2"/>
+        <path d="M7 6h10M7 18h10"/>
+      </svg>
+      <span>ریلز</span>
+    </a>
+    <a href="upload.html" class="bottom-nav-item active" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      <span>ارسال</span>
+    </a>
+    <a href="about.html" class="bottom-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 16v-4M12 8h.01"/>
+      </svg>
+      <span>درباره</span>
+    </a>
+  </nav>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom" style="border:none;margin:0;padding:0;">
+        <span>© ۲۰۲۶ پیکسلری</span>
+        <span>ساخته‌شده با ❤ روی GitHub Pages</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/upload.js"></script>
+</body>
+</html>

@@ -53,8 +53,8 @@
     {
       "name": "ارسال محتوا",
       "short_name": "ارسال",
-      "url": "./submit.html",
-      "description": "ارسال عکس یا ویدیوی جدید"
+      "url": "./upload.html",
+      "description": "آپلود راحت عکس یا ویدیو با چند کلیک"
     }
   ]
 }
