@@ -1,10 +1,10 @@
 {
   "version": "1.0.0",
-  "generated_at": "2026-08-10T17:13:48Z",
+  "generated_at": "2026-08-11T14:24:19Z",
   "source": "Wikimedia Commons",
   "source_url": "https://commons.wikimedia.org",
   "license_note": "All images are CC-licensed or public domain. See each photo for specific license.",
-  "total": 167,
+  "total": 168,
   "categories": [
     {
       "slug": "nature",
@@ -3403,6 +3403,28 @@
       "id": "fi_0167",
       "category": "wildlife",
       "category_label": "Wildlife & Animals"
+    },
+    {
+      "id": "fu_0001",
+      "title": "تست فاز ۴ — آپلود راحت",
+      "description": "این یک تست خودکار است برای بررسی pipeline آپلود. می‌توانید آن را نادیده بگیرید.",
+      "category": "nature",
+      "category_label": "Nature & Landscapes",
+      "thumbnail": "https://betaversion488-oss.github.io/uploads/user/2026-08-11T14-22-06-wxgnul-تست-فاز-۴-آپلود-راحت.png",
+      "full": "https://betaversion488-oss.github.io/uploads/user/2026-08-11T14-22-06-wxgnul-تست-فاز-۴-آپلود-راحت.png",
+      "width": 1,
+      "height": 1,
+      "thumb_width": 800,
+      "thumb_height": 800,
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "author": "تست خودکار",
+      "author_url": "",
+      "source": "User submission via Pixelary upload",
+      "uploaded_at": "2026-08-11",
+      "commons_page": "",
+      "submission_source": "user",
+      "submission_issue": "#1"
     }
   ]
 }
