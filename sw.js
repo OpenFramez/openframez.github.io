@@ -5,7 +5,7 @@
  * Serves Wikimedia Commons, Internet Archive, and user *.github.io repos.
  */
 
-const CACHE_VERSION = 'pixelary-v5.0.0';
+const CACHE_VERSION = 'pixelary-v5.1.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DATA_CACHE = `${CACHE_VERSION}-data`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -26,9 +26,11 @@ const STATIC_ASSETS = [
   './assets/css/style.css',
   './assets/css/reels.css',
   './assets/css/upload.css',
+  './assets/css/feedback.css',
   './assets/js/ui.js',
   './assets/js/db.js',
   './assets/js/federated.js',
+  './assets/js/error-report.js',
   './assets/js/app.js',
   './assets/js/photo.js',
   './assets/js/videos.js',
@@ -38,6 +40,7 @@ const STATIC_ASSETS = [
   './assets/js/oauth.js',
   './assets/js/repo.js',
   './assets/js/upload.js',
+  './assets/js/feedback.js',
   './data/registry.json',
   './data/federated.json',
   './manifest.json',

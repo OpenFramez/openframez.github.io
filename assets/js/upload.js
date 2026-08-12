@@ -498,6 +498,17 @@
       })
       .catch(function (err) {
         console.error('Upload failed:', err);
+        // Auto-report the failure to the team
+        if (window.PixelaryErrors) {
+          window.PixelaryErrors.capture(err, {
+            flow: 'upload',
+            step: state.currentStep,
+            fileType: state.fileType,
+            fileSize: state.file ? state.file.size : 0,
+            hasAuth: !!(state.auth && state.auth.token),
+            userRepoReady: state.userRepoReady,
+          });
+        }
         showError(err.message || 'خطای ناشناخته در ارسال محتوا');
       });
   }
@@ -702,13 +713,56 @@
       repoLink.href = 'https://github.com/' + state.auth.user.login + '/pixelary-uploads';
     }
 
-    // Show file URL
+    // Show file URL — start with raw URL (works immediately), then poll Pages
     var fileLink = $('#userFileLink');
     if (fileLink && fileInfo) {
-      fileLink.href = fileInfo.public_url;
+      // Use raw URL as the immediate fallback (always works)
+      var rawUrl = window.PixelaryRepo.getRawFileUrl(state.auth.user.login, fileInfo.path);
+      fileLink.href = rawUrl;
+      fileLink.textContent = 'مشاهده فایل (raw)';
+
+      // Try to upgrade to Pages URL once Pages is built (~30-60s)
+      pollPagesAndUpgradeLink(fileInfo.path, fileLink);
     }
 
     UI.toast('محتوای شما با موفقیت در مخزن شخصی‌تان آپلود شد!', 'success', 5000);
+  }
+
+  /**
+   * Poll the user's repo Pages status. Once built, upgrade the success link
+   * from the raw URL to the Pages URL (cleaner, served from CDN).
+   * Gives up after 6 attempts (~60 seconds).
+   */
+  function pollPagesAndUpgradeLink(filePath, linkEl) {
+    var username = state.auth.user.login;
+    var token = state.auth.token;
+    var attempts = 0;
+    var maxAttempts = 6;
+
+    function check() {
+      attempts++;
+      fetch('https://api.github.com/repos/' + username + '/pixelary-uploads/pages', {
+        headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' },
+      }).then(function (res) {
+        if (!res.ok) return null;
+        return res.json();
+      }).then(function (data) {
+        if (data && data.status === 'built') {
+          // Pages is ready — upgrade link
+          var pagesUrl = window.PixelaryRepo.getPublicFileUrl(username, filePath);
+          linkEl.href = pagesUrl;
+          linkEl.textContent = 'مشاهده فایل آپلودشده';
+        } else if (attempts < maxAttempts) {
+          setTimeout(check, 10000); // retry in 10s
+        }
+        // If still not built after maxAttempts, leave the raw URL — it works fine
+      }).catch(function () {
+        // Network/API error — leave raw URL in place
+      });
+    }
+
+    // First check after 15s (give Pages a head start to begin building)
+    setTimeout(check, 15000);
   }
 
   function showError(message) {
