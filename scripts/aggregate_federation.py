@@ -137,7 +137,10 @@ def normalize_entry(entry, user_login, manifest):
         'category_label': CATEGORY_LABELS.get(entry.get('category', 'other'), entry.get('category', 'سایر')),
         'author': entry.get('author', user_login),
         'license': entry.get('license', 'CC BY 4.0'),
-        'license_url': get_license_url(entry.get('license', 'CC BY 4.0')),
+        'license_url': entry.get('license_url') or get_license_url(entry.get('license', 'CC BY 4.0')),
+        'spdx_id': entry.get('spdx_id') or get_spdx_id(entry.get('license', 'CC BY 4.0')),
+        'license_viral': entry.get('license_viral', entry.get('license') == 'CC BY-SA 4.0'),
+        'license_file_path': entry.get('license_file_path', ''),
         'source_user': user_login,
         'source_repo': 'pixelary-uploads',
         'source_url': f'https://github.com/{user_login}/pixelary-uploads',
@@ -154,16 +157,44 @@ def normalize_entry(entry, user_login, manifest):
     }
 
 
+# License metadata registry — SPDX IDs are the standard for machine-readable license identification.
+LICENSE_METADATA = {
+    'CC BY 4.0': {
+        'url': 'https://creativecommons.org/licenses/by/4.0/',
+        'spdx': 'CC-BY-4.0',
+        'viral': False,
+    },
+    'CC BY-SA 4.0': {
+        'url': 'https://creativecommons.org/licenses/by-sa/4.0/',
+        'spdx': 'CC-BY-SA-4.0',
+        'viral': True,
+    },
+    'CC0': {
+        'url': 'https://creativecommons.org/publicdomain/zero/1.0/',
+        'spdx': 'CC0-1.0',
+        'viral': False,
+    },
+    'Public Domain': {
+        'url': 'https://creativecommons.org/publicdomain/mark/1.0/',
+        'spdx': 'CC-PDDC',
+        'viral': False,
+    },
+    'GFDL': {
+        'url': 'https://www.gnu.org/licenses/fdl-1.3.html',
+        'spdx': 'GFDL-1.3-only',
+        'viral': True,
+    },
+}
+
+
 def get_license_url(license_name):
     """Map license name to URL."""
-    licenses = {
-        'CC BY 4.0': 'https://creativecommons.org/licenses/by/4.0/',
-        'CC BY-SA 4.0': 'https://creativecommons.org/licenses/by-sa/4.0/',
-        'CC0': 'https://creativecommons.org/publicdomain/zero/1.0/',
-        'Public Domain': 'https://creativecommons.org/publicdomain/mark/1.0/',
-        'GFDL': 'https://www.gnu.org/licenses/fdl-1.3.html',
-    }
-    return licenses.get(license_name, '')
+    return LICENSE_METADATA.get(license_name, {}).get('url', '')
+
+
+def get_spdx_id(license_name):
+    """Map license name to SPDX identifier."""
+    return LICENSE_METADATA.get(license_name, {}).get('spdx', '')
 
 
 def assign_ids(items):

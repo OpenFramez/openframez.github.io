@@ -109,13 +109,191 @@ window.PixelaryRepo = (function () {
           return updateFile(token, username, MANIFEST_PATH, buildEmptyManifest(username), 'Initialize manifest');
         })
         .then(function () {
-          // Step 4: Enable GitHub Pages on main branch
+          // Step 4: Write top-level LICENSE file (CC0 for repo metadata).
+          // The repo metadata (README, manifest.json, NOTICE.md) is dedicated to
+          // the public domain so that aggregators and crawlers can freely index it.
+          // Individual uploaded files retain their own per-file license (CC BY-SA / BY / CC0)
+          // declared in the accompanying `.LICENSE.txt` file.
+          return updateFile(token, username, 'LICENSE', buildRepoLicenseCc0(), 'Add CC0 license for repo metadata');
+        })
+        .then(function () {
+          // Step 5: Write top-level NOTICE.md
+          return updateFile(token, username, 'NOTICE.md', buildRepoNotice(username, []), 'Initialize NOTICE');
+        })
+        .then(function () {
+          // Step 6: Enable GitHub Pages on main branch
           return enablePages(token, username);
         })
         .then(function () {
           return repo;
         });
     });
+  }
+
+  /**
+   * Build the CC0 public-domain dedication text for the repo-level LICENSE file.
+   * This applies ONLY to the repo's metadata (README, manifest.json, NOTICE.md).
+   * User-uploaded content files keep their own per-file licenses in `.LICENSE.txt`.
+   */
+  function buildRepoLicenseCc0() {
+    return [
+      'Creative Commons Legal Code',
+      '===========================',
+      '',
+      'CC0 1.0 Universal',
+      '',
+      '    CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE',
+      '    LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN',
+      '    ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS',
+      '    INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES',
+      '    REGARDING THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS',
+      '    PROVIDED HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM',
+      '    THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED',
+      '    HEREUNDER.',
+      '',
+      'Statement of Purpose',
+      '--------------------',
+      '',
+      'The laws of most jurisdictions throughout the world automatically confer',
+      'exclusive Copyright and Related Rights (defined below) upon the creator',
+      'and subsequent owner(s) (each and all, an "owner") of an original work of',
+      'authorship and/or a database (each, a "Work").',
+      '',
+      'Certain owners wish to permanently relinquish those rights to a Work for',
+      'the purpose of contributing to a commons of creative, cultural and',
+      'scientific works ("Commons") that the public can reliably and without fear',
+      'of later claims of infringement build upon, modify, incorporate in other',
+      'works, reuse and redistribute as freely as possible in any form whatsoever',
+      'and for any purposes, including without limitation commercial purposes.',
+      '',
+      'These owners may contribute to the Commons to promote the ideal of a free',
+      'culture and the further production of creative, cultural and scientific',
+      'works, or to gain reputation or greater distribution for their Work in',
+      'part through the use and efforts of others.',
+      '',
+      'For these and/or other purposes and motivations, and without any',
+      'expectation of additional consideration or compensation, the person',
+      'associating CC0 with a Work (the "Affirmer"), to the extent that he or she',
+      'is an owner of Copyright and Related Rights in the Work, voluntarily',
+      'elects to apply CC0 to the Work and publicly distribute the Work under its',
+      'terms, with knowledge of his or her Copyright and Related Rights in the',
+      'Work and the meaning and intended legal effect of CC0 on those rights.',
+      '',
+      '1. Copyright and Related Rights.',
+      '',
+      '   A Work made available under CC0 may be protected by copyright and',
+      '   related or neighboring rights ("Copyright and Related Rights").',
+      '   Copyright and Related Rights include, but are not limited to, the',
+      '   following:',
+      '',
+      '     i. the right to reproduce, adapt, distribute, perform, display,',
+      '        communicate, and translate a Work;',
+      '',
+      '    ii. moral rights retained by the original author(s) and/or performer(s);',
+      '',
+      '   iii. publicity and privacy rights pertaining to a person\'s image or',
+      '        likeness depicted in a Work;',
+      '',
+      '    iv. rights protecting against unfair competition in regards to a Work,',
+      '        subject to the limitations in paragraph 4(a) below;',
+      '',
+      '     v. rights protecting the extraction, dissemination, use and reuse of',
+      '        data in a Work;',
+      '',
+      '    vi. database rights (such as those arising under Directive 96/9/EC of',
+      '        the European Parliament and of the Council of 11 March 1996 on the',
+      '        legal protection of databases, and under any national',
+      '        implementation thereof, including any amended or successor version',
+      '        of such directive); and',
+      '',
+      '   vii. other similar, equivalent or corresponding rights throughout the',
+      '        world based on applicable law or treaty, and any national',
+      '        implementations thereof.',
+      '',
+      '2. Waiver.',
+      '',
+      '   To the greatest extent permitted by, but not in contravention of,',
+      '   applicable law, Affirmer hereby overtly, fully, permanently,',
+      '   irrevocably and unconditionally waives, abandons, and surrenders all of',
+      '   Affirmer\'s Copyright and Related Rights and associated claims and',
+      '   causes of action, whether now known or unknown (including existing as',
+      '   well as future claims and causes of action), in the Work (i) in all',
+      '   territories worldwide, (ii) for the maximum duration provided by',
+      '   applicable law or treaty (including future time extensions), (iii) in',
+      '   any current or future medium and for any number of copies, and (iv) for',
+      '   any purpose whatsoever, including without limitation commercial,',
+      '   advertising or promotional purposes (the "Waiver").',
+      '',
+      '   Affirmer makes the Waiver for the benefit of each member of the public',
+      '   at large and to the detriment of Affirmer\'s heirs and successors,',
+      '   fully intending that such Waiver shall not be subject to revocation,',
+      '   rescission, cancellation, termination, or any other legal or equitable',
+      '   action to disrupt the quiet enjoyment of the Work by the public as',
+      '   contemplated by Affirmer\'s express Statement of Purpose.',
+      '',
+      '3. Public License Fallback.',
+      '',
+      '   Should any part of the Waiver for any reason be judged legally invalid',
+      '   or ineffective under applicable law, then the Waiver shall be preserved',
+      '   to the maximum extent permitted taking into account Affirmer\'s express',
+      '   Statement of Purpose. In addition, to the extent the Waiver is so',
+      '   judged Affirmer hereby grants to each affected person a royalty-free,',
+      '   non transferable, non sublicensable, non exclusive, irrevocable and',
+      '   unconditional license to exercise Affirmer\'s Copyright and Related',
+      '   Rights in the Work (i) in all territories worldwide, (ii) for the',
+      '   maximum duration provided by applicable law or treaty (including future',
+      '   time extensions), (iii) in any current or future medium and for any',
+      '   number of copies, and (iv) for any purpose whatsoever, including',
+      '   without limitation commercial, advertising or promotional purposes',
+      '   (the "License").',
+      '',
+      '   The License shall be deemed effective as of the date CC0 was applied by',
+      '   Affirmer to the Work. Should any part of the License for any reason be',
+      '   judged legally invalid or ineffective under applicable law, such partial',
+      '   invalidity or ineffectiveness shall not invalidate the remainder of the',
+      '   License, and in such case Affirmer hereby affirms that he or she will',
+      '   not (i) exercise any of his or her remaining Copyright and Related',
+      '   Rights in the Work or (ii) assert any associated claims and causes of',
+      '   action with respect to the Work, in either case contrary to Affirmer\'s',
+      '   express Statement of Purpose.',
+      '',
+      '4. Limitations and Disclaimers.',
+      '',
+      '   a. No trademark or patent rights held by Affirmer are waived,',
+      '      abandoned, surrendered, licensed or otherwise affected by this',
+      '      document.',
+      '',
+      '   b. Affirmer offers the Work as-is and makes no representations or',
+      '      warranties of any kind concerning the Work, express, implied,',
+      '      statutory or otherwise, including without limitation warranties of',
+      '      title, merchantability, fitness for a particular purpose, non',
+      '      infringement, or the absence of latent or other defects, accuracy,',
+      '      or the present or absence of errors, whether or not discoverable,',
+      '      all to the greatest extent permissible under applicable law.',
+      '',
+      '   c. Affirmer disclaims responsibility for clearing rights of other',
+      '      persons that may apply to the Work or any use thereof, including',
+      '      without limitation any person\'s Copyright and Related Rights in the',
+      '      Work.',
+      '',
+      '   d. Affirmer understands and acknowledges that Creative Commons is not a',
+      '      party to this document and has no duty or obligation with respect',
+      '      to this CC0 or use of the Work.',
+      '',
+      'For more information, please see',
+      '    http://creativecommons.org/publicdomain/zero/1.0/',
+      '',
+      '---',
+      '',
+      'SCOPE NOTE — This LICENSE file applies ONLY to the repository metadata',
+      '(README.md, manifest.json, NOTICE.md, and other non-content files).',
+      '',
+      'Each uploaded content file in uploads/ has its OWN per-file license,',
+      'declared in the accompanying uploads/{filename}.LICENSE.txt file.',
+      'Those per-file licenses take precedence for the content itself.',
+      '',
+      'Generated by Pixelary (https://betaversion488-oss.github.io/).',
+    ].join('\n');
   }
 
   /**
@@ -152,9 +330,22 @@ window.PixelaryRepo = (function () {
       '- **نام نمایشی:** ' + name + '\n\n' +
       '## محتوا\n\n' +
       'فایل‌های آپلودشده در پوشه `uploads/` قرار دارند و فهرست آن‌ها در `manifest.json`.\n\n' +
-      '## مجوز\n\n' +
-      'هر فایل مجوز خود را دارد که در `manifest.json` مشخص شده است.\n' +
-      'خود مخزن تحت مجوز CC0 است.\n\n' +
+      '## مجوز (License)\n\n' +
+      '**دو لایه مجوز وجود دارد:**\n\n' +
+      '1. **محتوای کاربر (عکس/ویدیو):** هر فایل مجوز خود را دارد که کاربر هنگام آپلود انتخاب کرده است.\n' +
+      '   - فایل `uploads/{filename}.LICENSE.txt` کنار هر فایل، مجوز کامل آن را شامل می‌شود.\n' +
+      '   - پیش‌فرض: `CC BY-SA 4.0` (Creative Commons Attribution-ShareAlike) — زنجیره اعتبار ویروسی.\n' +
+      '   - گزینه‌های دیگر: `CC BY 4.0` (فقط ذکر نام) و `CC0` (مالکیت عمومی).\n' +
+      '   - شناسه SPDX و URL مجوز در `manifest.json` ذخیره می‌شود.\n\n' +
+      '2. **متادیتای مخزن (README، manifest.json، NOTICE.md):** تحت مجوز `CC0 1.0` (مالکیت عمومی) است.\n' +
+      '   فایل `LICENSE` در ریشه مخزن این موضوع را اعلام می‌کند.\n' +
+      '   هدف: ایندکس‌گرها و جمع‌آوری‌کننده‌ها بتوانند آزادانه متادیتای مخزن را بخوانند.\n\n' +
+      '## فایل‌های سیستمی\n\n' +
+      '- `README.md` — این فایل (توضیح مخزن)\n' +
+      '- `LICENSE` — مجوز CC0 برای متادیتای مخزن\n' +
+      '- `NOTICE.md` — خلاصه لایسنس همه محتوا (به‌روزرسانی خودکار پس از هر آپلود)\n' +
+      '- `manifest.json` — فهرست کامل محتوای آپلودشده\n' +
+      '- `uploads/` — فایل‌های محتوا + فایل‌های `.LICENSE.txt` کنار هر کدام\n\n' +
       '## حذف محتوا\n\n' +
       'برای حذف محتوا، می‌توانید فایل را از این مخزن حذف کنید. پس از حذف، محتوا به‌طور خودکار از گالری پیکسلری نیز پاک خواهد شد.\n\n' +
       '---\n\n' +
@@ -509,11 +700,25 @@ window.PixelaryRepo = (function () {
    *   - Full text of the selected CC license
    */
   function buildLicenseFileContent(entry, username) {
-    var licenseUrl = {
-      'CC BY-SA 4.0': 'https://creativecommons.org/licenses/by-sa/4.0/',
-      'CC BY 4.0': 'https://creativecommons.org/licenses/by/4.0/',
-      'CC0': 'https://creativecommons.org/publicdomain/zero/1.0/',
-    }[entry.license] || 'https://creativecommons.org/licenses/by-sa/4.0/';
+    var licenseMeta = {
+      'CC BY-SA 4.0': {
+        url: 'https://creativecommons.org/licenses/by-sa/4.0/',
+        spdx: 'CC-BY-SA-4.0',
+      },
+      'CC BY 4.0': {
+        url: 'https://creativecommons.org/licenses/by/4.0/',
+        spdx: 'CC-BY-4.0',
+      },
+      'CC0': {
+        url: 'https://creativecommons.org/publicdomain/zero/1.0/',
+        spdx: 'CC0-1.0',
+      },
+    }[entry.license] || {
+      url: 'https://creativecommons.org/licenses/by-sa/4.0/',
+      spdx: 'CC-BY-SA-4.0',
+    };
+    var licenseUrl = licenseMeta.url;
+    var spdxId = entry.spdx_id || licenseMeta.spdx;
 
     var canonical = 'https://betaversion488-oss.github.io/photo.html?id=' + encodeURIComponent(entry.id);
     var sourceRepo = 'https://github.com/' + username + '/' + REPO_NAME + '/tree/main/' + entry.file_path;
@@ -523,12 +728,15 @@ window.PixelaryRepo = (function () {
       'PIXELARY CONTENT LICENSE',
       '========================',
       '',
+      'SPDX-License-Identifier: ' + spdxId,
+      '',
       'File:           ' + entry.file_path,
       'Title:          ' + entry.title,
       'Author:         ' + entry.author,
       'Uploader:       ' + username + ' (https://github.com/' + username + ')',
       'Uploaded:       ' + uploadedAt,
       'License:        ' + entry.license,
+      'SPDX ID:        ' + spdxId,
       'License URL:    ' + licenseUrl,
       'Canonical URL:  ' + canonical,
       'Source repo:    ' + sourceRepo,
@@ -537,7 +745,7 @@ window.PixelaryRepo = (function () {
       'TERMS',
       '=====',
       '',
-      'This content is licensed under ' + entry.license + '.',
+      'This content is licensed under ' + entry.license + ' (SPDX: ' + spdxId + ').',
       'See ' + licenseUrl + ' for the full legal text.',
       '',
     ];
@@ -625,23 +833,45 @@ window.PixelaryRepo = (function () {
       '',
       'این مخزن حاوی محتوای آپلودشده توسط کاربر در پلتفرم [پیکسلری](https://betaversion488-oss.github.io) است.',
       '',
-      '## خلاصه لایسنس',
+      '## خلاصه لایسنس (License Summary)',
       '',
-      '| نوع | لایسنس | توضیح |',
-      '|-----|--------|-------|',
-      '| محتوای آپلودشده (عکس/ویدیو) | CC BY-SA 4.0 (پیش‌فرض) | هر فایل دارای فایل `.LICENSE.txt` کنار خود است |',
-      '| کد و طراحی پلتفرم | AGPL-3.0 | [github.com/betaversion488-oss/betaversion488-oss.github.io](https://github.com/betaversion488-oss/betaversion488-oss.github.io) |',
+      'این مخزن از **دو لایه مجوز** استفاده می‌کند:',
+      '',
+      '| لایه | شامل | مجوز | فایل اعلام‌کننده |',
+      '|------|------|------|------------------|',
+      '| ۱. محتوای کاربر | عکس‌ها و ویدیوهای آپلودشده در `uploads/` | هر فایل مجوز خود را دارد (پیش‌فرض: CC BY-SA 4.0) | `uploads/{filename}.LICENSE.txt` کنار هر فایل |',
+      '| ۲. متادیتای مخزن | README، manifest.json، NOTICE.md | CC0 1.0 (مالکیت عمومی) | `LICENSE` در ریشه مخزن |',
+      '',
+      '### لایسنس‌های محتوای کاربر',
+      '',
+      'کاربر هنگام آپلود یکی از سه لایسنس زیر را انتخاب می‌کند:',
+      '',
+      '| لایسنس | SPDX ID | ویژگی |',
+      '|--------|---------|-------|',
+      '| CC BY-SA 4.0 (پیش‌فرض) | CC-BY-SA-4.0 | ذکر نام + نسخه‌های مشتق تحت همان لایسنس (ویروسی) |',
+      '| CC BY 4.0 | CC-BY-4.0 | فقط ذکر نام کافی است |',
+      '| CC0 | CC0-1.0 | مالکیت عمومی — بدون هیچ محدودیتی |',
+      '',
+      '### سایر لایسنس‌ها',
+      '',
+      '| نوع | لایسنس | منبع |',
+      '|------|--------|------|',
+      '| کد و طراحی پلتفرم پیکسلری | AGPL-3.0 | [github.com/betaversion488-oss/betaversion488-oss.github.io](https://github.com/betaversion488-oss/betaversion488-oss.github.io) |',
       '| نام و لوگوی «پیکسلری» | Trademark | استفاده بدون اجازه ممنوع است |',
       '',
-      '## فهرست محتوا',
+      '## فهرست محتوا (Recent Uploads)',
       '',
     ];
 
     if (entries && entries.length) {
-      lines.push('| عنوان | نوع | لایسنس | تاریخ |');
-      lines.push('|-------|-----|--------|-------|');
+      lines.push('| عنوان | نوع | لایسنس | SPDX | تاریخ |');
+      lines.push('|-------|-----|--------|------|-------|');
       entries.slice(-50).forEach(function (e) { // last 50 to keep NOTICE manageable
-        lines.push('| ' + (e.title || '—') + ' | ' + (e.type || '—') + ' | ' + (e.license || '—') + ' | ' + (e.uploaded_at || '—') + ' |');
+        lines.push('| ' + (e.title || '—') +
+          ' | ' + (e.type || '—') +
+          ' | ' + (e.license || '—') +
+          ' | ' + (e.spdx_id || '—') +
+          ' | ' + (e.uploaded_at || '—') + ' |');
       });
     } else {
       lines.push('_هنوز محتوایی آپلود نشده است._');
@@ -678,5 +908,6 @@ window.PixelaryRepo = (function () {
     updateNotice: updateNotice,
     buildLicenseFileContent: buildLicenseFileContent,
     buildRepoNotice: buildRepoNotice,
+    buildRepoLicenseCc0: buildRepoLicenseCc0,
   };
 })();

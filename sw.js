@@ -5,7 +5,7 @@
  * Serves Wikimedia Commons, Internet Archive, and user *.github.io repos.
  */
 
-const CACHE_VERSION = 'pixelary-v5.1.0';
+const CACHE_VERSION = 'pixelary-v5.2.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DATA_CACHE = `${CACHE_VERSION}-data`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
@@ -83,6 +83,7 @@ self.addEventListener('fetch', (event) => {
   const isGitHubOAuth = url.hostname === 'github.com'; // OAuth Device Flow + raw.githubusercontent
   const isUserPages = url.hostname.endsWith('.github.io'); // user-uploaded content served from Pages
   const isRawGithub = url.hostname === 'raw.githubusercontent.com';
+  // isCatbox removed — service no longer used. Leftover references cleaned up below.
 
   // Don't intercept GitHub API calls (they need their own auth headers)
   if (isGitHubApi) return;
@@ -135,8 +136,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // ---------- Images (wikimedia + archive.org + catbox.moe thumbnails): stale-while-revalidate ----------
-  if ((isWikimedia || isArchiveOrg || isCatbox) && (req.destination === 'image' || url.pathname.includes('/thumb/') || url.pathname.match(/\.(jpg|jpeg|png|webp)$/i))) {
+  // ---------- Images (wikimedia + archive.org thumbnails): stale-while-revalidate ----------
+  if ((isWikimedia || isArchiveOrg) && (req.destination === 'image' || url.pathname.includes('/thumb/') || url.pathname.match(/\.(jpg|jpeg|png|webp)$/i))) {
     event.respondWith(
       caches.open(IMAGE_CACHE).then((cache) =>
         cache.match(req).then((cached) => {
@@ -147,23 +148,6 @@ self.addEventListener('fetch', (event) => {
           return cached || network;
         })
       )
-    );
-    return;
-  }
-
-  // ---------- Catbox.moe video streaming (user uploads): network-first with range support ----------
-  if (isCatbox && (req.destination === 'video' || url.pathname.match(/\.(mp4|webm|mov)$/i))) {
-    event.respondWith(
-      fetch(req, { headers: req.headers })
-        .then((res) => {
-          const size = parseInt(res.headers.get('content-length') || '0', 10);
-          if (res.ok && size > 0 && size < 20 * 1024 * 1024 && res.status === 200) {
-            const copy = res.clone();
-            caches.open(VIDEO_CACHE).then((c) => c.put(req, copy)).catch(() => {});
-          }
-          return res;
-        })
-        .catch(() => caches.match(req).then((cached) => cached || Response.error()))
     );
     return;
   }

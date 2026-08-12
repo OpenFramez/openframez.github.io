@@ -163,13 +163,18 @@
     if (!dropzone || !fileInput) return; // Not on upload page
 
     // Dropzone click
-    dropzone.addEventListener('click', function () {
-      fileInput.click();
+    // IMPORTANT: when we call fileInput.click() programmatically, that synthetic
+    // click event bubbles back up to the dropzone (fileInput is a child of dropzone).
+    // We must NOT re-trigger fileInput.click() in that case, otherwise the picker
+    // can be cancelled/reopened in rapid succession and the browser may block it.
+    dropzone.addEventListener('click', function (e) {
+      if (e.target === fileInput) return; // synthetic click from .click() — skip
+      openFilePicker();
     });
     dropzone.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        fileInput.click();
+        openFilePicker();
       }
     });
 
@@ -201,7 +206,7 @@
         e.stopPropagation();
         var mode = btn.getAttribute('data-pick');
         setFileInputMode(mode);
-        fileInput.click();
+        openFilePicker();
       });
     });
 
@@ -210,6 +215,8 @@
       if (e.target.files && e.target.files.length) {
         handleFile(e.target.files[0]);
       }
+      // If user cancels the picker, do nothing — value stays as-is.
+      // We'll reset it the next time openFilePicker() is called.
     });
 
     // Change file button
@@ -274,6 +281,22 @@
   }
 
   // ---------- File Input Mode ----------
+  /**
+   * Open the OS file picker. We always reset the input's value first so that
+   * selecting the SAME file twice in a row still fires the `change` event
+   * (browsers skip the event if the value didn't change).
+   *
+   * This is wrapped in a try/catch because some older browsers throw on
+   * `fileInput.value = ''` for security reasons — in that case we ignore
+   * the error and just call .click().
+   */
+  function openFilePicker() {
+    var fileInput = $('#fileInput');
+    if (!fileInput) return;
+    try { fileInput.value = ''; } catch (e) { /* ignore */ }
+    fileInput.click();
+  }
+
   function setFileInputMode(mode) {
     var fileInput = $('#fileInput');
     fileInput.removeAttribute('capture');
@@ -634,6 +657,28 @@
     var username = state.auth.user.login;
     var token = state.auth.token;
 
+    // Lookup SPDX identifier + canonical license URL for the chosen license.
+    // This makes the manifest entry machine-readable for crawlers, AI indexers,
+    // and downstream aggregators (SPDX is the standard for license identification).
+    var LICENSE_REGISTRY = {
+      'CC BY-SA 4.0': {
+        spdx_id: 'CC-BY-SA-4.0',
+        url: 'https://creativecommons.org/licenses/by-sa/4.0/',
+        viral: true,
+      },
+      'CC BY 4.0': {
+        spdx_id: 'CC-BY-4.0',
+        url: 'https://creativecommons.org/licenses/by/4.0/',
+        viral: false,
+      },
+      'CC0': {
+        spdx_id: 'CC0-1.0',
+        url: 'https://creativecommons.org/publicdomain/zero/1.0/',
+        viral: false,
+      },
+    };
+    var licenseMeta = LICENSE_REGISTRY[formData.license] || LICENSE_REGISTRY['CC BY-SA 4.0'];
+
     var entry = {
       id: 'fu_' + Date.now(),
       type: formData.type,
@@ -642,6 +687,10 @@
       category: formData.category,
       author: formData.author,
       license: formData.license,
+      license_url: licenseMeta.url,
+      spdx_id: licenseMeta.spdx_id,
+      license_viral: licenseMeta.viral,
+      license_file_path: fileInfo.path + '.LICENSE.txt',
       file_url: fileInfo.public_url,
       file_path: fileInfo.path,
       thumbnail_url: fileInfo.public_url,
