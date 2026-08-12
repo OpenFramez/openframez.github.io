@@ -481,13 +481,27 @@
         state.uploadResult = fileInfo;
         updateProgressStage('upload', 'done');
         updateProgressStage('metadata', 'active');
-        updateProgressPercent(70, 'در حال به‌روزرسانی فهرست محتوا...');
+        updateProgressPercent(65, 'در حال به‌روزرسانی فهرست محتوا...');
         return appendToUserManifest(state.formData, fileInfo);
+      })
+      .then(function (manifestEntry) {
+        // Write a LICENSE.txt file alongside the uploaded content file,
+        // implementing the auto-licensing policy from the strategic whitepaper (ch.6).
+        // CC BY-SA 4.0 by default (viral attribution chain). User can pick CC BY or CC0.
+        updateProgressPercent(80, 'در حال اعمال لایسنس روی محتوا...');
+        return writeLicenseFileForEntry(manifestEntry).then(function () { return manifestEntry; });
+      })
+      .then(function (manifestEntry) {
+        // Update NOTICE.md at repo root with the latest list of uploads
+        updateProgressPercent(88, 'در حال به‌روزرسانی NOTICE...');
+        return updateRepoNotice().catch(function (e) {
+          console.warn('NOTICE update failed (non-fatal):', e);
+        });
       })
       .then(function () {
         updateProgressStage('metadata', 'done');
         updateProgressStage('review', 'active');
-        updateProgressPercent(90, 'در حال ثبت در فهرست مرکزی...');
+        updateProgressPercent(92, 'در حال ثبت در فهرست مرکزی...');
         return registerInCentralRegistry();
       })
       .then(function () {
@@ -650,6 +664,33 @@
       .catch(function (err) {
         // Non-fatal — the upload itself succeeded
         console.warn('Failed to register in central registry:', err);
+      });
+  }
+
+  /**
+   * Write a LICENSE.txt file alongside the just-uploaded content file.
+   * This auto-applies the user-selected license to the content,
+   * implementing the whitepaper's "viral attribution chain" policy.
+   */
+  function writeLicenseFileForEntry(entry) {
+    var username = state.auth.user.login;
+    var token = state.auth.token;
+    return window.PixelaryRepo.writeLicenseFile(token, username, entry)
+      .catch(function (e) {
+        console.warn('LICENSE file write failed (non-fatal):', e);
+      });
+  }
+
+  /**
+   * Update NOTICE.md at the user's repo root with the latest list of uploads.
+   * This gives any visitor (human or AI crawler) a clear license summary.
+   */
+  function updateRepoNotice() {
+    var username = state.auth.user.login;
+    var token = state.auth.token;
+    return window.PixelaryRepo.getManifest(token, username)
+      .then(function (manifest) {
+        return window.PixelaryRepo.updateNotice(token, username, manifest.uploads || []);
       });
   }
 

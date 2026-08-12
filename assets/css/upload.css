@@ -153,6 +153,13 @@
   pointer-events: none;
 }
 
+/* Pick buttons inside dropzone MUST be clickable (override pointer-events: none from parent) */
+.dropzone-inner .dropzone-actions,
+.dropzone-inner .dropzone-actions button,
+.dropzone-inner .dropzone-actions a {
+  pointer-events: auto;
+}
+
 .dropzone-icon {
   width: 64px;
   height: 64px;

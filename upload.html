@@ -250,24 +250,27 @@
 
             <div class="form-field">
               <label>مجوز انتشار <span class="required">*</span></label>
+              <small class="form-hint" style="display:block;margin-bottom:8px;">
+                پیش‌فرض <strong>CC BY-SA 4.0</strong> است — هر نسخه مشتق باید به شما attribution بدهد و همان لایسنس را حفظ کند (زنجیره اعتبار). می‌توانید لایسنس بازتر انتخاب کنید.
+              </small>
               <div class="license-options">
                 <label class="license-option">
-                  <input type="radio" name="license" value="CC BY 4.0" required checked>
+                  <input type="radio" name="license" value="CC BY-SA 4.0" required checked>
                   <div class="license-card">
-                    <div class="license-icon">CC BY</div>
+                    <div class="license-icon">CC BY-SA</div>
                     <div class="license-text">
-                      <strong>Creative Commons Attribution 4.0</strong>
-                      <span>اجازه استفاده، تغییر و انتشار با ذکر نام</span>
+                      <strong>Creative Commons Attribution-ShareAlike 4.0 — پیشنهادی</strong>
+                      <span>ذکر نام + نسخه‌های مشتق تحت همان لایسنس. زنجیره اعتبار.</span>
                     </div>
                   </div>
                 </label>
                 <label class="license-option">
-                  <input type="radio" name="license" value="CC BY-SA 4.0">
+                  <input type="radio" name="license" value="CC BY 4.0">
                   <div class="license-card">
-                    <div class="license-icon">CC BY-SA</div>
+                    <div class="license-icon">CC BY</div>
                     <div class="license-text">
-                      <strong>Creative Commons Attribution-ShareAlike 4.0</strong>
-                      <span>مانند بالا، اما نسخه‌های مشتق باید تحت همان مجوز باشند</span>
+                      <strong>Creative Commons Attribution 4.0</strong>
+                      <span>ذکر نام کافی است — نسخه‌های مشتق می‌توانند لایسنس متفاوت داشته باشند.</span>
                     </div>
                   </div>
                 </label>
@@ -277,7 +280,7 @@
                     <div class="license-icon">CC0</div>
                     <div class="license-text">
                       <strong>Public Domain Dedication</strong>
-                      <span>بدون هیچ حقوقی — کاملاً آزاد برای هر استفاده‌ای</span>
+                      <span>بدون هیچ حقوقی — کاملاً آزاد برای هر استفاده‌ای.</span>
                     </div>
                   </div>
                 </label>
@@ -287,7 +290,14 @@
             <div class="form-field">
               <label class="checkbox-field">
                 <input type="checkbox" id="ownershipConfirm" required>
-                <span>تأیید می‌کنم که این محتوا را خودم خلق کرده‌ام و حق انتشار آن را دارم. همچنین می‌دانم که محتوای غیرقانونی، توهین‌آمیز یا دارای کپی‌رایت بدون اطلاع حذف خواهد شد.</span>
+                <span>
+                  <strong>شرایط آپلود (ToS):</strong>
+                  ۱. تأیید می‌کنم که این محتوا را خودم خلق کرده‌ام و حق انتشار آن را دارم.
+                  ۲. محتوا تحت لایسنس انتخابی به پیکسلری ارائه می‌شود.
+                  ۳. پیکسلری حق دارد محتوا را نمایش، توزیع و بازنشر کند (طبق همان لایسنس).
+                  ۴. حق مؤلف نزد خود کاربر باقی می‌ماند (انتقال حق مؤلف رخ نمی‌دهد).
+                  ۵. می‌دانم که محتوای غیرقانونی، توهین‌آمیز یا دارای کپی‌رایت بدون اطلاع حذف خواهد شد.
+                </span>
               </label>
             </div>
 
@@ -453,7 +463,7 @@
   </footer>
 
   <script src="assets/js/error-report.js"></script>
-  "></script>
+  <script src="assets/js/ui.js"></script>
   <script src="assets/js/federated.js"></script>
   <script src="assets/js/oauth.js"></script>
   <script src="assets/js/repo.js"></script>
