@@ -1,5 +1,5 @@
 {
-  "last_aggregated": "2026-08-12T18:07:17.780211+00:00",
+  "last_aggregated": "2026-08-12T21:29:13.735509+00:00",
   "users": 1,
   "users_failed": 0,
   "total_photos": 1,
@@ -16,6 +16,9 @@
       "author": "mortt0tteza2",
       "license": "CC BY 4.0",
       "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "spdx_id": "CC-BY-4.0",
+      "license_viral": false,
+      "license_file_path": "",
       "source_user": "mortt0tteza2",
       "source_repo": "pixelary-uploads",
       "source_url": "https://github.com/mortt0tteza2/pixelary-uploads",
