@@ -1,0 +1,84 @@
+name: Process User Reports
+
+# Auto-triages user-report issues filed by the Pixelary client.
+# - Adds category-specific colors to labels
+# - Posts an acknowledgment comment
+# - Optionally pings maintainers for high-severity reports
+#
+# This is a lightweight moderation workflow — no PAT needed.
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'user-report')
+    steps:
+      - name: Triage user report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const labels = (issue.labels || []).map(l => l.name);
+            const category = labels.find(l => ['bug', 'feedback', 'question'].includes(l)) || 'bug';
+
+            // Color mapping for labels (so the issue list looks organized)
+            const labelColors = {
+              'bug':        'D73A4A', // red
+              'feedback':   '0075CA', // blue
+              'question':   'D876E3', // purple
+              'user-report':'FBCA04', // yellow
+            };
+
+            // Ensure labels exist with correct colors
+            for (const [name, color] of Object.entries(labelColors)) {
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name,
+                });
+              } catch (e) {
+                try {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name,
+                    color,
+                    description: name === 'user-report' ? 'Filed via Pixelary client' : `Category: ${name}`,
+                  });
+                } catch (e2) {
+                  console.log(`Could not create label ${name}:`, e2.message);
+                }
+              }
+            }
+
+            // Acknowledge the report
+            const ackMessages = {
+              'bug':      '🐛 باگ شما دریافت شد. در اولین فرصت بررسی خواهد شد.',
+              'feedback': '💬 بازخورد شما دریافت شد. متشکریم!',
+              'question': '❓ سؤال شما دریافت شد. به‌زودی پاسخ می‌دهیم.',
+            };
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: [
+                ackMessages[category] || ackMessages['bug'],
+                '',
+                `**کاربر:** @${issue.user.login}`,
+                `**دسته:** \`${category}\``,
+                `**زمان:** ${new Date().toISOString()}`,
+                '',
+                '---',
+                '_این کامنت به‌صورت خودکار توسط `process-reports.yml` ایجاد شده است._',
+              ].join('\n')
+            });
+
+            console.log(`Triage complete for issue #${issue.number} (category: ${category})`);

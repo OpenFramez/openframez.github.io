@@ -208,6 +208,29 @@ def aggregate():
     """Main aggregation routine."""
     log('Starting federated content aggregation...')
 
+    # Optional: rebuild registry from registration issues first.
+    # This keeps the registry fresh even between Action runs.
+    # Only runs if GH_TOKEN is available (CI environment).
+    if os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_TOKEN'):
+        log('GH_TOKEN detected — rebuilding registry from registration issues first...')
+        try:
+            import subprocess
+            result = subprocess.run(
+                ['python3', str(REPO_ROOT / 'scripts' / 'rebuild_registry.py')],
+                env=os.environ.copy(),
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            if result.returncode != 0:
+                log(f'  ! rebuild_registry.py failed: {result.stderr}')
+            else:
+                log('  ✓ registry rebuilt from issues.')
+        except Exception as e:
+            log(f'  ! rebuild_registry.py exception: {e}')
+    else:
+        log('No GH_TOKEN — skipping registry rebuild (will use existing registry.json).')
+
     registry = load_registry()
     users = registry.get('users', [])
     log(f'Found {len(users)} registered users.')

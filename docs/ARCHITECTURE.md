@@ -245,8 +245,59 @@ Update document.title, meta tags, JSON-LD for SEO
 
 ❌ نمی‌توانیم search server-side انجام دهیم (در عوض: client-side)
 ❌ نمی‌توانیم analytics جمع‌آوری کنیم (و این عمداً است)
-❌ نمی‌توانیم user-generated content را به‌صورت real-time پذیرش کنیم (در عوض: PR-based)
+❌ نمی‌توانیم user-generated content را به‌صورت real-time پذیرش کنیم (در عوض: Issue-based event-sourcing)
 ✅ هیچ هزینه سرور، هیچ نگهداری، هیچ scaling concern
+
+### معماری Event-Sourcing برای ثبت‌نام کاربران (جدید)
+
+پیاده‌سازی ثبت‌نام کاربران در فدراسیون از الگوی event-sourcing استفاده می‌کند:
+
+**Source of truth:** GitHub Issues با label `registration`
+**Generated view:** `data/registry.json` (بازسازی‌شده توسط Action)
+
+```
+┌─────────────┐         ┌──────────────┐         ┌────────────────┐
+│   Browser   │ ──POST──│ GitHub Issues│ ──hook──│ GitHub Action  │
+│ (user token)│         │  (Issue #N)  │         │ process-       │
+└─────────────┘         └──────────────┘         │ registration   │
+                          │                      └────────────────┘
+                          │                              │
+                          │                              ▼
+                          │                      ┌────────────────┐
+                          │                      │ rebuild_       │
+                          │                      │ registry.py    │
+                          │                      └────────────────┘
+                          │                              │
+                          │                              ▼
+                          │                      ┌────────────────┐
+                          └──────────────────────│ data/registry  │
+                                                 │     .json      │
+                                                 └────────────────┘
+                                                          │
+                                                          ▼
+                                                 ┌────────────────┐
+                                                 │ aggregate_     │
+                                                 │ federation.py  │
+                                                 └────────────────┘
+                                                          │
+                                                          ▼
+                                                 ┌────────────────┐
+                                                 │ data/federated │
+                                                 │     .json      │
+                                                 └────────────────┘
+```
+
+**مزایا:**
+- ✅ هیچ PAT در سمت کلاینت وجود ندارد (کاربر از توکن OAuth خودش استفاده می‌کند)
+- ✅ هیچ کانفلیکتی ممکن نیست (Issues مستقل هستند)
+- ✅ Idempotent — اجرای مجدد Action همان نتیجه را می‌دهد
+- ✅ Audit trail کامل — هر ثبت‌نام یک Issue عمومی است
+- ✅ کاربر می‌تواند وضعیت ثبت‌نام خود را ببیند (Issue باز = در حال پردازش، Issue بسته = تکمیل‌شده)
+
+**امنیت:**
+- Action بررسی می‌کند که `issue.user.login === body.login` (کاربر A نمی‌تواند کاربر B را ثبت کند)
+- توکن OAuth کاربر فقط scope `public_repo` دارد (کافی برای باز کردن Issue روی repo عمومی)
+- اگر کاربر لاگین نباشد، سیستم گزارش خطا به URL دستی GitHub fallback می‌کند
 
 ### چون از GitHub Pages استفاده می‌کنیم:
 

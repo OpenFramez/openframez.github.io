@@ -709,10 +709,13 @@
 
   function registerInCentralRegistry() {
     var username = state.auth.user.login;
-    return window.PixelaryRepo.registerInCentralRegistry(username)
+    var token = state.auth.token;
+    // PAT-FREE: open a registration Issue with the user's own OAuth token.
+    // The process-registration.yml Action rebuilds registry.json from these issues.
+    return window.PixelaryRepo.registerInCentralRegistry(token, username)
       .catch(function (err) {
         // Non-fatal — the upload itself succeeded
-        console.warn('Failed to register in central registry:', err);
+        console.warn('Failed to open registration issue:', err);
       });
   }
 

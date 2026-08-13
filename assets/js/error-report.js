@@ -31,15 +31,12 @@ window.PixelaryErrors = (function () {
   var REPO_OWNER = 'betaversion488-oss';
   var REPO_NAME = 'betaversion488-oss.github.io';
 
-  // Bot PAT — same one used for registry append.
-  // Scope: public_repo only. Cannot write to user repos, cannot read private data.
-  // If this PAT is rotated, update repo.js too (same token).
-  var BOT_TOKEN = (function () {
-    var p = [103, 104, 112, 95, 113, 114, 83, 55, 75, 112, 73, 99, 107, 90, 49, 49, 82, 102, 53, 109, 53, 74, 56, 54, 79, 87, 109, 119, 98, 84, 79, 106, 103, 57, 50, 98, 76, 81, 67, 101];
-    var s = '';
-    for (var i = 0; i < p.length; i++) s += String.fromCharCode(p[i]);
-    return s;
-  })();
+  // PAT-FREE architecture: we use the user's own OAuth token (from localStorage)
+  // to open Issues. The `public_repo` scope is enough to open issues on a
+  // public repo. If the user is NOT logged in, we fall back to opening the
+  // GitHub Issue creation URL in a new tab so they can file it manually.
+  //
+  // This eliminates the security disaster of shipping a bot PAT in client JS.
 
   // Rate limit: don't flood the issue tracker
   var MIN_INTERVAL_MS = 30 * 1000; // 30 sec between auto-reports
@@ -170,6 +167,16 @@ window.PixelaryErrors = (function () {
     };
   }
 
+  // ---------- Internal: get user's OAuth token from localStorage ----------
+  function getUserToken() {
+    try {
+      // oauth.js stores token as a plain string at 'pixelary_oauth_token'
+      return localStorage.getItem('pixelary_oauth_token');
+    } catch (e) {
+      return null;
+    }
+  }
+
   // ---------- Internal: post to GitHub Issues API ----------
   function postIssue(payload) {
     var now = Date.now();
@@ -178,10 +185,23 @@ window.PixelaryErrors = (function () {
     }
     lastReportAt = now;
 
+    var token = getUserToken();
+    if (!token) {
+      // User not logged in — fall back to opening the issue form in a new tab.
+      // This is a degraded experience but better than failing silently.
+      console.warn('PixelaryErrors: user not logged in, falling back to manual issue creation');
+      var url = 'https://github.com/' + REPO_OWNER + '/' + REPO_NAME +
+        '/issues/new?title=' + encodeURIComponent(payload.title) +
+        '&body=' + encodeURIComponent(payload.body) +
+        '&labels=' + encodeURIComponent((payload.labels || []).join(','));
+      window.open(url, '_blank');
+      return Promise.resolve({ skipped: true, reason: 'not-logged-in', fallback: 'manual' });
+    }
+
     return fetch('https://api.github.com/repos/' + REPO_OWNER + '/' + REPO_NAME + '/issues', {
       method: 'POST',
       headers: {
-        'Authorization': 'token ' + BOT_TOKEN,
+        'Authorization': 'token ' + token,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
       },

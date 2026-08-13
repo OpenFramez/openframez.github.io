@@ -29,23 +29,13 @@ window.PixelaryRepo = (function () {
   var README_PATH = 'README.md';
   var UPLOADS_DIR = 'uploads';
 
-  // Central registry API (for adding the user's repo to the federated index)
-  // Uses the existing bot PAT — only used for this single API call.
-  // This is the only place the bot PAT is still used.
+  // Central registry repo (where users file registration Issues)
+  // NO PAT IS USED HERE ANYMORE. Users open an Issue with their OWN OAuth token,
+  // and the process-registration.yml GitHub Action rebuilds data/registry.json
+  // from those issues. This is the event-sourcing pattern.
   var CENTRAL_REPO_OWNER = 'betaversion488-oss';
   var CENTRAL_REPO_NAME = 'betaversion488-oss.github.io';
-  var CENTRAL_REGISTRY_PATH = 'data/registry.json';
   var CENTRAL_API_BASE = 'https://api.github.com/repos/' + CENTRAL_REPO_OWNER + '/' + CENTRAL_REPO_NAME;
-
-  // Bot PAT (obfuscated — for central registry append only)
-  // This PAT only touches data/registry.json on the central repo.
-  // It does NOT upload user content (that uses the user's own OAuth token).
-  var BOT_TOKEN = (function () {
-    var p = [103, 104, 112, 95, 113, 114, 83, 55, 75, 112, 73, 99, 107, 90, 49, 49, 82, 102, 53, 109, 53, 74, 56, 54, 79, 87, 109, 119, 98, 84, 79, 106, 103, 57, 50, 98, 76, 81, 67, 101];
-    var s = '';
-    for (var i = 0; i < p.length; i++) s += String.fromCharCode(p[i]);
-    return s;
-  })();
 
   // ---------- Helpers ----------
   function ghHeaders(token, extra) {
@@ -55,10 +45,6 @@ window.PixelaryRepo = (function () {
     };
     if (extra) Object.assign(h, extra);
     return h;
-  }
-
-  function botHeaders(extra) {
-    return ghHeaders(BOT_TOKEN, extra);
   }
 
   /**
@@ -589,63 +575,70 @@ window.PixelaryRepo = (function () {
 
   /**
    * Register this user's repo in the central federated registry.
-   * This is the ONLY place the bot PAT is used — and it only appends to a JSON file.
-   * Triggered after first successful upload.
+   *
+   * EVENT-SOURCING PATTERN (PAT-FREE):
+   * Instead of writing to data/registry.json directly (which would require a
+   * bot PAT embedded in client code — a security disaster), the user opens an
+   * Issue on the central repo with their OWN OAuth token. The
+   * process-registration.yml GitHub Action then rebuilds registry.json from
+   * all registration issues.
+   *
+   * Conflict resolution:
+   *   - Issues are independent, so concurrent registrations never conflict.
+   *   - If a user opens multiple registration issues, the rebuild script
+   *     dedupes by login (last-write-wins by issue creation time).
+   *   - registry.json is always regenerated from sources, never appended to.
+   *
+   * Security:
+   *   - The rebuild script verifies that issue.user.login === body.login,
+   *     so user A cannot register user B's repo.
+   *   - The user's OAuth token only has `public_repo` scope, which is exactly
+   *     what's needed to open issues on a public repo.
+   *
+   * @param {string} token  User's OAuth token (NOT a bot PAT)
+   * @param {string} username  User's GitHub login
+   * @returns {Promise<Object>}  The created issue
    */
-  function registerInCentralRegistry(username) {
-    // First fetch current registry
-    return fetch(CENTRAL_API_BASE + '/contents/' + CENTRAL_REGISTRY_PATH, {
-      headers: botHeaders(),
+  function registerInCentralRegistry(token, username) {
+    var registrationData = {
+      login: username,
+      repo: REPO_NAME,
+      url: 'https://github.com/' + username + '/' + REPO_NAME,
+      pages_url: 'https://' + username + '.github.io/' + REPO_NAME,
+      registered_at: new Date().toISOString(),
+    };
+
+    var issueBody = [
+      '## ثبت‌نام در فدراسیون پیکسلری',
+      '',
+      'این issue به‌صورت خودکار پس از اولین آپلود موفق ایجاد شده است.',
+      '',
+      '```json',
+      JSON.stringify(registrationData, null, 2),
+      '```',
+      '',
+      '---',
+      '_این issue توسط Pixelary client ایجاد شده و توسط ' +
+        '`process-registration.yml` GitHub Action پردازش خواهد شد._',
+    ].join('\n');
+
+    var payload = {
+      title: 'Register: ' + username,
+      body: issueBody,
+      labels: ['registration'],
+    };
+
+    return fetch('https://api.github.com/repos/' + CENTRAL_REPO_OWNER + '/' + CENTRAL_REPO_NAME + '/issues', {
+      method: 'POST',
+      headers: ghHeaders(token, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload),
     }).then(function (res) {
-      if (!res.ok) throw new Error('Failed to fetch central registry: ' + res.status);
-      return res.json();
-    }).then(function (data) {
-      var content = atob(data.content.replace(/\n/g, ''));
-      var registry;
-      try {
-        registry = JSON.parse(decodeURIComponent(escape(content)));
-      } catch (e) {
-        registry = JSON.parse(content);
-      }
-
-      registry.users = registry.users || [];
-      registry.last_updated = new Date().toISOString();
-
-      // Check if user already registered
-      var existing = registry.users.find(function (u) { return u.login === username; });
-      if (!existing) {
-        registry.users.push({
-          login: username,
-          repo: REPO_NAME,
-          url: 'https://github.com/' + username + '/' + REPO_NAME,
-          pages_url: 'https://' + username + '.github.io/' + REPO_NAME,
-          registered_at: new Date().toISOString(),
-          last_active: new Date().toISOString(),
+      if (!res.ok) {
+        return res.json().then(function (err) {
+          throw new Error('Failed to open registration issue: ' + (err.message || res.status));
         });
-      } else {
-        existing.last_active = new Date().toISOString();
       }
-
-      var newContent = JSON.stringify(registry, null, 2);
-      var body = {
-        message: 'Register user: ' + username,
-        content: btoa(unescape(encodeURIComponent(newContent))),
-        branch: 'main',
-        sha: data.sha,
-      };
-
-      return fetch(CENTRAL_API_BASE + '/contents/' + CENTRAL_REGISTRY_PATH, {
-        method: 'PUT',
-        headers: botHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(body),
-      }).then(function (res) {
-        if (!res.ok) {
-          return res.json().then(function (err) {
-            throw new Error('Failed to update registry: ' + (err.message || res.status));
-          });
-        }
-        return res.json();
-      });
+      return res.json();
     });
   }
 
@@ -901,6 +894,8 @@ window.PixelaryRepo = (function () {
     appendToManifest: appendToManifest,
     getManifest: getManifest,
     registerInCentralRegistry: registerInCentralRegistry,
+    // alias for clarity in calling code
+    openRegistrationIssue: function (token, username) { return registerInCentralRegistry(token, username); },
     waitForPagesReady: waitForPagesReady,
     getPublicFileUrl: getPublicFileUrl,
     getRawFileUrl: getRawFileUrl,
