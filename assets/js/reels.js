@@ -1,5 +1,5 @@
 /**
- * Pixelary — Reels Mode (Phase 2.5)
+ * OpenFramez — Reels Mode (Phase 2.5)
  * =================================
  * Fullscreen vertical video feed with snap-scroll, autoplay-on-scroll,
  * like/comment/share side-action-bar, and keyboard navigation.
@@ -548,11 +548,11 @@
   // ---------- Init ----------
   async function init() {
     // Load both data sources in parallel
-    const promises = [Pixelary.loadVideos()];
+    const promises = [OpenFramez.loadVideos()];
     // Try loading IA videos; if it fails, continue with just Wikimedia
-    if (Pixelary.loadIAVideos) {
+    if (OpenFramez.loadIAVideos) {
       promises.push(
-        Pixelary.loadIAVideos().catch((err) => {
+        OpenFramez.loadIAVideos().catch((err) => {
           console.warn('IA videos failed to load, continuing with Wikimedia only:', err);
           return null;
         })

@@ -1,5 +1,5 @@
 /**
- * Pixelary — OAuth Device Flow (Phase 5 — Federated Upload)
+ * OpenFramez — OAuth Device Flow (Phase 5 — Federated Upload)
  *
  * Lets non-technical users authenticate with their OWN GitHub account
  * directly from a static GitHub Pages site — no backend, no PAT leak.
@@ -19,15 +19,15 @@
  *     the attack surface is minimal. For higher security, use a serverless proxy.
  *   - Device Flow is the recommended OAuth flow for static sites / mobile apps / CLI tools.
  *
- * @author Pixelary Team
+ * @author OpenFramez Team
  */
 
-window.PixelaryOAuth = (function () {
+window.OpenFramezOAuth = (function () {
   'use strict';
 
   // ---------- Configuration ----------
   // OAuth App registered by org owner at https://github.com/settings/applications/new
-  // (or under https://github.com/organizations/betaversion488-oss/settings/applications/new)
+  // (or under https://github.com/organizations/OpenFramez/settings/applications/new)
   // Required scopes: `public_repo` (or `repo` for private user repos).
   // "Enable Device Flow" checkbox MUST be enabled during app creation.
   // Client ID format: starts with "Ov23li" (20 chars) for OAuth Apps (not GitHub Apps).
@@ -44,7 +44,7 @@ window.PixelaryOAuth = (function () {
   //
   // For production, deploy your OWN proxy (see /cloudflare-worker/oauth-proxy.js in this repo).
   // Set the deployed Worker URL as OAUTH_PROXY_BASE, e.g.
-  //   'https://pixelary-oauth.YOUR-SUBDOMAIN.workers.dev/?url='
+  //   'https://openframez-oauth.YOUR-SUBDOMAIN.workers.dev/?url='
   //
   // The default below uses proxy.cors.sh — a public CORS proxy that supports POST + JSON.
   // Suitable for testing. For production with high traffic or sensitive data, deploy your own.
@@ -65,9 +65,9 @@ window.PixelaryOAuth = (function () {
   var DEFAULT_EXPIRY = 900; // 15 minutes
 
   // Storage keys
-  var TOKEN_KEY = 'pixelary_oauth_token';
-  var USER_KEY = 'pixelary_oauth_user';
-  var TOKEN_EXPIRY_KEY = 'pixelary_oauth_token_expiry';
+  var TOKEN_KEY = 'openframez_oauth_token';
+  var USER_KEY = 'openframez_oauth_user';
+  var TOKEN_EXPIRY_KEY = 'openframez_oauth_token_expiry';
 
   // Token TTL — refresh after 7 days (GitHub tokens don't expire by default,
   // but we rotate to be safe). User can also revoke at any time.

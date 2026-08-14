@@ -1,12 +1,12 @@
 /**
- * Pixelary — Feedback Button + Modal
+ * OpenFramez — Feedback Button + Modal
  *
  * Floating "report a problem" button visible on every page.
  * Opens a small modal where the user can write a message and pick a
  * category (bug / feedback / question). The message is sent to
- * PixelaryErrors which files it as a GitHub Issue with the user-report label.
+ * OpenFramezErrors which files it as a GitHub Issue with the user-report label.
  *
- * @author Pixelary Team
+ * @author OpenFramez Team
  */
 
 (function () {
@@ -14,7 +14,7 @@
 
   // Wait for DOM
   function init() {
-    if (!window.PixelaryErrors) {
+    if (!window.OpenFramezErrors) {
       // Error reporter not loaded — skip
       return;
     }
@@ -94,7 +94,7 @@
       }
 
       showStatus(modal, 'sending', 'در حال ارسال...');
-      window.PixelaryErrors.send({ message: message, category: category })
+      window.OpenFramezErrors.send({ message: message, category: category })
         .then(function (result) {
           if (result && result.skipped) {
             showStatus(modal, 'error', 'ریت‌لیمت شده — لطفاً چند ثانیه بعد دوباره تلاش کنید');

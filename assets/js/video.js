@@ -1,5 +1,5 @@
 /**
- * Pixelary — Video Detail Page (Phase 2)
+ * OpenFramez — Video Detail Page (Phase 2)
  * Loads ?id=... and renders a custom video player with full metadata, attribution,
  * quality selector, and related videos. Mirrors photo.js structure.
  */
@@ -44,13 +44,13 @@
     const sizeStr = formatSize(v);
 
     // Update document title + meta tags
-    document.title = `${v.title} — پیکسلری`;
+    document.title = `${v.title} — اُپن‌فریمز`;
     const setMeta = (selector, attr, value) => {
       const el = document.querySelector(selector);
       if (el) el.setAttribute(attr, value);
     };
     setMeta('meta[name="description"]', 'content', desc.slice(0, 160));
-    setMeta('meta[property="og:title"]', 'content', v.title + ' — پیکسلری');
+    setMeta('meta[property="og:title"]', 'content', v.title + ' — اُپن‌فریمز');
     setMeta('meta[property="og:description"]', 'content', desc.slice(0, 200));
     setMeta('meta[property="og:image"]', 'content', v.thumb_url);
     setMeta('meta[property="og:type"]', 'content', 'video.other');
@@ -58,7 +58,7 @@
     setMeta('meta[name="twitter:title"]', 'content', v.title);
     setMeta('meta[name="twitter:description"]', 'content', desc.slice(0, 200));
     setMeta('meta[name="twitter:image"]', 'content', v.thumb_url);
-    setMeta('link[rel="canonical"]', 'href', `https://betaversion488-oss.github.io/video.html?id=${encodeURIComponent(v.id)}`);
+    setMeta('link[rel="canonical"]', 'href', `https://openframez.github.io/video.html?id=${encodeURIComponent(v.id)}`);
 
     // JSON-LD: VideoObject
     const ld = {
@@ -157,7 +157,7 @@
     // Mount the player
     const playerWrap = document.getElementById('video-player-wrap');
     if (playerWrap) {
-      player = PixelaryPlayer.create({
+      player = OpenFramezPlayer.create({
         container: playerWrap,
         video: v,
         autoplay: true,
@@ -192,7 +192,7 @@
   }
 
   function renderRelated(video) {
-    const related = Pixelary.getAllVideoRelated(video, 10);
+    const related = OpenFramez.getAllVideoRelated(video, 10);
     if (!related.length) {
       els.related.parentElement.classList.add('hidden');
       return;
@@ -244,7 +244,7 @@
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">برای جستجو تایپ کنید…</div>';
       return;
     }
-    const results = Pixelary.filterVideos({ query, sort: 'newest' }).slice(0, 10);
+    const results = OpenFramez.filterVideos({ query, sort: 'newest' }).slice(0, 10);
     if (results.length === 0) {
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">نتیجه‌ای یافت نشد</div>';
       return;
@@ -267,7 +267,7 @@
   async function init() {
     try {
       // Load both sources in parallel — IA failure is non-fatal
-      await Pixelary.loadAllVideos();
+      await OpenFramez.loadAllVideos();
     } catch (err) {
       console.error(err);
       fail('خطا در بارگذاری داده‌ها.');
@@ -281,7 +281,7 @@
       return;
     }
     // Unified lookup: handles both Wikimedia (fv_*) and Internet Archive (ia_*) IDs
-    const video = Pixelary.getAnyVideoById(id);
+    const video = OpenFramez.getAnyVideoById(id);
     if (!video) {
       fail(`ویدیو با شناسه ${id} یافت نشد.`);
       return;

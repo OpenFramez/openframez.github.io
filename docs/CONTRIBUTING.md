@@ -1,6 +1,6 @@
-# راهنمای مشارکت در پیکسلری
+# راهنمای مشارکت در اُپن‌فریمز
 
-از مشارکت شما در پیکسلری استقبال می‌کنیم! این سند راهنمای کاملی برای انواع مشارکت است.
+از مشارکت شما در اُپن‌فریمز استقبال می‌کنیم! این سند راهنمای کاملی برای انواع مشارکت است.
 
 ## انواع مشارکت
 
@@ -18,7 +18,7 @@
 
 #### مراحل
 
-۱. **Fork کنيد**: به [مخزن اصلی](https://github.com/betaversion488-oss/betaversion488-oss.github.io) بروید و روی Fork کلیک کنید.
+۱. **Fork کنيد**: به [مخزن اصلی](https://github.com/OpenFramez/openframez.github.io) بروید و روی Fork کلیک کنید.
 
 ۲. **عکس را آپلود کنید**: در fork خود، فایل را به پوشه `uploads/photos/` اضافه کنید. نام فایل را به انگلیسی و توصیفی انتخاب کنید:
    ```
@@ -73,7 +73,7 @@
 
 اگر باگی پیدا کردید:
 
-۱. به [GitHub Issues](https://github.com/betaversion488-oss/betaversion488-oss.github.io/issues) بروید
+۱. به [GitHub Issues](https://github.com/OpenFramez/openframez.github.io/issues) بروید
 ۲. روی "New Issue" کلیک کنید
 ۳. از template باگ استفاده کنید (یا بنویسید):
    - **خلاصه**: یک جمله describing مشکل
@@ -148,7 +148,7 @@ function renderCard(photo){
 
 ### تعهد ما
 
-پیکسلری یک community inclusive و welcoming است. ما متعهدیم به:
+اُپن‌فریمز یک community inclusive و welcoming است. ما متعهدیم به:
 
 - **رفتار دوستانه**: همیشه با احترام صحبت کنید
 - **گشودگی**: از تازه‌واردان استقبال کنیم
@@ -164,7 +164,7 @@ function renderCard(photo){
 
 ### اجرا
 
-تخلفات را به [GitHub Issues](https://github.com/betaversion488-oss/betaversion488-oss.github.io/issues) گزارش دهید. maintainers در کمتر از ۲۴ ساعت پاسخ می‌دهند.
+تخلفات را به [GitHub Issues](https://github.com/OpenFramez/openframez.github.io/issues) گزارش دهید. maintainers در کمتر از ۲۴ ساعت پاسخ می‌دهند.
 
 ## سوالات متداول
 
@@ -189,4 +189,4 @@ function renderCard(photo){
 
 ---
 
-سوال دیگری دارید؟ [Issue باز کنید](https://github.com/betaversion488-oss/betaversion488-oss.github.io/issues/new)!
+سوال دیگری دارید؟ [Issue باز کنید](https://github.com/OpenFramez/openframez.github.io/issues/new)!

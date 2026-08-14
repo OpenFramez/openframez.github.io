@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Generate PWA icons (192, 512) for Pixelary using Pillow."""
+"""Generate PWA icons (192, 512) for OpenFramez using Pillow."""
 
 from PIL import Image, ImageDraw, ImageFont
 import os
 
-OUT_DIR = "/home/z/my-project/pixelary/assets/icons"
+OUT_DIR = "/home/z/my-project/openframez/assets/icons"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 

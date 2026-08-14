@@ -35,8 +35,8 @@ jobs:
 
       - name: Commit changes
         run: |
-          git config user.name "pixelary-bot"
-          git config user.email "bot@pixelary.local"
+          git config user.name "openframez-bot"
+          git config user.email "bot@openframez.local"
           git add data/federated.json data/registry.json
           if git diff --cached --quiet; then
             echo "No changes to commit."

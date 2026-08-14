@@ -1,5 +1,5 @@
 /**
- * Pixelary OAuth CORS Proxy — Cloudflare Worker
+ * OpenFramez OAuth CORS Proxy — Cloudflare Worker
  *
  * Why this exists:
  *   GitHub's OAuth Device Flow endpoints (/login/device/code and
@@ -23,18 +23,18 @@
  *   4. Create this file as oauth-proxy.js
  *   5. Create wrangler.toml in the same directory:
  *
- *        name = "pixelary-oauth"
+ *        name = "openframez-oauth"
  *        main = "oauth-proxy.js"
  *        compatibility_date = "2024-09-01"
  *
  *   6. Deploy:  wrangler deploy
- *   7. Note the deployed URL (e.g. https://pixelary-oauth.YOUR-SUBDOMAIN.workers.dev)
+ *   7. Note the deployed URL (e.g. https://openframez-oauth.YOUR-SUBDOMAIN.workers.dev)
  *   8. In /assets/js/oauth.js, change OAUTH_PROXY_BASE to:
- *        'https://pixelary-oauth.YOUR-SUBDOMAIN.workers.dev/?url='
+ *        'https://openframez-oauth.YOUR-SUBDOMAIN.workers.dev/?url='
  *      and update the proxied() function to URL-encode the upstream URL.
  *
  * Cost:
- *   Cloudflare Workers free tier = 100,000 requests/day. Pixelary's OAuth
+ *   Cloudflare Workers free tier = 100,000 requests/day. OpenFramez's OAuth
  *   traffic will be a tiny fraction of that.
  *
  * Security:

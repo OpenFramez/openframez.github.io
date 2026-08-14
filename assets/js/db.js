@@ -1,10 +1,10 @@
 /**
- * Pixelary — Data Layer (Phase 1 + Phase 2)
+ * OpenFramez — Data Layer (Phase 1 + Phase 2)
  * Loads photos.json (Phase 1) and videos.json (Phase 2).
  * Provides search, filter, paginate, related-content APIs for both.
  */
 
-const Pixelary = (function () {
+const OpenFramez = (function () {
   // ---------- Photos cache (Phase 1) ----------
   let photoCache = null;
   let photoPromise = null;

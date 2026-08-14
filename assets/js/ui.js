@@ -1,15 +1,15 @@
 /**
- * Pixelary — Shared utilities
+ * OpenFramez — Shared utilities
  * Theme management, toast notifications, lazy loading, RTL helpers
  */
 
 const UI = (function () {
   // ---------- Theme ----------
   function getStoredTheme() {
-    try { return localStorage.getItem('pixelary-theme'); } catch (e) { return null; }
+    try { return localStorage.getItem('openframez-theme'); } catch (e) { return null; }
   }
   function setStoredTheme(t) {
-    try { localStorage.setItem('pixelary-theme', t); } catch (e) {}
+    try { localStorage.setItem('openframez-theme', t); } catch (e) {}
   }
   function getPreferredTheme() {
     const stored = getStoredTheme();

@@ -1,11 +1,11 @@
 /**
- * Pixelary Service Worker — Phase 5 (Federated Uploads)
+ * OpenFramez Service Worker — Phase 5 (Federated Uploads)
  * Cache-first for static assets, network-first for data, with offline fallback.
  * Range-request aware for video streaming (partial content).
  * Serves Wikimedia Commons, Internet Archive, and user *.github.io repos.
  */
 
-const CACHE_VERSION = 'pixelary-v5.2.0';
+const CACHE_VERSION = 'openframez-v5.2.0';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DATA_CACHE = `${CACHE_VERSION}-data`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;

@@ -1,8 +1,8 @@
-# Pixelary - Privacy Policy Supplement
+# OpenFramez - Privacy Policy Supplement
 
 ## Privacy-First Architecture
 
-Pixelary is designed with a privacy-first approach. We collect ZERO user data.
+OpenFramez is designed with a privacy-first approach. We collect ZERO user data.
 
 ## What We Don't Collect
 
@@ -16,7 +16,7 @@ Pixelary is designed with a privacy-first approach. We collect ZERO user data.
 
 ## What We Store Locally (in your browser)
 
-- `pixelary-theme`: Your theme preference (light/dark) in localStorage
+- `openframez-theme`: Your theme preference (light/dark) in localStorage
 - Service Worker cache: Static files for offline use
 - HTTP cache: Standard browser caching
 
@@ -24,7 +24,7 @@ This data never leaves your device. Clearing your browser data removes it comple
 
 ## Third-Party Resources
 
-Pixelary loads the following third-party resources:
+OpenFramez loads the following third-party resources:
 
 1. **Wikimedia CDN** (`upload.wikimedia.org`): Photo thumbnails
    - We display images hosted by Wikimedia Commons
@@ -43,7 +43,7 @@ In Phase 2, we plan to:
 
 ## Contact
 
-Open a [GitHub Issue](https://github.com/betaversion488-oss/betaversion488-oss.github.io/issues) for privacy questions.
+Open a [GitHub Issue](https://github.com/OpenFramez/openframez.github.io/issues) for privacy questions.
 
 ---
 

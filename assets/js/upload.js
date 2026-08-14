@@ -1,24 +1,24 @@
 /**
- * Pixelary — Upload Page Logic (Phase 5 — Federated Upload)
+ * OpenFramez — Upload Page Logic (Phase 5 — Federated Upload)
  *
  * Easy content upload for non-technical users via OAuth Device Flow.
  *
  * NEW Architecture (Phase 5):
  *   - User signs in with THEIR OWN GitHub account via OAuth Device Flow
- *   - On first upload, a `pixelary-uploads` repo is auto-created on their account
+ *   - On first upload, a `openframez-uploads` repo is auto-created on their account
  *   - File is uploaded to their own repo (uploads/{timestamp}-{slug}.{ext})
- *   - File is served from https://{username}.github.io/pixelary-uploads/uploads/...
+ *   - File is served from https://{username}.github.io/openframez-uploads/uploads/...
  *   - Entry is appended to their manifest.json
  *   - Central registry is updated (single API call) so aggregator picks them up
  *
  * OLD Architecture (Phase 4 — REMOVED):
  *   - Bot PAT embedded in client-side JS (SECURITY RISK)
- *   - All user content dumped into central betaversion488-oss repo (mixed ownership)
+ *   - All user content dumped into central OpenFramez repo (mixed ownership)
  *
  * Bot PAT is still used for ONE purpose only: appending to data/registry.json
  * when a user registers. This is the minimal scope — never used for content upload.
  *
- * @author Pixelary Team
+ * @author OpenFramez Team
  */
 
 (function () {
@@ -62,7 +62,7 @@
   }
 
   function checkAuthState() {
-    var auth = window.PixelaryOAuth.getAuth();
+    var auth = window.OpenFramezOAuth.getAuth();
     if (auth) {
       state.auth = auth;
       showLoggedInState(auth.user);
@@ -103,7 +103,7 @@
     var logoutBtn = $('#logoutBtn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', function () {
-        window.PixelaryOAuth.logout().then(function () {
+        window.OpenFramezOAuth.logout().then(function () {
           state.auth = null;
           location.reload();
         });
@@ -122,7 +122,7 @@
     if (loginStatus) loginStatus.classList.remove('hidden');
     if (loginStatus) loginStatus.textContent = 'در حال دریافت کد از GitHub...';
 
-    window.PixelaryOAuth.login(function (deviceResp) {
+    window.OpenFramezOAuth.login(function (deviceResp) {
       // Show device code to user
       if (loginStatus) loginStatus.classList.add('hidden');
       if (deviceCodeCard) deviceCodeCard.classList.remove('hidden');
@@ -536,8 +536,8 @@
       .catch(function (err) {
         console.error('Upload failed:', err);
         // Auto-report the failure to the team
-        if (window.PixelaryErrors) {
-          window.PixelaryErrors.capture(err, {
+        if (window.OpenFramezErrors) {
+          window.OpenFramezErrors.capture(err, {
             flow: 'upload',
             step: state.currentStep,
             fileType: state.fileType,
@@ -613,14 +613,14 @@
     var username = state.auth.user.login;
     var token = state.auth.token;
 
-    return window.PixelaryRepo.repoExists(token, username)
+    return window.OpenFramezRepo.repoExists(token, username)
       .then(function (exists) {
         if (exists) {
           state.userRepoReady = true;
           return null;
         }
         updateProgressPercent(10, 'در حال ایجاد مخزن شخصی شما... (یک‌بار برای همیشه)');
-        return window.PixelaryRepo.createRepo(token, username, state.auth.user)
+        return window.OpenFramezRepo.createRepo(token, username, state.auth.user)
           .then(function () {
             state.userRepoReady = true;
           });
@@ -646,7 +646,7 @@
     var username = state.auth.user.login;
     var token = state.auth.token;
 
-    return window.PixelaryRepo.uploadFile(token, username, path, base64, message, function (pct, msg) {
+    return window.OpenFramezRepo.uploadFile(token, username, path, base64, message, function (pct, msg) {
       updateProgressPercent(pct, msg);
     }).then(function (info) {
       return info;
@@ -703,7 +703,7 @@
       original_filename: formData.fileName,
     };
 
-    return window.PixelaryRepo.appendToManifest(token, username, entry)
+    return window.OpenFramezRepo.appendToManifest(token, username, entry)
       .then(function () { return entry; });
   }
 
@@ -712,7 +712,7 @@
     var token = state.auth.token;
     // PAT-FREE: open a registration Issue with the user's own OAuth token.
     // The process-registration.yml Action rebuilds registry.json from these issues.
-    return window.PixelaryRepo.registerInCentralRegistry(token, username)
+    return window.OpenFramezRepo.registerInCentralRegistry(token, username)
       .catch(function (err) {
         // Non-fatal — the upload itself succeeded
         console.warn('Failed to open registration issue:', err);
@@ -727,7 +727,7 @@
   function writeLicenseFileForEntry(entry) {
     var username = state.auth.user.login;
     var token = state.auth.token;
-    return window.PixelaryRepo.writeLicenseFile(token, username, entry)
+    return window.OpenFramezRepo.writeLicenseFile(token, username, entry)
       .catch(function (e) {
         console.warn('LICENSE file write failed (non-fatal):', e);
       });
@@ -740,9 +740,9 @@
   function updateRepoNotice() {
     var username = state.auth.user.login;
     var token = state.auth.token;
-    return window.PixelaryRepo.getManifest(token, username)
+    return window.OpenFramezRepo.getManifest(token, username)
       .then(function (manifest) {
-        return window.PixelaryRepo.updateNotice(token, username, manifest.uploads || []);
+        return window.OpenFramezRepo.updateNotice(token, username, manifest.uploads || []);
       });
   }
 
@@ -803,14 +803,14 @@
     // Show user's repo link
     var repoLink = $('#userRepoLink');
     if (repoLink && state.auth && state.auth.user) {
-      repoLink.href = 'https://github.com/' + state.auth.user.login + '/pixelary-uploads';
+      repoLink.href = 'https://github.com/' + state.auth.user.login + '/openframez-uploads';
     }
 
     // Show file URL — start with raw URL (works immediately), then poll Pages
     var fileLink = $('#userFileLink');
     if (fileLink && fileInfo) {
       // Use raw URL as the immediate fallback (always works)
-      var rawUrl = window.PixelaryRepo.getRawFileUrl(state.auth.user.login, fileInfo.path);
+      var rawUrl = window.OpenFramezRepo.getRawFileUrl(state.auth.user.login, fileInfo.path);
       fileLink.href = rawUrl;
       fileLink.textContent = 'مشاهده فایل (raw)';
 
@@ -834,7 +834,7 @@
 
     function check() {
       attempts++;
-      fetch('https://api.github.com/repos/' + username + '/pixelary-uploads/pages', {
+      fetch('https://api.github.com/repos/' + username + '/openframez-uploads/pages', {
         headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' },
       }).then(function (res) {
         if (!res.ok) return null;
@@ -842,7 +842,7 @@
       }).then(function (data) {
         if (data && data.status === 'built') {
           // Pages is ready — upgrade link
-          var pagesUrl = window.PixelaryRepo.getPublicFileUrl(username, filePath);
+          var pagesUrl = window.OpenFramezRepo.getPublicFileUrl(username, filePath);
           linkEl.href = pagesUrl;
           linkEl.textContent = 'مشاهده فایل آپلودشده';
         } else if (attempts < maxAttempts) {

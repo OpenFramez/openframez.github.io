@@ -1,6 +1,6 @@
-# مرجع API پیکسلری
+# مرجع API اُپن‌فریمز
 
-پیکسلری یک پلتفرم static است، بنابراین API سنتی (REST/GraphQL) ندارد. اما چند رابط برنامه‌نویسی دارد:
+اُپن‌فریمز یک پلتفرم static است، بنابراین API سنتی (REST/GraphQL) ندارد. اما چند رابط برنامه‌نویسی دارد:
 
 ## ۱. Data File API
 
@@ -50,7 +50,7 @@ manifest کامل همه عکس‌ها.
 
 **استفاده:**
 ```bash
-curl https://betaversion488-oss.github.io/data/photos.json
+curl https://openframez.github.io/data/photos.json
 ```
 
 ### `GET /data/videos.json` *(Phase 2)*
@@ -125,160 +125,160 @@ manifest کامل همه ویدیوهای کوتاه (۲-۳۰ ثانیه).
 
 **استفاده:**
 ```bash
-curl https://betaversion488-oss.github.io/data/videos.json | jq '.videos[0].sources'
+curl https://openframez.github.io/data/videos.json | jq '.videos[0].sources'
 ```
 
 ## ۲. JavaScript Module API
 
-### `Pixelary` (global)
+### `OpenFramez` (global)
 
 دسترسی به داده‌ها در browser — شامل متدهای عکس (Phase 1) و ویدیو (Phase 2).
 
 #### Phase 1 (Photos)
 
-##### `Pixelary.load(): Promise<Manifest>`
+##### `OpenFramez.load(): Promise<Manifest>`
 
 بارگذاری manifest عکس‌ها. cache در memory.
 
 ```javascript
-const data = await Pixelary.load();
+const data = await OpenFramez.load();
 console.log(data.total); // 167
 ```
 
-##### `Pixelary.getById(id: string): Photo | null`
+##### `OpenFramez.getById(id: string): Photo | null`
 
 گرفتن یک عکس با ID.
 
 ```javascript
-const photo = Pixelary.getById('fi_0001');
+const photo = OpenFramez.getById('fi_0001');
 console.log(photo.title);
 ```
 
-##### `Pixelary.getCategories(): Category[]`
+##### `OpenFramez.getCategories(): Category[]`
 
 لیست دسته‌بندی‌های عکس با count.
 
 ```javascript
-const cats = Pixelary.getCategories();
+const cats = OpenFramez.getCategories();
 // [{slug: 'nature', label: 'Nature & Landscapes', count: 13}, ...]
 ```
 
-##### `Pixelary.getTotal(): number`
+##### `OpenFramez.getTotal(): number`
 
 تعداد کل عکس‌ها.
 
-##### `Pixelary.filter(options: FilterOptions): Photo[]`
+##### `OpenFramez.filter(options: FilterOptions): Photo[]`
 
 فیلتر و جستجو.
 
 ```javascript
-const results = Pixelary.filter({
+const results = OpenFramez.filter({
   category: 'nature',     // optional: category slug
   query: 'mountain',      // optional: search query
   sort: 'newest',         // 'newest' | 'oldest'
 });
 ```
 
-##### `Pixelary.getRelated(photo: Photo, limit: number = 6): Photo[]`
+##### `OpenFramez.getRelated(photo: Photo, limit: number = 6): Photo[]`
 
 عکس‌های مرتبط (همان دسته).
 
-##### `Pixelary.getStats(): Stats`
+##### `OpenFramez.getStats(): Stats`
 
 آمار کلی عکس‌ها.
 
 ```javascript
-const stats = Pixelary.getStats();
+const stats = OpenFramez.getStats();
 // {total: 167, categories: 7, authors: 92}
 ```
 
 #### Phase 2 (Videos)
 
-##### `Pixelary.loadVideos(): Promise<VideoManifest>`
+##### `OpenFramez.loadVideos(): Promise<VideoManifest>`
 
 بارگذاری manifest ویدیوها. cache در memory.
 
 ```javascript
-const data = await Pixelary.loadVideos();
+const data = await OpenFramez.loadVideos();
 console.log(data.total); // 76
 ```
 
-##### `Pixelary.getVideoById(id: string): Video | null`
+##### `OpenFramez.getVideoById(id: string): Video | null`
 
 ```javascript
-const v = Pixelary.getVideoById('fv_0001');
+const v = OpenFramez.getVideoById('fv_0001');
 console.log(v.title, v.duration, v.sources);
 ```
 
-##### `Pixelary.getVideoCategories(): Category[]`
+##### `OpenFramez.getVideoCategories(): Category[]`
 
 لیست دسته‌بندی‌های ویدیو (فقط دسته‌هایی که حداقل ۱ ویدیو دارند).
 
-##### `Pixelary.getVideoTotal(): number`
+##### `OpenFramez.getVideoTotal(): number`
 
-##### `Pixelary.filterVideos(options): Video[]`
+##### `OpenFramez.filterVideos(options): Video[]`
 
 ```javascript
-const results = Pixelary.filterVideos({
+const results = OpenFramez.filterVideos({
   category: 'science',    // optional
   query: 'NASA',          // optional
   sort: 'newest',         // 'newest' | 'oldest' | 'shortest' | 'longest'
 });
 ```
 
-##### `Pixelary.getVideoRelated(video: Video, limit: number = 6): Video[]`
+##### `OpenFramez.getVideoRelated(video: Video, limit: number = 6): Video[]`
 
-##### `Pixelary.getVideoStats(): VideoStats`
+##### `OpenFramez.getVideoStats(): VideoStats`
 
 ```javascript
-const stats = Pixelary.getVideoStats();
+const stats = OpenFramez.getVideoStats();
 // {total: 76, categories: 16, authors: 40, totalDuration: 1023}
 ```
 
 #### Phase 2.5 (Internet Archive + Combined)
 
-##### `Pixelary.loadIAVideos(): Promise<IAVideoManifest>`
+##### `OpenFramez.loadIAVideos(): Promise<IAVideoManifest>`
 
 بارگذاری manifest ویدیوهای Internet Archive (`data/videos_ia.json`). cache در memory.
 
 ```javascript
-const iaData = await Pixelary.loadIAVideos();
+const iaData = await OpenFramez.loadIAVideos();
 console.log(iaData.total); // 48
 console.log(iaData.videos[0].source); // 'Internet Archive'
 console.log(iaData.videos[0].ia_identifier); // 'dmbb00506'
 ```
 
-##### `Pixelary.getIAVideoById(id: string): Video | null`
+##### `OpenFramez.getIAVideoById(id: string): Video | null`
 
 ```javascript
-const v = Pixelary.getIAVideoById('ia_0001');
+const v = OpenFramez.getIAVideoById('ia_0001');
 console.log(v.title, v.collection, v.license);
 ```
 
-##### `Pixelary.loadAllVideos(): Promise<{wikimedia, internetArchive}>`
+##### `OpenFramez.loadAllVideos(): Promise<{wikimedia, internetArchive}>`
 
 بارگذاری همزمان هر دو منبع (Wikimedia + IA). در صورت شکست IA، فقط Wikimedia برمی‌گردد.
 
 ```javascript
-const { wikimedia, internetArchive } = await Pixelary.loadAllVideos();
+const { wikimedia, internetArchive } = await OpenFramez.loadAllVideos();
 console.log(`WM: ${wikimedia.videos.length}, IA: ${internetArchive.videos.length}`);
 ```
 
-##### `Pixelary.getAnyVideoById(id: string): Video | null`
+##### `OpenFramez.getAnyVideoById(id: string): Video | null`
 
 Lookup یکپارچه — تشخیص خودکار منبع از روی prefix (`fv_*` → Wikimedia، `ia_*` → IA).
 
 ```javascript
-const v1 = Pixelary.getAnyVideoById('fv_0001'); // Wikimedia
-const v2 = Pixelary.getAnyVideoById('ia_0001'); // Internet Archive
+const v1 = OpenFramez.getAnyVideoById('fv_0001'); // Wikimedia
+const v2 = OpenFramez.getAnyVideoById('ia_0001'); // Internet Archive
 ```
 
-##### `Pixelary.filterAllVideos(options): Video[]`
+##### `OpenFramez.filterAllVideos(options): Video[]`
 
 فیلتر ترکیبی در هر دو منبع — نتایج interleaved (یکی در میان از هر منبع).
 
 ```javascript
-const results = Pixelary.filterAllVideos({
+const results = OpenFramez.filterAllVideos({
   category: 'vintage_ad',
   query: 'coffee',
   sort: 'newest',
@@ -286,28 +286,28 @@ const results = Pixelary.filterAllVideos({
 // Alternates: ia[0], wm[0], ia[1], wm[1], ...
 ```
 
-##### `Pixelary.getAllVideoCategories(): Category[]`
+##### `OpenFramez.getAllVideoCategories(): Category[]`
 
 دسته‌بندی‌های ادغام‌شده از هر دو منبع، با شمارش ترکیبی. مرتب بر اساس تعداد.
 
-##### `Pixelary.getCombinedVideoStats(): CombinedStats`
+##### `OpenFramez.getCombinedVideoStats(): CombinedStats`
 
 ```javascript
-const stats = Pixelary.getCombinedVideoStats();
+const stats = OpenFramez.getCombinedVideoStats();
 // {total: 124, categories: 18, authors: 53, totalDuration: 2456}
 // total = Wikimedia total + IA total
 ```
 
-##### `Pixelary.getAllVideoRelated(video: Video, limit: number = 10): Video[]`
+##### `OpenFramez.getAllVideoRelated(video: Video, limit: number = 10): Video[]`
 
 ویدیوهای مرتبط از هر دو منبع — اولویت با same-category از همان منبع، سپس cross-source.
 
-### `PixelaryPlayer` (global) — Phase 2
+### `OpenFramezPlayer` (global) — Phase 2
 
 Custom video player factory.
 
 ```javascript
-const player = PixelaryPlayer.create({
+const player = OpenFramezPlayer.create({
   container: HTMLElement,      // where to mount
   video: videoObject,          // entry from videos.json
   autoplay: true,              // autoplay when scrolled into view
@@ -451,12 +451,12 @@ UI.toPersianDigits(42);     // '۴۲'
 ### Embed یک عکس در سایت دیگر
 
 ```html
-<a href="https://betaversion488-oss.github.io/photo.html?id=fi_0001">
+<a href="https://openframez.github.io/photo.html?id=fi_0001">
   <img src="https://upload.wikimedia.org/..." alt="...">
 </a>
 ```
 
-**نکته**: thumbnail از Wikimedia CDN لود می‌شود، نه از پیکسلری. لطفاً [TOU Wikimedia](https://commons.wikimedia.org/wiki/Commons:Terms_of_Use) را رعایت کنید.
+**نکته**: thumbnail از Wikimedia CDN لود می‌شود، نه از اُپن‌فریمز. لطفاً [TOU Wikimedia](https://commons.wikimedia.org/wiki/Commons:Terms_of_Use) را رعایت کنید.
 
 ### RSS Feed (آینده)
 
@@ -466,12 +466,12 @@ UI.toPersianDigits(42);     // '۴۲'
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>پیکسلری — آخرین عکس‌ها</title>
-    <link>https://betaversion488-oss.github.io/</link>
+    <title>اُپن‌فریمز — آخرین عکس‌ها</title>
+    <link>https://openframez.github.io/</link>
     <description>...</description>
     <item>
       <title>...</title>
-      <link>https://betaversion488-oss.github.io/photo.html?id=...</link>
+      <link>https://openframez.github.io/photo.html?id=...</link>
       <pubDate>...</pubDate>
     </item>
   </channel>
@@ -486,11 +486,11 @@ UI.toPersianDigits(42);     // '۴۲'
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "پیکسلری",
-  "url": "https://betaversion488-oss.github.io/",
+  "name": "اُپن‌فریمز",
+  "url": "https://openframez.github.io/",
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "https://betaversion488-oss.github.io/?q={search_term_string}",
+    "target": "https://openframez.github.io/?q={search_term_string}",
     "query-input": "required name=search_term_string"
   }
 }
@@ -522,17 +522,17 @@ UI.toPersianDigits(42);     // '۴۲'
 
 | Resource Type | Strategy | Cache Name |
 |---------------|----------|------------|
-| Static (HTML, CSS, JS) | Cache-first | `pixelary-v1.0.0-static` |
-| Data (photos.json) | Network-first | `pixelary-v1.0.0-data` |
-| Images (Wikimedia) | Stale-while-revalidate | `pixelary-v1.0.0-images` |
-| Fonts (Google) | Cache-first | `pixelary-v1.0.0-static` |
+| Static (HTML, CSS, JS) | Cache-first | `openframez-v1.0.0-static` |
+| Data (photos.json) | Network-first | `openframez-v1.0.0-data` |
+| Images (Wikimedia) | Stale-while-revalidate | `openframez-v1.0.0-images` |
+| Fonts (Google) | Cache-first | `openframez-v1.0.0-static` |
 
 ### Manual Cache Control
 
 ```javascript
 // در browser console:
 caches.keys().then(keys => console.log(keys));
-caches.delete('pixelary-v1.0.0-static');
+caches.delete('openframez-v1.0.0-static');
 ```
 
 ## ۸. Scraper API (داخلی)
@@ -584,4 +584,4 @@ THUMB_WIDTH = 800      # عرض thumbnail
 
 ---
 
-برای سوالات بیشتر، [GitHub Issue](https://github.com/betaversion488-oss/betaversion488-oss.github.io/issues) باز کنید.
+برای سوالات بیشتر، [GitHub Issue](https://github.com/OpenFramez/openframez.github.io/issues) باز کنید.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pixelary Phase 1 Data Scraper
+OpenFramez Phase 1 Data Scraper
 =============================
 Scrapes CC-licensed / public-domain images from Wikimedia Commons
 "Quality Images" and "Featured Pictures" categories across multiple themes.
@@ -45,7 +45,7 @@ import urllib.request
 from pathlib import Path
 from html import unescape
 
-USER_AGENT = "PixelaryBot/1.0 (https://github.com/betaversion488-oss/betaversion488-oss.github.io; contact via GitHub Issues)"
+USER_AGENT = "OpenFramezBot/1.0 (https://github.com/OpenFramez/openframez.github.io; contact via GitHub Issues)"
 
 # Curated categories - high-quality, freely-licensed images
 CATEGORIES = [

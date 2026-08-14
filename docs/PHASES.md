@@ -1,6 +1,6 @@
-# نقشه راه فازهای پیکسلری
+# نقشه راه فازهای اُپن‌فریمز
 
-پیکسلری در ۶ فاز توسعه داده می‌شود. هر فاز یک قابلیت کلیدی جدید اضافه می‌کند و یک milestone قابل انتشار دارد.
+اُپن‌فریمز در ۶ فاز توسعه داده می‌شود. هر فاز یک قابلیت کلیدی جدید اضافه می‌کند و یک milestone قابل انتشار دارد.
 
 ## فاز ۱: گالری تصاویر (MVP) ✅
 
@@ -234,7 +234,7 @@ GitHub Action → افزودن به data/photos.json یا videos.json → commit
 ```
 کاربر ← OAuth Device Flow ← GitHub خودش
   ↓
-بررسی: آیا {username}/pixelary-uploads وجود دارد؟
+بررسی: آیا {username}/openframez-uploads وجود دارد؟
   ↓ NO
 ایجاد خودکار مخزن (با README + manifest.json + GitHub Pages)
   ↓
@@ -246,7 +246,7 @@ GitHub Action → افزودن به data/photos.json یا videos.json → commit
   ↓
 GitHub Action ساعتانه ← manifest.json همه کاربران را merge می‌کند → data/federated.json
   ↓
-گالری پیکسلری federated.json را می‌خواند و محتوای همه کاربران را نمایش می‌دهد
+گالری اُپن‌فریمز federated.json را می‌خواند و محتوای همه کاربران را نمایش می‌دهد
 ```
 
 **قابلیت‌های پیاده‌سازی‌شده:**
@@ -255,7 +255,7 @@ GitHub Action ساعتانه ← manifest.json همه کاربران را merge 
   - توکن در localStorage ذخیره می‌شود (7 روز TTL)
   - اسکوپ: `public_repo,read:user` — فقط دسترسی به مخازن عمومی کاربر
 - ✅ **ساخت خودکار مخزن شخصی** (`assets/js/repo.js`)
-  - مخزن `{username}/pixelary-uploads` به‌صورت خودکار ساخته می‌شود
+  - مخزن `{username}/openframez-uploads` به‌صورت خودکار ساخته می‌شود
   - GitHub Pages به‌صورت خودکار فعال می‌شود
   - README و manifest.json اولیه ایجاد می‌شوند
 - ✅ **آپلود به مخزن کاربر** (نه مخزن مرکزی)
@@ -279,9 +279,9 @@ GitHub Action ساعتانه ← manifest.json همه کاربران را merge 
 
 **نصب OAuth App (یک‌بار، توسط مدیر):**
 1. به https://github.com/settings/applications/new بروید
-2. Application name: `Pixelary Uploader`
-3. Homepage URL: `https://betaversion488-oss.github.io`
-4. Authorization callback URL: `https://betaversion488-oss.github.io/upload.html` (برای Device Flow لازم نیست ولی GitHub آن را می‌خواهد)
+2. Application name: `OpenFramez Uploader`
+3. Homepage URL: `https://openframez.github.io`
+4. Authorization callback URL: `https://openframez.github.io/upload.html` (برای Device Flow لازم نیست ولی GitHub آن را می‌خواهد)
 5. **Enable Device Flow** checkbox را تیک بزنید
 6. Client ID را کپی کنید و در `assets/js/oauth.js` جایگزین `Ov23liPLACEHOLDER1234` کنید
 

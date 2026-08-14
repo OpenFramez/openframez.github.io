@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pixelary — Rebuild Registry from Registration Issues
+OpenFramez — Rebuild Registry from Registration Issues
 
 This script implements the event-sourcing pattern for user registration.
 Instead of appending to data/registry.json on each registration (which causes
@@ -16,9 +16,9 @@ The script:
        ```json
        {
          "login": "username",
-         "repo": "pixelary-uploads",
-         "url": "https://github.com/username/pixelary-uploads",
-         "pages_url": "https://username.github.io/pixelary-uploads",
+         "repo": "openframez-uploads",
+         "url": "https://github.com/username/openframez-uploads",
+         "pages_url": "https://username.github.io/openframez-uploads",
          "registered_at": "2026-08-13T10:00:00Z"
        }
        ```
@@ -48,8 +48,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REGISTRY_PATH = REPO_ROOT / 'data' / 'registry.json'
 
-REPO_OWNER = 'betaversion488-oss'
-REPO_NAME = 'betaversion488-oss.github.io'
+REPO_OWNER = 'OpenFramez'
+REPO_NAME = 'openframez.github.io'
 
 # Match ```json ... ``` blocks in issue bodies
 JSON_BLOCK_RE = re.compile(r'```json\s*\n(.*?)\n```', re.DOTALL)
@@ -66,7 +66,7 @@ def gh_api_get(path, token):
     req = urllib.request.Request(url, headers={
         'Authorization': f'token {token}',
         'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'Pixelary-RegistryRebuilder/1.0',
+        'User-Agent': 'OpenFramez-RegistryRebuilder/1.0',
     })
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
@@ -133,7 +133,7 @@ def parse_issue_body(body, issue_author):
         return None
 
     login = data.get('login', '').strip()
-    repo = data.get('repo', 'pixelary-uploads').strip()
+    repo = data.get('repo', 'openframez-uploads').strip()
     pages_url = data.get('pages_url', '').strip()
     url = data.get('url', '').strip()
     registered_at = data.get('registered_at', '').strip()

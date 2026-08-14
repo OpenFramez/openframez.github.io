@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pixelary — Submission Processor
+OpenFramez — Submission Processor
 
 Reads YAML metadata from a GitHub issue body, validates it,
 adds an entry to data/photos.json or data/videos.json,
@@ -19,8 +19,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # ---------- Configuration ----------
-REPO_OWNER = "betaversion488-oss"
-REPO_NAME = "betaversion488-oss.github.io"
+REPO_OWNER = "OpenFramez"
+REPO_NAME = "openframez.github.io"
 PHOTOS_JSON = Path("data/photos.json")
 VIDEOS_JSON = Path("data/videos.json")
 
@@ -223,7 +223,7 @@ def main():
 
     if success:
         # Success comment
-        gallery_link = "https://betaversion488-oss.github.io/"
+        gallery_link = "https://openframez.github.io/"
         msg = f"""✅ محتوای شما با موفقیت پردازش و به گالری اضافه شد!
 
 | فیلد | مقدار |
@@ -234,7 +234,7 @@ def main():
 | مجوز | {data['license']} |
 | نویسنده | {data.get('author', issue_author)} |
 
-🔗 محتوای شما در گالری پیکسلری نمایش داده خواهد شد: {gallery_link}
+🔗 محتوای شما در گالری اُپن‌فریمز نمایش داده خواهد شد: {gallery_link}
 
 این issue بسته می‌شود. در صورت نیاز به تغییر، می‌توانید issue جدیدی باز کنید."""
         post_comment(issue_number, msg)
@@ -311,7 +311,7 @@ def process_photo(data, issue_author):
         "license_url": license_url,
         "author": data.get("author", issue_author),
         "author_url": "",
-        "source": "User submission via Pixelary upload",
+        "source": "User submission via OpenFramez upload",
         "uploaded_at": today,
         "commons_page": "",
         "submission_source": "user",
@@ -403,7 +403,7 @@ def process_video(data, issue_author):
         "license_url": license_url,
         "artist": data.get("author", issue_author),
         "artist_url": "",
-        "credit": "User submission via Pixelary upload",
+        "credit": "User submission via OpenFramez upload",
         "uploaded_at": today,
         "category": category,
         "category_label": cat_label,

@@ -1,8 +1,8 @@
-# مسائل قانونی پیکسلری
+# مسائل قانونی اُپن‌فریمز
 
 ## نمای کلی
 
-پیکسلری یک پلتفرم نمایش محتوای آزاد است. این سند سیاست‌های قانونی پروژه را به‌طور کامل توضیح می‌دهد. توجه: این سند مشاوره حقوقی نیست؛ برای موارد خاص با وکیل مشورت کنید.
+اُپن‌فریمز یک پلتفرم نمایش محتوای آزاد است. این سند سیاست‌های قانونی پروژه را به‌طور کامل توضیح می‌دهد. توجه: این سند مشاوره حقوقی نیست؛ برای موارد خاص با وکیل مشورت کنید.
 
 ## ۱. مجوز تصاویر
 
@@ -24,16 +24,16 @@
 | Public Domain | بدون حقوق | ✓ | ✓ | اختیاری |
 | GFDL | GNU Free Documentation License | ✓ | ✓ (تحت GFDL) | الزامی |
 
-### سیاست پیکسلری
+### سیاست اُپن‌فریمز
 
-پیکسلری **فقط** تصاویری را نمایش می‌دهد که:
+اُپن‌فریمز **فقط** تصاویری را نمایش می‌دهد که:
 - مجوز CC BY، CC BY-SA، CC0، Public Domain، یا GFDL داشته باشند
 - مجوزهای NonCommercial (NC) یا NoDerivs (ND) پذیرفته **نمی‌شوند** (چون محدودیت‌هایی برای کاربران ایجاد می‌کنند)
 - اطلاعات attribution کامل (عکاس، منبع، لینک مجوز) نمایش داده شود
 
 ### نمایش Attribution
 
-برای هر عکس، پیکسلری اطلاعات زیر را نمایش می‌دهد:
+برای هر عکس، اُپن‌فریمز اطلاعات زیر را نمایش می‌دهد:
 - نام عکس (title)
 - نام عکاس (با لینک به صفحه او در Wikimedia اگر موجود باشد)
 - مجوز (با لینک به متن کامل)
@@ -50,7 +50,7 @@
 
 ### Safe Harbor
 
-پیکسلری تحت DMCA Safe Harbor (17 U.S.C. § 512) اجرا می‌شود. این یعنی:
+اُپن‌فریمز تحت DMCA Safe Harbor (17 U.S.C. § 512) اجرا می‌شود. این یعنی:
 - ما میزبان محتوا هستیم، نه ناشر
 - مسئولیتی در قبال محتوای کاربران نداریم، **به شرطی که** به گزارش‌های DMCA به‌موقع پاسخ دهیم
 - باید سیاست termination برای متخلفان تکراری داشته باشیم
@@ -59,12 +59,12 @@
 
 اگر فکر می‌کنید حق کپی‌رایت شما نقض شده است:
 
-۱. **گزارش ارسال کنید**: [GitHub Issue جدید](https://github.com/betaversion488-oss/betaversion488-oss.github.io/issues/new?title=DMCA%20Report) با عنوان "DMCA Report"
+۱. **گزارش ارسال کنید**: [GitHub Issue جدید](https://github.com/OpenFramez/openframez.github.io/issues/new?title=DMCA%20Report) با عنوان "DMCA Report"
 
 ۲. **اطلاعات مورد نیاز**:
    - نام، آدرس، تلفن، ایمیل شما
    - شناسایی اثر اصلی (URL یا توصیف)
-   - شناسایی محتوای متخلفانه (URL در پیکسلری)
+   - شناسایی محتوای متخلفانه (URL در اُپن‌فریمز)
    - بیانیه حسن نیت: "I have a good faith belief that use of the copyrighted materials described above as allegedly infringing is not authorized by the copyright owner, its agent, or the law."
    - بیانیه درستی: "I swear, under penalty of perjury, that the information in the notification is accurate and that I am the copyright owner or am authorized to act on behalf of the owner of an exclusive right that is allegedly infringed."
    - امضای فیزیکی یا الکترونیکی
@@ -81,7 +81,7 @@
 
 ### جمع‌آوری داده
 
-پیکسلری **هیچ داده شخصی کاربران را جمع‌آوری نمی‌کند**:
+اُپن‌فریمز **هیچ داده شخصی کاربران را جمع‌آوری نمی‌کند**:
 - ❌ هیچ analytics (Google Analytics، Matomo، Plausible، etc.)
 - ❌ هیچ ردیاب یا pixel
 - ❌ هیچ کوکی بازاریابی یا تبلیغاتی
@@ -92,7 +92,7 @@
 ### داده‌های ذخیره‌شده
 
 تنها داده‌ای که در دستگاه کاربر ذخیره می‌شود:
-- `pixelary-theme`: تنظیمات تم (`light` یا `dark`) در `localStorage`
+- `openframez-theme`: تنظیمات تم (`light` یا `dark`) در `localStorage`
 - **Service Worker cache**: فایل‌های static برای استفاده آفلاین
 - **HTTP cache**: مرورگر به‌صورت خودکار فایل‌ها را cache می‌کند
 
@@ -118,7 +118,7 @@
 
 ### Attribution صحیح
 
-برای استفاده از عکس‌های پیکسلری، attribution به این شکل توصیه می‌شود:
+برای استفاده از عکس‌های اُپن‌فریمز، attribution به این شکل توصیه می‌شود:
 
 ```
 "غروب آفتاب در البرز" توسط [نام عکاس]
@@ -129,7 +129,7 @@ https://creativecommons.org/licenses/by-sa/4.0/
 یا در قالب HTML:
 
 ```html
-<a href="https://betaversion488-oss.github.io/photo.html?id=fi_0001">"غروب آفتاب"</a>
+<a href="https://openframez.github.io/photo.html?id=fi_0001">"غروب آفتاب"</a>
 by <a href="[author_url]">[نام عکاس]</a>,
 licensed under <a href="[license_url]">CC BY-SA 4.0</a>
 ```
@@ -149,7 +149,7 @@ licensed under <a href="[license_url]">CC BY-SA 4.0</a>
 
 ### سیاست no-tracking
 
-پیکسلری متعهد است که:
+اُپن‌فریمز متعهد است که:
 - هیچ ردیابی از رفتار کاربران انجام ندهد
 - هیچ profile از کاربران نسازد
 - هیچ داده‌ای به third-party ارسال نکند (به جز درخواست‌های ضروری به Wikimedia CDN برای thumbnails و Google Fonts برای fonts)
@@ -157,7 +157,7 @@ licensed under <a href="[license_url]">CC BY-SA 4.0</a>
 
 ### Third-Party Resources
 
-پیکسلری از منابع third-party زیر استفاده می‌کند:
+اُپن‌فریمز از منابع third-party زیر استفاده می‌کند:
 - **Wikimedia CDN** (`upload.wikimedia.org`): thumbnails عکس‌ها
 - **Google Fonts** (`fonts.googleapis.com`, `fonts.gstatic.com`): فونت Vazirmatn
 
@@ -200,7 +200,7 @@ licensed under <a href="[license_url]">CC BY-SA 4.0</a>
 
 ## ۷. محدودیت مسئولیت
 
-پیکسلری "as is" ارائه می‌شود، بدون هیچ ضمانتی. ما مسئولیتی در قبال:
+اُپن‌فریمز "as is" ارائه می‌شود، بدون هیچ ضمانتی. ما مسئولیتی در قبال:
 - دقیق بودن metadata نداریم
 - در دسترس بودن مداوم سایت نداریم
 - خسارات ناشی از استفاده یا ناتوانی در استفاده نداریم
@@ -208,12 +208,12 @@ licensed under <a href="[license_url]">CC BY-SA 4.0</a>
 
 ## ۸. تغییرات سیاست
 
-این سند ممکن است به‌روز شود. تغییرات مهم در [GitHub Issues](https://github.com/betaversion488-oss/betaversion488-oss.github.io/issues) اعلام می‌شود. ادامه استفاده از سایت پس از تغییرات به‌معنای پذیرش سیاست جدید است.
+این سند ممکن است به‌روز شود. تغییرات مهم در [GitHub Issues](https://github.com/OpenFramez/openframez.github.io/issues) اعلام می‌شود. ادامه استفاده از سایت پس از تغییرات به‌معنای پذیرش سیاست جدید است.
 
 ## ۹. تماس
 
 برای سوالات قانونی:
-- [GitHub Issues](https://github.com/betaversion488-oss/betaversion488-oss.github.io/issues) — برای سوالات عمومی
+- [GitHub Issues](https://github.com/OpenFramez/openframez.github.io/issues) — برای سوالات عمومی
 - برای مسائل حساس، به maintainer مخزن پیام خصوصی دهید
 
 ---

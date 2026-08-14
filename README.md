@@ -1,15 +1,15 @@
-# پیکسلری (Pixelary) 📸 🎬
+# اُپن‌فریمز (OpenFramez) 📸 🎬
 
 > یک گالری تصاویر و ویدیوهای کوتاه آزاد و بدون سرور — میزبانی‌شده روی GitHub Pages
 
-[![Live Demo](https://img.shields.io/badge/live-demo-brightgreen)](https://betaversion488-oss.github.io)
+[![Live Demo](https://img.shields.io/badge/live-demo-brightgreen)](https://openframez.github.io)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Phase](https://img.shields.io/badge/phase-2.5%20reels-purple)](docs/PHASES.md)
 [![Content](https://img.shields.io/badge/content-291%20items-orange)](#)
 
-پیکسلری یک پلتفرم نمایش محتوای بصری است که کاملاً روی GitHub Pages اجرا می‌شود — بدون نیاز به سرور، پایگاه‌داده، یا حتی حساب کاربری برای مشاهده. تمام عکس‌ها از [Wikimedia Commons](https://commons.wikimedia.org) و ویدیوها از [Wikimedia Commons](https://commons.wikimedia.org) و [Internet Archive](https://archive.org) با مجوز Creative Commons یا Public Domain جمع‌آوری شده‌اند.
+اُپن‌فریمز یک پلتفرم نمایش محتوای بصری است که کاملاً روی GitHub Pages اجرا می‌شود — بدون نیاز به سرور، پایگاه‌داده، یا حتی حساب کاربری برای مشاهده. تمام عکس‌ها از [Wikimedia Commons](https://commons.wikimedia.org) و ویدیوها از [Wikimedia Commons](https://commons.wikimedia.org) و [Internet Archive](https://archive.org) با مجوز Creative Commons یا Public Domain جمع‌آوری شده‌اند.
 
-این پروژه نمونه‌ی عملی از معماری **JAMstack** است که در [whitepaper تحقیقاتی](https://github.com/betaversion488-oss/betaversion488-oss.github.io/blob/main/docs/WHITEPAPER.md) توضیح داده شده است.
+این پروژه نمونه‌ی عملی از معماری **JAMstack** است که در [whitepaper تحقیقاتی](https://github.com/OpenFramez/openframez.github.io/blob/main/docs/WHITEPAPER.md) توضیح داده شده است.
 
 ## ✨ ویژگی‌ها
 
@@ -31,7 +31,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  GitHub Pages (CDN) — betaversion488-oss.github.io   │
+│  GitHub Pages (CDN) — openframez.github.io   │
 └─────────────────────────────────────────────────────┘
                        ↑
         ┌──────────────┴──────────────┐
@@ -134,7 +134,7 @@ python3 scripts/scrape_videos.py    # ویدیوهای کوتاه
 
 ## 📋 نقشه راه
 
-پیکسلری در ۶ فاز توسعه داده می‌شود:
+اُپن‌فریمز در ۶ فاز توسعه داده می‌شود:
 
 | فاز | محتوا | وضعیت |
 |-----|--------|--------|
@@ -166,8 +166,8 @@ python3 scripts/scrape_videos.py    # ویدیوهای کوتاه
 
 ## 📞 تماس
 
-- [GitHub Issues](https://github.com/betaversion488-oss/betaversion488-oss.github.io/issues) — گزارش باگ، درخواست ویژگی، گزارش تخلف
-- [Pull Requests](https://github.com/betaversion488-oss/betaversion488-oss.github.io/pulls) — مشارکت کد
+- [GitHub Issues](https://github.com/OpenFramez/openframez.github.io/issues) — گزارش باگ، درخواست ویژگی، گزارش تخلف
+- [Pull Requests](https://github.com/OpenFramez/openframez.github.io/pulls) — مشارکت کد
 
 ## 🙏 اعتراف
 
@@ -177,4 +177,4 @@ python3 scripts/scrape_videos.py    # ویدیوهای کوتاه
 
 ---
 
-ساخته‌شده با ❤ روی GitHub Pages — © ۲۰۲۶ پیکسلری
+ساخته‌شده با ❤ روی GitHub Pages — © ۲۰۲۶ اُپن‌فریمز

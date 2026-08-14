@@ -1,5 +1,5 @@
 /**
- * Pixelary — Custom Video Player (Phase 2)
+ * OpenFramez — Custom Video Player (Phase 2)
  * Persian RTL video player with:
  *   - Custom controls (play/pause, mute, progress, time, quality, loop, download, fullscreen)
  *   - Autoplay on scroll (IntersectionObserver) — muted, looped
@@ -8,7 +8,7 @@
  *   - Mobile-friendly: tap to play/pause, swipe-friendly controls
  *
  * Usage:
- *   const player = PixelaryPlayer.create({
+ *   const player = OpenFramezPlayer.create({
  *     container: HTMLElement,        // where to mount
  *     video: videoObject,            // entry from videos.json
  *     autoplay: true,                // autoplay when scrolled into view (default true)
@@ -17,7 +17,7 @@
  *   });
  */
 
-const PixelaryPlayer = (function () {
+const OpenFramezPlayer = (function () {
   // Active player registry (for autoplay management — only one plays at a time)
   const activePlayers = new Set();
   let autoplayObserver = null;
@@ -27,7 +27,7 @@ const PixelaryPlayer = (function () {
     autoplayObserver = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          const player = entry.target._pixelaryPlayer;
+          const player = entry.target._openframezPlayer;
           if (!player) continue;
           if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
             // Pause all other players, then play this one
@@ -523,7 +523,7 @@ const PixelaryPlayer = (function () {
       videoEl.pause();
       videoEl.src = '';
     };
-    container._pixelaryPlayer = state;
+    container._openframezPlayer = state;
     container.tabIndex = 0;
 
     if (autoplay) {

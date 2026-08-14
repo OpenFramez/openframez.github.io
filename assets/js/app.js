@@ -1,5 +1,5 @@
 /**
- * Pixelary — Gallery App (home page)
+ * OpenFramez — Gallery App (home page)
  * Handles: category filter, search, infinite scroll, mobile search overlay
  */
 
@@ -58,10 +58,10 @@
   // ---------- Render category chips ----------
   function renderCategories() {
     // Merge Wikimedia categories with federated user-submitted categories
-    const wmCats = Pixelary.getCategories();
-    const fedCats = window.PixelaryFederation ? PixelaryFederation.getCategories() : [];
+    const wmCats = OpenFramez.getCategories();
+    const fedCats = window.OpenFramezFederation ? OpenFramezFederation.getCategories() : [];
     const merged = mergeCategories(wmCats, fedCats);
-    const total = Pixelary.getTotal() + (window.PixelaryFederation ? PixelaryFederation.getPhotosTotal() : 0);
+    const total = OpenFramez.getTotal() + (window.OpenFramezFederation ? OpenFramezFederation.getPhotosTotal() : 0);
 
     const html = [
       `<button class="chip ${state.category === 'all' ? 'active' : ''}" data-cat="all">همه <span class="count">(${total})</span></button>`,
@@ -92,15 +92,15 @@
       state.rendered = 0;
     }
 
-    state.items = Pixelary.filter({
+    state.items = OpenFramez.filter({
       category: state.category === 'all' ? null : state.category,
       query: state.query,
       sort: state.sort,
     });
 
     // Merge federated (user-submitted) photos
-    if (window.PixelaryFederation) {
-      const fedItems = PixelaryFederation.filter({
+    if (window.OpenFramezFederation) {
+      const fedItems = OpenFramezFederation.filter({
         type: 'photo',
         category: state.category === 'all' ? null : state.category,
         query: state.query,
@@ -205,8 +205,8 @@
 
   // ---------- Hero stats ----------
   function renderStats() {
-    const stats = Pixelary.getStats();
-    const fedStats = window.PixelaryFederation ? PixelaryFederation.getStats() : { total: 0, contributors: 0, categories: 0 };
+    const stats = OpenFramez.getStats();
+    const fedStats = window.OpenFramezFederation ? OpenFramezFederation.getStats() : { total: 0, contributors: 0, categories: 0 };
     const nums = els.heroStats.querySelectorAll('.num');
     if (nums.length >= 3) {
       nums[0].textContent = (stats.total + fedStats.total).toLocaleString('fa-IR');
@@ -245,7 +245,7 @@
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">برای جستجو تایپ کنید…</div>';
       return;
     }
-    const results = Pixelary.filter({ query, sort: 'newest' }).slice(0, 10);
+    const results = OpenFramez.filter({ query, sort: 'newest' }).slice(0, 10);
     if (results.length === 0) {
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">نتیجه‌ای یافت نشد</div>';
       return;
@@ -268,11 +268,11 @@
   // ---------- Init ----------
   async function init() {
     try {
-      await Pixelary.load();
+      await OpenFramez.load();
       // Load federated content in parallel (non-fatal on failure)
-      if (window.PixelaryFederation) {
+      if (window.OpenFramezFederation) {
         try {
-          await PixelaryFederation.load();
+          await OpenFramezFederation.load();
         } catch (e) {
           console.warn('Federated content load failed (non-fatal):', e);
         }

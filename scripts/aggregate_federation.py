@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Pixelary — Federated Content Aggregator (Phase 5)
+OpenFramez — Federated Content Aggregator (Phase 5)
 
 Reads data/registry.json to get the list of registered user repos,
-fetches each user's manifest.json from their pixelary-uploads repo,
+fetches each user's manifest.json from their openframez-uploads repo,
 and aggregates everything into data/federated.json.
 
 Run locally:
@@ -16,7 +16,7 @@ Run in CI:
 The script:
   1. Reads data/registry.json from this repo (local file).
   2. For each registered user, fetches their manifest.json from
-     https://raw.githubusercontent.com/{user}/pixelary-uploads/main/manifest.json
+     https://raw.githubusercontent.com/{user}/openframez-uploads/main/manifest.json
   3. Normalizes each entry: assign fu_NNNN ID, attach source_user/source_repo,
      map to gallery schema.
   4. Writes data/federated.json with all aggregated entries.
@@ -42,7 +42,7 @@ FEDERATED_PATH = REPO_ROOT / 'data' / 'federated.json'
 
 # GitHub raw URL pattern for fetching user manifests
 MANIFEST_URL_TEMPLATE = (
-    'https://raw.githubusercontent.com/{user}/pixelary-uploads/main/manifest.json'
+    'https://raw.githubusercontent.com/{user}/openframez-uploads/main/manifest.json'
 )
 
 # Category label map (Persian) — matches upload.html category dropdown
@@ -79,7 +79,7 @@ def fetch_json(url, timeout=15):
     """Fetch JSON from URL with timeout. Returns dict or None on failure."""
     try:
         req = urllib.request.Request(url, headers={
-            'User-Agent': 'Pixelary-Aggregator/1.0',
+            'User-Agent': 'OpenFramez-Aggregator/1.0',
             'Accept': 'application/json',
         })
         with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -114,15 +114,15 @@ def normalize_entry(entry, user_login, manifest):
 
     # If file_url uses raw.githubusercontent, also construct a Pages URL
     # (Pages URL is faster + better CORS for the gallery)
-    if 'raw.githubusercontent.com' in file_url and '/pixelary-uploads/' in file_url:
-        # raw.githubusercontent.com/{user}/pixelary-uploads/main/uploads/...
+    if 'raw.githubusercontent.com' in file_url and '/openframez-uploads/' in file_url:
+        # raw.githubusercontent.com/{user}/openframez-uploads/main/uploads/...
         try:
-            parts = file_url.split('/pixelary-uploads/', 1)
+            parts = file_url.split('/openframez-uploads/', 1)
             after_repo = parts[1]
             # Strip branch name (e.g., 'main/uploads/...')
             if '/' in after_repo:
                 after_branch = after_repo.split('/', 1)[1]
-                file_url = f'https://{user_login}.github.io/pixelary-uploads/{after_branch}'
+                file_url = f'https://{user_login}.github.io/openframez-uploads/{after_branch}'
                 if not entry.get('thumbnail_url'):
                     thumbnail_url = file_url
         except Exception:
@@ -142,8 +142,8 @@ def normalize_entry(entry, user_login, manifest):
         'license_viral': entry.get('license_viral', entry.get('license') == 'CC BY-SA 4.0'),
         'license_file_path': entry.get('license_file_path', ''),
         'source_user': user_login,
-        'source_repo': 'pixelary-uploads',
-        'source_url': f'https://github.com/{user_login}/pixelary-uploads',
+        'source_repo': 'openframez-uploads',
+        'source_url': f'https://github.com/{user_login}/openframez-uploads',
         'source_user_url': f'https://github.com/{user_login}',
         'file_url': file_url,
         'thumbnail_url': thumbnail_url,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pixelary Phase 2.5 — Internet Archive Video Scraper
+OpenFramez Phase 2.5 — Internet Archive Video Scraper
 ===================================================
 Scrapes short (≤ 60 s) public-domain / CC-licensed videos from the Internet Archive
 to enrich the existing Wikimedia Commons catalog and feed the new Reels mode.
@@ -69,7 +69,7 @@ import urllib.request
 import html
 from pathlib import Path
 
-USER_AGENT = "PixelaryBot/2.5 (https://github.com/betaversion488-oss/betaversion488-oss.github.io; contact via GitHub Issues)"
+USER_AGENT = "OpenFramezBot/2.5 (https://github.com/OpenFramez/openframez.github.io; contact via GitHub Issues)"
 
 # ----------- Categories (Persian labels) -----------
 # Each IA collection maps to one or more category slugs that are recognizable
@@ -558,7 +558,7 @@ def process_source(source, seen_ids):
 
 def main():
     out_path = Path(__file__).resolve().parent.parent / "data" / "videos_ia.json"
-    print(f"Pixelary Phase 2.5 — Internet Archive Scraper")
+    print(f"OpenFramez Phase 2.5 — Internet Archive Scraper")
     print(f"Target: {len(SOURCES)} collections")
     print(f"Filters: duration {MIN_DURATION}-{MAX_DURATION}s, size ≤ {MAX_SIZE_BYTES/1024/1024:.0f}MB")
 

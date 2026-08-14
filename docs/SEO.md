@@ -1,8 +1,8 @@
-# تحلیل SEO پیکسلری
+# تحلیل SEO اُپن‌فریمز
 
 ## نمای کلی
 
-پیکسلری یک پلتفرم static است که روی GitHub Pages میزبانی می‌شود. این یعنی ما فرصت‌های SEO خاصی داریم (سرعت بالا، محتوای قابل crawl) اما چالش‌هایی هم وجود دارد (no server-side rendering، limited custom headers). این سند استراتژی SEO کامل را توضیح می‌دهد.
+اُپن‌فریمز یک پلتفرم static است که روی GitHub Pages میزبانی می‌شود. این یعنی ما فرصت‌های SEO خاصی داریم (سرعت بالا، محتوای قابل crawl) اما چالش‌هایی هم وجود دارد (no server-side rendering، limited custom headers). این سند استراتژی SEO کامل را توضیح می‌دهد.
 
 ## استراتژی کلی
 
@@ -32,7 +32,7 @@
 <meta property="og:title" content="...">
 <meta property="og:description" content="...">
 <meta property="og:url" content="...">
-<meta property="og:site_name" content="Pixelary">
+<meta property="og:site_name" content="OpenFramez">
 <meta property="og:locale" content="fa_IR">
 <meta property="og:image" content="...">  <!-- برای photo.html -->
 ```
@@ -53,11 +53,11 @@
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "پیکسلری",
-  "url": "https://betaversion488-oss.github.io/",
+  "name": "اُپن‌فریمز",
+  "url": "https://openframez.github.io/",
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "https://betaversion488-oss.github.io/?q={search_term_string}",
+    "target": "https://openframez.github.io/?q={search_term_string}",
     "query-input": "required name=search_term_string"
   }
 }
@@ -87,7 +87,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://betaversion488-oss.github.io/</loc>
+    <loc>https://openframez.github.io/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -106,7 +106,7 @@ Disallow: /data/
 Disallow: /assets/js/
 Disallow: /scripts/
 Disallow: /docs/
-Sitemap: https://betaversion488-oss.github.io/sitemap.xml
+Sitemap: https://openframez.github.io/sitemap.xml
 ```
 
 ### ۷. Semantic HTML
@@ -177,10 +177,10 @@ Sitemap: https://betaversion488-oss.github.io/sitemap.xml
 
 ### چالش ۴: Single Domain
 
-**مشکل**: URL روی `betaversion488-oss.github.io` است. اگر domain سفارشی بخواهیم، باید DNS تنظیم کنیم.
+**مشکل**: URL روی `openframez.github.io` است. اگر domain سفارشی بخواهیم، باید DNS تنظیم کنیم.
 
 **راه‌حل آینده**: 
-- خرید domain (مثلاً pixelary.app)
+- خرید domain (مثلاً openframez.app)
 - تنظیم CNAME در GitHub Pages
 - آپدیت canonical URLs در همه صفحات
 
@@ -244,7 +244,7 @@ Sitemap: https://betaversion488-oss.github.io/sitemap.xml
 
 - [ ] Pre-render صفحات photo برای هر عکس
 - [ ] Sitemap شامل تک‌تک عکس‌ها
-- [ ] Custom domain (pixelary.app)
+- [ ] Custom domain (openframez.app)
 - [ ] Google Search Console verification
 - [ ] Internal linking strategy (related photos)
 
@@ -280,4 +280,4 @@ Sitemap: https://betaversion488-oss.github.io/sitemap.xml
 
 ## جمع‌بندی
 
-پیکسلری با وجود محدودیت‌های static hosting، فرصت‌های SEO خوبی دارد. ترکیب سرعت بالا، محتوای باکیفیت، و structured data کامل، آن را در موقعیت خوبی قرار می‌دهد. با اجرای نقشه راه فوق، می‌توانیم در ۱۲ ماه به یک پلتفرم شناخته‌شده برای گالری تصاویر آزاد فارسی تبدیل شویم.
+اُپن‌فریمز با وجود محدودیت‌های static hosting، فرصت‌های SEO خوبی دارد. ترکیب سرعت بالا، محتوای باکیفیت، و structured data کامل، آن را در موقعیت خوبی قرار می‌دهد. با اجرای نقشه راه فوق، می‌توانیم در ۱۲ ماه به یک پلتفرم شناخته‌شده برای گالری تصاویر آزاد فارسی تبدیل شویم.

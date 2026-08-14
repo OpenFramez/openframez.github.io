@@ -5,4 +5,4 @@ Disallow: /assets/js/
 Disallow: /scripts/
 Disallow: /docs/
 
-Sitemap: https://betaversion488-oss.github.io/sitemap.xml
+Sitemap: https://openframez.github.io/sitemap.xml

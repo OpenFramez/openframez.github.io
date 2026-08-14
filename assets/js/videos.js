@@ -1,8 +1,8 @@
 /**
- * Pixelary — Videos Gallery (Phase 2 + 2.5)
+ * OpenFramez — Videos Gallery (Phase 2 + 2.5)
  * Mirrors app.js (photo gallery) but for videos.
  * Loads BOTH Wikimedia Commons (videos.json) and Internet Archive (videos_ia.json)
- * sources in parallel and merges them via Pixelary.filterAllVideos().
+ * sources in parallel and merges them via OpenFramez.filterAllVideos().
  * Handles: category filter, search, infinite scroll, mobile search overlay.
  */
 
@@ -34,8 +34,8 @@
 
   // ---------- Render category chips ----------
   function renderCategories() {
-    const cats = Pixelary.getAllVideoCategories();
-    const totalAll = Pixelary.getCombinedVideoStats().total;
+    const cats = OpenFramez.getAllVideoCategories();
+    const totalAll = OpenFramez.getCombinedVideoStats().total;
     const html = [
       `<button class="chip ${state.category === 'all' ? 'active' : ''}" data-cat="all">همه <span class="count">(${totalAll})</span></button>`,
       ...cats.map(
@@ -65,7 +65,7 @@
       state.rendered = 0;
     }
 
-    state.items = Pixelary.filterAllVideos({
+    state.items = OpenFramez.filterAllVideos({
       category: state.category === 'all' ? null : state.category,
       query: state.query,
       sort: state.sort,
@@ -152,7 +152,7 @@
 
   // ---------- Hero stats ----------
   function renderStats() {
-    const stats = Pixelary.getCombinedVideoStats();
+    const stats = OpenFramez.getCombinedVideoStats();
     const nums = els.heroStats.querySelectorAll('.num');
     if (nums.length >= 4) {
       nums[0].textContent = UI.toPersianDigits(stats.total);
@@ -192,7 +192,7 @@
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">برای جستجو تایپ کنید…</div>';
       return;
     }
-    const results = Pixelary.filterAllVideos({ query, sort: 'newest' }).slice(0, 10);
+    const results = OpenFramez.filterAllVideos({ query, sort: 'newest' }).slice(0, 10);
     if (results.length === 0) {
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">نتیجه‌ای یافت نشد</div>';
       return;
@@ -215,7 +215,7 @@
   // ---------- Init ----------
   async function init() {
     try {
-      await Pixelary.loadAllVideos();
+      await OpenFramez.loadAllVideos();
     } catch (err) {
       console.error(err);
       els.loading.innerHTML = '<div>خطا در بارگذاری داده‌ها. لطفاً صفحه را تازه‌سازی کنید.</div>';

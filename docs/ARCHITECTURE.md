@@ -1,8 +1,8 @@
-# معماری پیکسلری
+# معماری اُپن‌فریمز
 
 ## نمای کلی
 
-پیکسلری یک پلتفرم نمایش تصاویر بدون سرور (serverless) است که از معماری **JAMstack** پیروی می‌کند. تمام محتوا به‌صورت ایستا (static) ارائه می‌شود و هیچ backend, database, یا authentication server وجود ندارد.
+اُپن‌فریمز یک پلتفرم نمایش تصاویر بدون سرور (serverless) است که از معماری **JAMstack** پیروی می‌کند. تمام محتوا به‌صورت ایستا (static) ارائه می‌شود و هیچ backend, database, یا authentication server وجود ندارد.
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -54,7 +54,7 @@
 
 ### ۱. بدون Build Step
 
-پیکسلری به‌عمد از هیچ ابزار build (Webpack, Rollup, Vite) استفاده نمی‌کند. این انتخاب بر اساس دلایل زیر است:
+اُپن‌فریمز به‌عمد از هیچ ابزار build (Webpack, Rollup, Vite) استفاده نمی‌کند. این انتخاب بر اساس دلایل زیر است:
 
 - **سادگی**: هر کسی می‌تواند بدون نصب ابزار خاصی، سورس را باز کند و اجرا کند
 - **سرعت توسعه**: تغییر فایل → refresh → نتیجه فوری
@@ -96,13 +96,13 @@
 مسئولیت: load, cache, query داده‌ها.
 
 ```javascript
-Pixelary.load()              // Promise<manifest>
-Pixelary.getById(id)         // photo object
-Pixelary.getCategories()     // [{slug, label, count}]
-Pixelary.getTotal()          // number
-Pixelary.filter({category, query, sort})  // photo[]
-Pixelary.getRelated(photo, n) // photo[]
-Pixelary.getStats()          // {total, categories, authors}
+OpenFramez.load()              // Promise<manifest>
+OpenFramez.getById(id)         // photo object
+OpenFramez.getCategories()     // [{slug, label, count}]
+OpenFramez.getTotal()          // number
+OpenFramez.filter({category, query, sort})  // photo[]
+OpenFramez.getRelated(photo, n) // photo[]
+OpenFramez.getStats()          // {total, categories, authors}
 ```
 
 ویژگی‌ها:
@@ -142,13 +142,13 @@ Pixelary.getStats()          // {total, categories, authors}
 ### ۱. بارگذاری اولیه
 
 ```
-User opens betaversion488-oss.github.io
+User opens openframez.github.io
   ↓
 Browser fetches index.html (cache-first via SW)
   ↓
 index.html loads CSS, ui.js, db.js, app.js (parallel, cache-first)
   ↓
-app.js calls Pixelary.load() → fetches data/photos.json (network-first)
+app.js calls OpenFramez.load() → fetches data/photos.json (network-first)
   ↓
 DB module builds search index in-memory
   ↓
@@ -166,7 +166,7 @@ User types "mountain" in search box
   ↓
 Debounced 250ms
   ↓
-Pixelary.filter({query: "mountain"})
+OpenFramez.filter({query: "mountain"})
   ↓
 Tokenize query → ["mountain"]
   ↓
@@ -188,11 +188,11 @@ photo.html loads (cache-first)
   ↓
 photo.js reads ?id from URL
   ↓
-Pixelary.getById("fi_0001") → photo object (from cache)
+OpenFramez.getById("fi_0001") → photo object (from cache)
   ↓
 Render: image, title, author, license, description, metadata
   ↓
-Pixelary.getRelated(photo, 10) → render related grid
+OpenFramez.getRelated(photo, 10) → render related grid
   ↓
 Update document.title, meta tags, JSON-LD for SEO
 ```

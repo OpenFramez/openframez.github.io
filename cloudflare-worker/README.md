@@ -1,4 +1,4 @@
-# Pixelary OAuth CORS Proxy — Cloudflare Worker
+# OpenFramez OAuth CORS Proxy — Cloudflare Worker
 
 ## Why this exists
 
@@ -34,8 +34,8 @@ wrangler deploy
 
 You'll see output like:
 ```
-Published pixelary-oauth (1.23 sec)
-  https://pixelary-oauth.<your-subdomain>.workers.dev
+Published openframez-oauth (1.23 sec)
+  https://openframez-oauth.<your-subdomain>.workers.dev
 ```
 
 ### 4. Update the site to use your Worker
@@ -53,7 +53,7 @@ function proxied(url) {
 to:
 
 ```js
-var OAUTH_PROXY_BASE = 'https://pixelary-oauth.<your-subdomain>.workers.dev/?url=';
+var OAUTH_PROXY_BASE = 'https://openframez-oauth.<your-subdomain>.workers.dev/?url=';
 
 function proxied(url) {
   return OAUTH_PROXY_BASE + encodeURIComponent(url);
@@ -85,4 +85,4 @@ Cloudflare Workers free tier:
 - 10 ms CPU per request (more than enough for a pass-through)
 - Always free, no credit card required
 
-For Pixelary's use case (each upload = ~3 OAuth requests), you'd need 33,000 uploads per day to hit the limit.
+For OpenFramez's use case (each upload = ~3 OAuth requests), you'd need 33,000 uploads per day to hit the limit.

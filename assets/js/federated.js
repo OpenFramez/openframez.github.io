@@ -1,5 +1,5 @@
 /**
- * Pixelary — Federated Content Layer (Phase 5)
+ * OpenFramez — Federated Content Layer (Phase 5)
  *
  * Reads the central registry at data/registry.json and the aggregated
  * federated.json that the GitHub Action produces hourly.
@@ -20,10 +20,10 @@
  *         "author": "alice",
  *         "license": "CC BY 4.0",
  *         "source_user": "alice",
- *         "source_repo": "pixelary-uploads",
- *         "source_url": "https://github.com/alice/pixelary-uploads",
- *         "file_url": "https://alice.github.io/pixelary-uploads/uploads/...",
- *         "thumbnail_url": "https://alice.github.io/pixelary-uploads/uploads/...",
+ *         "source_repo": "openframez-uploads",
+ *         "source_url": "https://github.com/alice/openframez-uploads",
+ *         "file_url": "https://alice.github.io/openframez-uploads/uploads/...",
+ *         "thumbnail_url": "https://alice.github.io/openframez-uploads/uploads/...",
  *         "uploaded_at": "2026-08-12T10:30:00Z",
  *         "width": 1920, "height": 1080,
  *         "duration": 0,
@@ -36,10 +36,10 @@
  * The aggregator (scripts/aggregate_federation.py) is run by a GitHub Action
  * that triggers on schedule (hourly) and on changes to data/registry.json.
  *
- * @author Pixelary Team
+ * @author OpenFramez Team
  */
 
-window.PixelaryFederation = (function () {
+window.OpenFramezFederation = (function () {
   'use strict';
 
   var FEDERATED_URL = './data/federated.json';

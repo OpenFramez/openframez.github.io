@@ -1,6 +1,6 @@
 name: Process User Reports
 
-# Auto-triages user-report issues filed by the Pixelary client.
+# Auto-triages user-report issues filed by the OpenFramez client.
 # - Adds category-specific colors to labels
 # - Posts an acknowledgment comment
 # - Optionally pings maintainers for high-severity reports
@@ -50,7 +50,7 @@ jobs:
                     repo: context.repo.repo,
                     name,
                     color,
-                    description: name === 'user-report' ? 'Filed via Pixelary client' : `Category: ${name}`,
+                    description: name === 'user-report' ? 'Filed via OpenFramez client' : `Category: ${name}`,
                   });
                 } catch (e2) {
                   console.log(`Could not create label ${name}:`, e2.message);

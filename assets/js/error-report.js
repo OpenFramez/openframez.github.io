@@ -1,5 +1,5 @@
 /**
- * Pixelary — Error Reporter
+ * OpenFramez — Error Reporter
  *
  * Automatically captures client-side errors and lets users send manual
  * feedback. Reports are filed as GitHub Issues on the central repo with
@@ -9,7 +9,7 @@
  * Captured events:
  *   - window.onerror (uncaught JS errors)
  *   - unhandledrejection (unhandled promise rejections)
- *   - PixelaryAPI errors during upload (manual call)
+ *   - OpenFramezAPI errors during upload (manual call)
  *   - Manual user feedback via UI.toast with type='report'
  *
  * Privacy:
@@ -21,15 +21,15 @@
  *
  * Rate-limited client-side: max 1 auto-report per 30 seconds.
  *
- * @author Pixelary Team
+ * @author OpenFramez Team
  */
 
-window.PixelaryErrors = (function () {
+window.OpenFramezErrors = (function () {
   'use strict';
 
   // Central repo where issues are filed
-  var REPO_OWNER = 'betaversion488-oss';
-  var REPO_NAME = 'betaversion488-oss.github.io';
+  var REPO_OWNER = 'OpenFramez';
+  var REPO_NAME = 'openframez.github.io';
 
   // PAT-FREE architecture: we use the user's own OAuth token (from localStorage)
   // to open Issues. The `public_repo` scope is enough to open issues on a
@@ -93,7 +93,7 @@ window.PixelaryErrors = (function () {
     var online = navigator.onLine ? 'yes' : 'no';
     var login = null;
     try {
-      var u = JSON.parse(localStorage.getItem('pixelary_oauth_user') || 'null');
+      var u = JSON.parse(localStorage.getItem('openframez_oauth_user') || 'null');
       if (u && u.login) login = u.login;
     } catch (e) {}
 
@@ -158,7 +158,7 @@ window.PixelaryErrors = (function () {
     }
     body.push('');
     body.push('---');
-    body.push('این گزارش توسط Pixelary Errors به‌صورت خودکار تولید شده است.');
+    body.push('این گزارش توسط OpenFramez Errors به‌صورت خودکار تولید شده است.');
 
     return {
       title: title,
@@ -170,8 +170,8 @@ window.PixelaryErrors = (function () {
   // ---------- Internal: get user's OAuth token from localStorage ----------
   function getUserToken() {
     try {
-      // oauth.js stores token as a plain string at 'pixelary_oauth_token'
-      return localStorage.getItem('pixelary_oauth_token');
+      // oauth.js stores token as a plain string at 'openframez_oauth_token'
+      return localStorage.getItem('openframez_oauth_token');
     } catch (e) {
       return null;
     }
@@ -189,7 +189,7 @@ window.PixelaryErrors = (function () {
     if (!token) {
       // User not logged in — fall back to opening the issue form in a new tab.
       // This is a degraded experience but better than failing silently.
-      console.warn('PixelaryErrors: user not logged in, falling back to manual issue creation');
+      console.warn('OpenFramezErrors: user not logged in, falling back to manual issue creation');
       var url = 'https://github.com/' + REPO_OWNER + '/' + REPO_NAME +
         '/issues/new?title=' + encodeURIComponent(payload.title) +
         '&body=' + encodeURIComponent(payload.body) +
@@ -209,12 +209,12 @@ window.PixelaryErrors = (function () {
     }).then(function (res) {
       if (!res.ok) {
         // Silent failure — never block UX for error reporting
-        console.warn('PixelaryErrors: failed to post issue, HTTP', res.status);
+        console.warn('OpenFramezErrors: failed to post issue, HTTP', res.status);
         return null;
       }
       return res.json();
     }).catch(function (e) {
-      console.warn('PixelaryErrors: network error', e);
+      console.warn('OpenFramezErrors: network error', e);
       return null;
     });
   }

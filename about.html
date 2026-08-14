@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#fafafa">
   <meta name="color-scheme" content="light dark">
-  <title>درباره پیکسلری — گالری تصاویر آزاد</title>
-  <meta name="description" content="پیکسلری یک پلتفرم بدون سرور برای گالری تصاویر است. درباره معماری، اهداف و راه‌اندازی آن بیشتر بدانید.">
-  <link rel="canonical" href="https://betaversion488-oss.github.io/about.html">
+  <title>درباره اُپن‌فریمز — گالری تصاویر آزاد</title>
+  <meta name="description" content="اُپن‌فریمز یک پلتفرم بدون سرور برای گالری تصاویر است. درباره معماری، اهداف و راه‌اندازی آن بیشتر بدانید.">
+  <link rel="canonical" href="https://openframez.github.io/about.html">
 
   <meta property="og:type" content="article">
-  <meta property="og:title" content="درباره پیکسلری">
+  <meta property="og:title" content="درباره اُپن‌فریمز">
   <meta property="og:description" content="پلتفرم بدون سرور برای گالری تصاویر آزاد">
   <meta property="og:locale" content="fa_IR">
 
@@ -20,7 +20,7 @@
   <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Pixelary">
+  <meta name="apple-mobile-web-app-title" content="OpenFramez">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,9 +32,9 @@
 
   <header class="site-header">
     <div class="container header-inner">
-      <a href="./" class="logo" aria-label="پیکسلری خانه">
+      <a href="./" class="logo" aria-label="اُپن‌فریمز خانه">
         <span class="logo-mark" aria-hidden="true">P</span>
-        <span class="logo-text">پیکسلری</span>
+        <span class="logo-text">اُپن‌فریمز</span>
       </a>
       <div class="header-actions">
         <button class="icon-btn" data-theme-toggle aria-label="تغییر تم" title="تغییر تم">
@@ -58,10 +58,10 @@
 
   <main id="main" class="container">
     <article class="page">
-      <h1>درباره پیکسلری</h1>
+      <h1>درباره اُپن‌فریمز</h1>
       <p class="lead">یک گالری تصاویر بدون سرور، بدون ورود، و کاملاً آزاد.</p>
 
-      <p>پیکسلری یک پلتفرم نمایش محتوای بصری است که کاملاً روی GitHub Pages اجرا می‌شود — بدون نیاز به سرور، پایگاه‌داده، یا حتی حساب کاربری برای مشاهده. تمام تصاویر از <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a> با مجوز Creative Commons یا مالکیت عمومی (Public Domain) جمع‌آوری شده‌اند و هر عکس همراه با اعتبار کامل عکاس و لینک مجوز نمایش داده می‌شود.</p>
+      <p>اُپن‌فریمز یک پلتفرم نمایش محتوای بصری است که کاملاً روی GitHub Pages اجرا می‌شود — بدون نیاز به سرور، پایگاه‌داده، یا حتی حساب کاربری برای مشاهده. تمام تصاویر از <a href="https://commons.wikimedia.org" target="_blank" rel="noopener">Wikimedia Commons</a> با مجوز Creative Commons یا مالکیت عمومی (Public Domain) جمع‌آوری شده‌اند و هر عکس همراه با اعتبار کامل عکاس و لینک مجوز نمایش داده می‌شود.</p>
 
       <p>هدف ما ساختن جای‌گزینی ساده، سریع و خصوصی‌ن PRIVACY-first برای شبکه‌های اجتماعی تصویرمحور است: بدون ردیابی، بدون تبلیغات، بدون جمع‌آوری داده، و بدون نیاز به ورود. کافیست آدرس را باز کنید و از گالری لذت ببرید.</p>
 
@@ -78,14 +78,14 @@
       </ul>
 
       <h2>معماری فنی</h2>
-      <p>پیکسلری از یک معماری <strong>JAMstack</strong> استفاده می‌کند: HTML ایستایی که در زمان build تولید می‌شود، داده‌ها در فایل JSON، و تعاملات کلاینت با JavaScript خالص (Vanilla JS) پیاده‌سازی شده‌اند. هیچ build step یا framework پیچیده‌ای وجود ندارد — این یعنی load سریع‌تر، attack surface کمتر، و نگهداری آسان‌تر.</p>
+      <p>اُپن‌فریمز از یک معماری <strong>JAMstack</strong> استفاده می‌کند: HTML ایستایی که در زمان build تولید می‌شود، داده‌ها در فایل JSON، و تعاملات کلاینت با JavaScript خالص (Vanilla JS) پیاده‌سازی شده‌اند. هیچ build step یا framework پیچیده‌ای وجود ندارد — این یعنی load سریع‌تر، attack surface کمتر، و نگهداری آسان‌تر.</p>
 
       <div class="callout">
         <p><strong>جمع‌آوری داده:</strong> داده‌ها با اسکریپت Python از Wikimedia Commons API استخراج می‌شوند و در <code>data/photos.json</code> ذخیره می‌شوند. هر بار اجرای اسکریپت، داده‌های تازه‌ای دریافت می‌شود.</p>
       </div>
 
       <h2>نقشه راه</h2>
-      <p>پیکسلری در فازهای مختلف توسعه داده می‌شود. در فاز ۱ (نسخه فعلی)، تمرکز روی گالری تصاویر است. در فازهای بعدی قصد داریم:</p>
+      <p>اُپن‌فریمز در فازهای مختلف توسعه داده می‌شود. در فاز ۱ (نسخه فعلی)، تمرکز روی گالری تصاویر است. در فازهای بعدی قصد داریم:</p>
       <ul>
         <li><strong>فاز ۲:</strong> افزودن ویدیوهای کوتاه از Internet Archive</li>
         <li><strong>فاز ۳:</strong> موسیقی از Free Music Archive</li>
@@ -93,13 +93,13 @@
         <li><strong>فاز ۵:</strong> عوامل هوش مصنوعی برای مرور و تأیید محتوا</li>
         <li><strong>فاز ۶:</strong> بازار نرم‌افزار آزاد</li>
       </ul>
-      <p>برای جزئیات کامل، به <a href="https://github.com/betaversion488-oss/betaversion488-oss.github.io/blob/main/docs/PHASES.md" target="_blank" rel="noopener">سند نقشه راه</a> مراجعه کنید.</p>
+      <p>برای جزئیات کامل، به <a href="https://github.com/OpenFramez/openframez.github.io/blob/main/docs/PHASES.md" target="_blank" rel="noopener">سند نقشه راه</a> مراجعه کنید.</p>
 
       <h2>مشارکت</h2>
-      <p>پیکسلری یک پروژه منبع‌باز است و از مشارکت community استقبال می‌کند. برای افزودن عکس‌های خود، اشکالات را گزارش کنید، یا ویژگی‌های جدید پیشنهاد دهید، به <a href="upload.html">صفحه ارسال محتوا</a> یا <a href="https://github.com/betaversion488-oss/betaversion488-oss.github.io" target="_blank" rel="noopener">مخزن GitHub</a> مراجعه کنید.</p>
+      <p>اُپن‌فریمز یک پروژه منبع‌باز است و از مشارکت community استقبال می‌کند. برای افزودن عکس‌های خود، اشکالات را گزارش کنید، یا ویژگی‌های جدید پیشنهاد دهید، به <a href="upload.html">صفحه ارسال محتوا</a> یا <a href="https://github.com/OpenFramez/openframez.github.io" target="_blank" rel="noopener">مخزن GitHub</a> مراجعه کنید.</p>
 
       <h2>حریم خصوصی</h2>
-      <p>پیکسلری هیچ داده‌ای از کاربران جمع‌آوری نمی‌کند. هیچ analytics، هیچ ردیاب، هیچ کوکی بازاریابی. تنها داده‌ای که ذخیره می‌شود تنظیمات تم شما (روشن/تاریک) در localStorage مرورگر شماست. وقتی صفحه را می‌بندید، هیچ ردی از شما باقی نمی‌ماند.</p>
+      <p>اُپن‌فریمز هیچ داده‌ای از کاربران جمع‌آوری نمی‌کند. هیچ analytics، هیچ ردیاب، هیچ کوکی بازاریابی. تنها داده‌ای که ذخیره می‌شود تنظیمات تم شما (روشن/تاریک) در localStorage مرورگر شماست. وقتی صفحه را می‌بندید، هیچ ردی از شما باقی نمی‌ماند.</p>
 
       <div class="callout">
         <p><strong>نسخه:</strong> ۱.۰.۰ (MVP فاز ۱) — <span dir="ltr">August 2026</span></p>
@@ -147,7 +147,7 @@
   <footer class="site-footer">
     <div class="container">
       <div class="footer-bottom" style="border:none;margin:0;padding:0;">
-        <span>© ۲۰۲۶ پیکسلری</span>
+        <span>© ۲۰۲۶ اُپن‌فریمز</span>
         <span>ساخته‌شده با ❤ روی GitHub Pages</span>
       </div>
     </div>

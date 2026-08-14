@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pixelary Phase 2 Data Scraper — Videos
+OpenFramez Phase 2 Data Scraper — Videos
 ======================================
 Scrapes CC-licensed / public-domain SHORT videos (2-30 seconds) from Wikimedia Commons
 across multiple topical search queries for content diversity.
@@ -56,7 +56,7 @@ import urllib.request
 from pathlib import Path
 from html import unescape
 
-USER_AGENT = "PixelaryBot/2.0 (https://github.com/betaversion488-oss/betaversion488-oss.github.io; contact via GitHub Issues)"
+USER_AGENT = "OpenFramezBot/2.0 (https://github.com/OpenFramez/openframez.github.io; contact via GitHub Issues)"
 
 # Topic-driven search queries. Wikimedia Commons search syntax:
 #   filetype:video        restrict to video files

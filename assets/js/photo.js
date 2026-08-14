@@ -1,5 +1,5 @@
 /**
- * Pixelary — Photo Detail Page
+ * OpenFramez — Photo Detail Page
  * Loads ?id=... and renders photo with metadata
  */
 
@@ -35,19 +35,19 @@
     const desc = p.description || 'بدون توضیحات.';
 
     // Update document title and meta tags (with null checks for safety)
-    document.title = `${p.title} — پیکسلری`;
+    document.title = `${p.title} — اُپن‌فریمز`;
     const setMeta = (selector, attr, value) => {
       const el = document.querySelector(selector);
       if (el) el.setAttribute(attr, value);
     };
     setMeta('meta[name="description"]', 'content', desc.slice(0, 160));
-    setMeta('meta[property="og:title"]', 'content', p.title + ' — پیکسلری');
+    setMeta('meta[property="og:title"]', 'content', p.title + ' — اُپن‌فریمز');
     setMeta('meta[property="og:description"]', 'content', desc.slice(0, 200));
     setMeta('meta[property="og:image"]', 'content', p.thumbnail);
     setMeta('meta[name="twitter:title"]', 'content', p.title);
     setMeta('meta[name="twitter:description"]', 'content', desc.slice(0, 200));
     setMeta('meta[name="twitter:image"]', 'content', p.thumbnail);
-    setMeta('link[rel="canonical"]', 'href', `https://betaversion488-oss.github.io/photo.html?id=${encodeURIComponent(p.id)}`);
+    setMeta('link[rel="canonical"]', 'href', `https://openframez.github.io/photo.html?id=${encodeURIComponent(p.id)}`);
 
     // JSON-LD
     const ld = {
@@ -161,7 +161,7 @@
   }
 
   function renderRelated(photo) {
-    const related = Pixelary.getRelated(photo, 10);
+    const related = OpenFramez.getRelated(photo, 10);
     if (!related.length) {
       els.related.parentElement.classList.add('hidden');
       return;
@@ -207,7 +207,7 @@
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">برای جستجو تایپ کنید…</div>';
       return;
     }
-    const results = Pixelary.filter({ query, sort: 'newest' }).slice(0, 10);
+    const results = OpenFramez.filter({ query, sort: 'newest' }).slice(0, 10);
     if (results.length === 0) {
       els.searchOverlayResults.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.875rem">نتیجه‌ای یافت نشد</div>';
       return;
@@ -229,7 +229,7 @@
 
   async function init() {
     try {
-      await Pixelary.load();
+      await OpenFramez.load();
     } catch (err) {
       console.error(err);
       fail('خطا در بارگذاری داده‌ها.');
@@ -242,7 +242,7 @@
       fail('شناسه عکس مشخص نیست.');
       return;
     }
-    const photo = Pixelary.getById(id);
+    const photo = OpenFramez.getById(id);
     if (!photo) {
       fail(`عکس با شناسه ${id} یافت نشد.`);
       return;
