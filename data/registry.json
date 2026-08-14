@@ -1,14 +1,6 @@
 {
-  "users": [
-    {
-      "login": "mortt0tteza2",
-      "repo": "openframez-uploads",
-      "url": "https://github.com/mortt0tteza2/openframez-uploads",
-      "pages_url": "https://mortt0tteza2.github.io/openframez-uploads",
-      "registered_at": "2026-08-12T09:23:21.720Z",
-      "last_active": "2026-08-12T09:23:21.720Z"
-    }
-  ],
-  "last_updated": "2026-08-12T09:23:21.720Z",
-  "description": "Central registry of federated OpenFramez contributors. Each user who uploads content via the upload page is registered here. The aggregate-federation GitHub Action reads this file and builds data/federated.json by fetching each user's manifest.json from their own openframez-uploads repo."
+  "users": [],
+  "last_updated": "2026-08-14T06:11:00Z",
+  "description": "Central registry of federated OpenFramez contributors. Each user who uploads content via the upload page is registered here. The aggregate-federation GitHub Action reads this file and builds data/federated.json by fetching each user's manifest.json from their own openframez-uploads repo.",
+  "source": "cleaned after OpenFramez migration — old pixelary-uploads users removed"
 }
